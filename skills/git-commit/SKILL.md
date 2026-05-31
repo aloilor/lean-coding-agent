@@ -26,6 +26,7 @@ Optional sections:
 2. Define the intended commit set.
    Commit only the files that match the user's request.
    If unrelated files are dirty, leave them alone unless the user explicitly asks to include them.
+   Treat existing worktree changes as intentional user work by default. Never revert, delete, or "clean up" manual edits just to make the commit set simpler unless the user explicitly asks for that.
 
 3. Stage only the intended files.
    Use targeted `git add <paths>` commands.
@@ -34,6 +35,7 @@ Optional sections:
 4. Review exactly what will be committed.
    Run `git diff --cached --stat` and `git diff --cached`.
    If the staged diff does not match the requested change set, fix the staging before writing the commit message.
+   Fix the staging by adjusting what is staged, not by reverting unrelated working-tree changes.
 
 5. Choose the Conventional Commit header.
    Pick the type from the actual change intent.
@@ -131,6 +133,7 @@ BREAKING CHANGE: existing automation that reads the old config key must be updat
 - Treat `git reset --hard`, `git checkout -- <path>`, `git clean -fd`, history rewrites, and force pushes as destructive.
 - Do not amend an existing commit unless the user explicitly asks for it.
 - Do not include unrelated changes just because they are already present in the worktree.
+- Do not revert, delete, or overwrite existing user changes in order to make a commit cleaner or narrower. Preserve manual edits unless the user explicitly asks to discard them.
 - If there is nothing to commit, say so clearly and do not create an empty commit.
 - If the requested commit boundaries are unclear, pause and clarify before committing.
 
