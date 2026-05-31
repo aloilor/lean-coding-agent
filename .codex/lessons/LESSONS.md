@@ -5,3 +5,4 @@
 - [Make README Indexes Clickable](C:\Users\Craas\Desktop\projects\agents\.codex\lessons\make-readme-indexes-clickable.md) - When a README serves as an index, link the referenced files so the document is directly navigable.
 - [Store Lessons At Codex Root](C:\Users\Craas\Desktop\projects\agents\.codex\lessons\store-lessons-at-codex-root.md) - Store project lessons under `.codex/lessons/` instead of nesting them inside `.codex/tasks/`.
 - [Ignore Codex Tasks](C:\Users\Craas\Desktop\projects\agents\.codex\lessons\ignore-codex-tasks.md) - Treat `.codex/tasks/` as local-only notes and keep the whole directory out of commits.
+- [Prefer Plainer Explanations In Guides](C:\Users\Craas\Desktop\projects\agents\.codex\lessons\prefer-plainer-explanations-in-guides.md) - Prefer the simplest wording that still preserves the concept when writing reusable guides.
