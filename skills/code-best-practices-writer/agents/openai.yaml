@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Best Practices Writer"
+  short_description: "Create and maintain guides in code-best-practices"
+  default_prompt: "Use $code-best-practices-writer to add or update a guide in the repository's code-best-practices folder while keeping the README indexes and writing style consistent."

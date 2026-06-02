@@ -8,6 +8,7 @@ This folder is the top-level index for the reusable best-practice guides in this
 - [Object-Oriented Programming](./object-oriented-programming/README.md): guidelines for SOLID, composition, encapsulation, and maintainable object design.
 - [Clean Code](./clean-code/README.md): guidelines for naming, function design, comments, readability, and safe refactoring.
 - [Design Patterns](./design-patterns/README.md): guidelines for creational, structural, and behavioral patterns, plus how to avoid misuse.
+- [Observability](./observability/README.md): guidelines for logging, monitoring, alerting, tracing, and correlating production signals.
 
 ## Use
 
