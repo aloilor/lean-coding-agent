@@ -9,6 +9,8 @@ This folder is the top-level index for the reusable best-practice guides in this
 - [Clean Code](./clean-code/README.md): guidelines for naming, function design, comments, readability, and safe refactoring.
 - [Design Patterns](./design-patterns/README.md): guidelines for creational, structural, and behavioral patterns, plus how to avoid misuse.
 - [Observability](./observability/README.md): guidelines for logging, monitoring, alerting, tracing, and correlating production signals.
+- [Git](./git/README.md): guidelines for branching, commits, rebasing, tagging, and safe history management.
+- [Python](./python/README.md): guidelines for readable Python style, maintainable modules, typing, exceptions, and practical testing habits.
 
 ## Use
 

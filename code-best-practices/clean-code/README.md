@@ -18,6 +18,7 @@ This folder collects reusable clean-code best practices for writing code that is
 - [Naming And Clarity](./naming-and-clarity.md): how to make code readable through names, small scopes, and explicit intent.
 - [Functions And Control Flow](./functions-and-control-flow.md): how to keep functions focused and control flow easy to scan.
 - [Comments And Documentation](./comments-and-documentation.md): when comments help, when they hurt, and how to keep them accurate.
+- [Code Documentation](./code-documentation.md): how to document public contracts, edge cases, and examples without creating stale or noisy docs.
 - [Duplication And Refactoring](./duplication-and-refactoring.md): how to spot duplication, use code smells well, and refactor in small safe steps.
 
 ## Core Rules
@@ -26,4 +27,5 @@ This folder collects reusable clean-code best practices for writing code that is
 - Keep functions focused on one small job.
 - Use control flow that is easy to scan, not clever to write.
 - Write comments for intent and context, not for obvious code.
+- Keep documentation close to the code and focused on usage, constraints, and edge cases.
 - Treat duplication and code smells as signals to refactor, not as reasons to panic.

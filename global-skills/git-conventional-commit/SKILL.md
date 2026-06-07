@@ -1,5 +1,5 @@
 ---
-name: git-commit
+name: git-conventional-commit
 description: Review git changes, propose commit messages, and create commits using Conventional Commits 1.0.0. Use when asked to commit work, suggest a commit message, stage the right files, or enforce a safe conventional commit workflow with type, optional scope, description, optional body, and optional footers.
 ---
 
