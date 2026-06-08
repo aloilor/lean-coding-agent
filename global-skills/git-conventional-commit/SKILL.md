@@ -3,7 +3,7 @@ name: git-conventional-commit
 description: Review git changes, propose commit messages, and create commits using Conventional Commits 1.0.0. Use when asked to commit work, suggest a commit message, stage the right files, or enforce a safe conventional commit workflow with type, optional scope, description, optional body, and optional footers.
 ---
 
-# Git Commit
+# Git Conventional Commit
 
 Follow the Conventional Commits 1.0.0 specification:
 https://www.conventionalcommits.org/en/v1.0.0/
