@@ -24,14 +24,14 @@ Optional sections:
    Review the actual content with `git diff` for unstaged changes and `git diff --cached` for staged changes.
 
 2. Define the intended commit set.
-   Commit only the files that match the user's request.
-   If unrelated files are dirty, leave them alone unless the user explicitly asks to include them.
-   Treat existing worktree changes as intentional user work by default. Never revert, delete, or "clean up" manual edits just to make the commit set simpler unless the user explicitly asks for that.
+   When the user asks you to commit work, treat the entire current git worktree as the default requested scope unless the user explicitly narrows it.
+   Do not exclude changes just because they were created before the current session or appear to be manual user edits.
+   Never revert, delete, or "clean up" manual edits just to make the commit set simpler unless the user explicitly asks for that.
    If many changed files are not part of one coherent change, split them into separate commits for each independent logical change set instead of forcing one mixed commit.
 
 3. Stage only the intended files.
-   Use targeted `git add <paths>` commands.
-   Avoid broad staging like `git add .` or `git add -A` unless the user clearly wants every change included.
+   Use targeted `git add <paths>` commands when splitting the worktree into independent logical change sets.
+   When one commit should include the remaining worktree state, broad staging like `git add -A` is acceptable.
    When splitting a large mixed worktree, stage and commit one independent logical change set at a time, reviewing each staged subset before moving to the next one.
 
 4. Review exactly what will be committed.
@@ -52,8 +52,8 @@ Optional sections:
    If the staged diff is empty, report that clearly instead of creating an empty commit.
    If the user only asked for a proposed message, stop after proposing it.
    If the requested work requires multiple commits, keep going commit by commit until no intended logical change sets remain.
-   After each commit in a multi-commit run, rerun `git status --short` and continue if remaining changes still match the user's requested work.
-   If you stop while changes remain, say exactly what is left and whether it is excluded as unrelated worktree state or still pending for a later commit.
+   After each commit in a multi-commit run, rerun `git status --short` and continue until it is empty unless the user explicitly excluded some remaining changes.
+   If you stop while changes remain, say exactly what is left and cite the explicit user instruction that caused those changes to be left uncommitted.
 
 8. Confirm the result after committing.
    Run `git log -1 --pretty=format:%s` to confirm the final subject line.
@@ -137,7 +137,8 @@ BREAKING CHANGE: existing automation that reads the old config key must be updat
 - Never run destructive git commands unless the user explicitly requests them.
 - Treat `git reset --hard`, `git checkout -- <path>`, `git clean -fd`, history rewrites, and force pushes as destructive.
 - Do not amend an existing commit unless the user explicitly asks for it.
-- Do not include unrelated changes just because they are already present in the worktree.
+- Do not exclude worktree changes only because they predate the current session or were not created by you.
+- When asked to commit work, default to committing the whole current worktree, split across multiple logical commits when needed, unless the user explicitly narrows the scope.
 - When the worktree contains multiple unrelated logical change sets, do not combine them into one commit just to reduce the commit count.
 - Do not revert, delete, or overwrite existing user changes in order to make a commit cleaner or narrower. Preserve manual edits unless the user explicitly asks to discard them.
 - If there is nothing to commit, say so clearly and do not create an empty commit.
@@ -148,6 +149,7 @@ BREAKING CHANGE: existing automation that reads the old config key must be updat
 - Review `git status --short` first.
 - Review `git diff` and `git diff --cached` before finalizing the commit.
 - Stage only the intended files.
+- If the user asked to commit work, continue until `git status --short` is empty unless the user explicitly excluded some paths.
 - Use a valid Conventional Commits header.
 - Add body or footers only when they help.
 - Confirm the final commit subject after `git commit`.
