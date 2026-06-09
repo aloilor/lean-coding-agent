@@ -40,7 +40,7 @@ Repo-only skills for maintaining this shared repo should live under [.codex/skil
 
 ## Sync Updated Shared Skills
 
-When you update a shared skill in `global-skills/`, sync that change into any maintained copies in this repo and sibling project repos under `../`:
+When you want to propagate an updated shared skill from `global-skills/`, sync that change into any maintained copies in this repo and sibling project repos under `../`:
 
 ```bash
 python scripts/sync_global_skills.py

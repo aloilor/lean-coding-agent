@@ -6,4 +6,4 @@ I updated a shared skill in `global-skills/` without also making sure the same m
 
 ## Rule
 
-When a shared skill in `global-skills/` is used locally or copied into project repos, keep a maintained local copy where needed and provide a sync path that updates matching `.codex/skills/<skill>` directories in this repo and sibling project repos under `../`.
+Whenever a skill in `global-skills/` is updated, sync that skill into every maintained matching `.codex/skills/<skill>` directory in this repo and sibling project repos under `../`.
