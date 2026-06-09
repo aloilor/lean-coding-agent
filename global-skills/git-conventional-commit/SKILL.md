@@ -51,6 +51,7 @@ Optional sections:
 7. Commit only when there is something to commit.
    If the staged diff is empty, report that clearly instead of creating an empty commit.
    If the user only asked for a proposed message, stop after proposing it.
+   If the requested work requires multiple commits, keep going commit by commit until no intended logical change sets remain.
 
 8. Confirm the result after committing.
    Run `git log -1 --pretty=format:%s` to confirm the final subject line.
