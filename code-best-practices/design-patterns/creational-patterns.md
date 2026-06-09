@@ -2,9 +2,14 @@
 
 ## Factory
 
-- A factory is a place whose job is to create objects for you.
-- Use it when creating the object is more than a simple `new Something(...)`.
-- It helps when callers should ask for an object, not know all the steps to build it.
+- A factory creates an object on behalf of the caller.
+- Use it when object creation includes choice, setup, or wiring that should not be repeated everywhere.
+- The caller should ask for "the thing it needs" and not care which concrete class or setup steps are behind it.
+
+In simple terms:
+
+- `new` is for direct, obvious construction.
+- A factory is for "figure out which object to build, then build it correctly."
 
 Good examples:
 
@@ -13,19 +18,52 @@ Good examples:
 - `storageClientFactory.create(environment)`
 - `reportExporterFactory.create(format)`
 
+More examples:
+
+- `parserFactory.create(fileType)` returns `CsvParser`, `JsonParser`, or `XmlParser`
+- `authHandlerFactory.create(strategy)` returns `PasswordAuthHandler`, `GoogleAuthHandler`, or `SamlAuthHandler`
+- `cacheFactory.create(environment)` returns an in-memory cache for local development and Redis for production
+- `shippingCalculatorFactory.create(region)` returns the pricing rules object for the destination country or market
+- `documentRendererFactory.create(outputFormat)` returns a PDF, HTML, or Markdown renderer with the right dependencies already configured
+
 Simple example:
 
 ```ts
 const gateway = paymentGatewayFactory.create(provider);
 ```
 
-- If `provider` is `"stripe"`, the factory can return `StripeGateway`.
-- If `provider` is `"paypal"`, the factory can return `PaypalGateway`.
-- The caller asks for a gateway, but does not need to know how each one is created.
+What the factory is doing for the caller:
+
+- If `provider` is `"stripe"`, it can return `StripeGateway`.
+- If `provider` is `"paypal"`, it can return `PaypalGateway`.
+- It can also apply setup rules such as API keys, retry settings, or test vs production configuration.
+- The caller just asks for a gateway and uses it.
+
+That matters because without the factory, the selection and setup logic often gets copied into multiple places.
+
+Another way to think about it:
+
+- Good: "Give me a payment gateway for this provider."
+- Less good: "Let me decide which class to instantiate and how to configure it here again."
+
+Use a factory when:
+
+- one request can lead to different concrete implementations
+- object creation needs a few steps, not just one constructor call
+- setup depends on environment, format, provider, or feature flags
+- you want the creation rules in one place instead of scattered across the codebase
+
+For example:
+
+- A parser factory hides which parser class matches the input file type.
+- A cache factory hides whether the app should use a lightweight local cache or a production cache backend.
+- An auth handler factory hides the strategy-specific setup needed for each login method.
 
 Avoid:
 
 - Adding a factory for a class that could just be created with `new UserService(...)`.
+- Wrapping a single constructor in a factory when there is no selection or setup logic to hide.
+- Introducing `somethingFactory.create()` just because "factories are a pattern."
 
 ## Builder
 
@@ -71,10 +109,23 @@ Good use:
 - one explicitly managed application logger shared across the process
 - one controlled in-memory feature flag registry for the running process
 
+More examples:
+
+- one metrics registry that the application initializes once at startup and all modules report into
+- one in-memory scheduler registry that tracks jobs for the current running process only
+- one application-wide configuration object loaded once during bootstrap and treated as read-only afterward
+- one connection pool manager only if the application lifecycle guarantees there should be exactly one shared pool per process
+
 Simple example:
 
 - one shared logger used across the whole application
 - one shared config registry loaded once at startup
+
+Concrete examples:
+
+- `AppLogger.getInstance()` returns the single logger configured during application startup
+- `FeatureFlagRegistry.getInstance()` returns the one in-memory registry for the running process
+- `MetricsRegistry.getInstance()` returns the one collector that all requests publish counters and timings to
 
 - The key idea is not "make it global because it is convenient".
 - The key idea is "there should truly be only one shared instance".
@@ -82,6 +133,12 @@ Simple example:
 Avoid:
 
 - using a singleton just to make access easy from anywhere
+- using a singleton for request-specific state, such as the current user or current tenant
+- using a singleton when tests need different instances or isolated state between runs
+
+Bad example:
+
+- `CurrentUserContext.getInstance()` as a global mutable object usually causes hidden coupling and test leaks
 
 ## Dependency Injection
 

@@ -18,11 +18,13 @@ This folder collects reusable object-oriented programming best practices, with a
 
 - [SOLID](./solid.md): how to apply SRP, OCP, LSP, ISP, and DIP without turning them into dogma.
 - [Composition And Encapsulation](./composition-and-encapsulation.md): when to favor composition, how to hide internals, and how to keep abstractions stable.
+- [Abstract Classes And Interfaces](./abstract-classes-and-interfaces.md): when to stay concrete, when to use interfaces, and when abstract base classes add real value.
 
 ## Core Rules
 
 - Keep responsibilities separated by reason to change, not by arbitrary class size.
 - Extend behavior through abstractions and composition before reaching for inheritance.
+- Stay concrete until an interface or abstract base class solves a real variation or reuse problem.
 - Treat subtype contracts as behavioral contracts, not only type signatures.
 - Keep interfaces small and dependencies pointing toward abstractions.
 - Let objects own behavior close to their data instead of leaking internal structure.
