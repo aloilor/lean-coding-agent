@@ -27,10 +27,12 @@ Optional sections:
    Commit only the files that match the user's request.
    If unrelated files are dirty, leave them alone unless the user explicitly asks to include them.
    Treat existing worktree changes as intentional user work by default. Never revert, delete, or "clean up" manual edits just to make the commit set simpler unless the user explicitly asks for that.
+   If many changed files are not part of one coherent change, split them into separate commits for each independent logical change set instead of forcing one mixed commit.
 
 3. Stage only the intended files.
    Use targeted `git add <paths>` commands.
    Avoid broad staging like `git add .` or `git add -A` unless the user clearly wants every change included.
+   When splitting a large mixed worktree, stage and commit one independent logical change set at a time, reviewing each staged subset before moving to the next one.
 
 4. Review exactly what will be committed.
    Run `git diff --cached --stat` and `git diff --cached`.
@@ -133,6 +135,7 @@ BREAKING CHANGE: existing automation that reads the old config key must be updat
 - Treat `git reset --hard`, `git checkout -- <path>`, `git clean -fd`, history rewrites, and force pushes as destructive.
 - Do not amend an existing commit unless the user explicitly asks for it.
 - Do not include unrelated changes just because they are already present in the worktree.
+- When the worktree contains multiple unrelated logical change sets, do not combine them into one commit just to reduce the commit count.
 - Do not revert, delete, or overwrite existing user changes in order to make a commit cleaner or narrower. Preserve manual edits unless the user explicitly asks to discard them.
 - If there is nothing to commit, say so clearly and do not create an empty commit.
 - If the requested commit boundaries are unclear, pause and clarify before committing.
