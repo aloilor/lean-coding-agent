@@ -37,3 +37,19 @@ The script will:
 To change which skills get installed into future projects, add or remove skill folders in [global-skills](/C:/Users/Craas/Desktop/projects/agents/global-skills).
 
 Repo-only skills for maintaining this shared repo should live under [.codex/skills](/C:/Users/Craas/Desktop/projects/agents/.codex/skills). Do not place repo-only skills in `global-skills/`, because everything installable there is copied into new project repos.
+
+## Sync Updated Shared Skills
+
+When you update a shared skill in `global-skills/`, sync that change into any maintained copies in this repo and sibling project repos under `../`:
+
+```bash
+python scripts/sync_global_skills.py
+```
+
+To sync only one shared skill:
+
+```bash
+python scripts/sync_global_skills.py git-conventional-commit
+```
+
+The sync script only updates matching `.codex/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.
