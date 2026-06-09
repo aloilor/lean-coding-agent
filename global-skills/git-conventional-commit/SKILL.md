@@ -52,6 +52,8 @@ Optional sections:
    If the staged diff is empty, report that clearly instead of creating an empty commit.
    If the user only asked for a proposed message, stop after proposing it.
    If the requested work requires multiple commits, keep going commit by commit until no intended logical change sets remain.
+   After each commit in a multi-commit run, rerun `git status --short` and continue if remaining changes still match the user's requested work.
+   If you stop while changes remain, say exactly what is left and whether it is excluded as unrelated worktree state or still pending for a later commit.
 
 8. Confirm the result after committing.
    Run `git log -1 --pretty=format:%s` to confirm the final subject line.
