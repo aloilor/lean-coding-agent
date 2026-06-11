@@ -13,7 +13,10 @@ from pathlib import Path
 SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parent.parent
 GLOBAL_SKILLS_ROOT = REPO_ROOT / "global-skills"
-DEFAULT_SKILLS_DIR = Path(".codex") / "skills"
+MANAGED_SKILLS_DIRS = [
+    Path(".codex") / "skills",
+    Path(".claude") / "skills",
+]
 MANIFEST_NAME = "global-skills-installed.json"
 LEGACY_MANIFEST_NAME = "awesome-codex-skills-installed.json"
 LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
@@ -22,6 +25,8 @@ LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 AGENTS_MARKER_START = "<!-- shared-agents-reference:start -->"
 AGENTS_MARKER_END = "<!-- shared-agents-reference:end -->"
+CLAUDE_MARKER_START = "<!-- shared-claude-reference:start -->"
+CLAUDE_MARKER_END = "<!-- shared-claude-reference:end -->"
 
 
 def parse_args() -> argparse.Namespace:
@@ -29,7 +34,7 @@ def parse_args() -> argparse.Namespace:
         description=(
             "Initialize a project repo so it uses this shared agents repo, creates "
             "agent-context, and installs this repo's global skills into the target "
-            "repo's .codex/skills directory."
+            "repo's .codex/skills and .claude/skills directories."
         )
     )
     parser.add_argument(
@@ -67,6 +72,36 @@ def shared_agents_block(target_repo: Path, shared_agents_path: Path) -> str:
     return "\n".join(lines)
 
 
+def shared_claude_block() -> str:
+    lines = [
+        CLAUDE_MARKER_START,
+        "## Shared Baseline",
+        "",
+        "Read and follow [AGENTS.md](AGENTS.md) before making changes in this repo.",
+        "",
+        "Keep Claude-specific instructions below this block.",
+        CLAUDE_MARKER_END,
+    ]
+    return "\n".join(lines)
+
+
+def replace_or_append_managed_block(
+    original: str,
+    block: str,
+    marker_start: str,
+    marker_end: str,
+) -> str:
+    if marker_start in original and marker_end in original:
+        start = original.index(marker_start)
+        end = original.index(marker_end) + len(marker_end)
+        return original[:start] + block + original[end:]
+
+    if block in original:
+        return original
+
+    return original.rstrip() + "\n\n" + block + "\n"
+
+
 def ensure_agents_file(target_repo: Path, shared_repo_root: Path) -> Path:
     agents_path = target_repo / "AGENTS.md"
     shared_agents_path = shared_repo_root / "AGENTS.md"
@@ -89,19 +124,51 @@ def ensure_agents_file(target_repo: Path, shared_repo_root: Path) -> Path:
         return agents_path
 
     original = agents_path.read_text(encoding="utf-8")
-    if AGENTS_MARKER_START in original and AGENTS_MARKER_END in original:
-        start = original.index(AGENTS_MARKER_START)
-        end = original.index(AGENTS_MARKER_END) + len(AGENTS_MARKER_END)
-        updated = original[:start] + block + original[end:]
-    elif block in original:
-        updated = original
-    else:
-        updated = original.rstrip() + "\n\n" + block + "\n"
+    updated = replace_or_append_managed_block(
+        original,
+        block,
+        AGENTS_MARKER_START,
+        AGENTS_MARKER_END,
+    )
 
     if updated != original:
         agents_path.write_text(updated, encoding="utf-8")
 
     return agents_path
+
+
+def ensure_claude_file(target_repo: Path) -> Path:
+    claude_path = target_repo / "CLAUDE.md"
+    block = shared_claude_block()
+
+    if not claude_path.exists():
+        content = "\n".join(
+            [
+                "# CLAUDE.md",
+                "",
+                block,
+                "",
+                "## Project-Specific Claude Notes",
+                "",
+                "- Add Claude-specific instructions here.",
+                "",
+            ]
+        )
+        claude_path.write_text(content, encoding="utf-8")
+        return claude_path
+
+    original = claude_path.read_text(encoding="utf-8")
+    updated = replace_or_append_managed_block(
+        original,
+        block,
+        CLAUDE_MARKER_START,
+        CLAUDE_MARKER_END,
+    )
+
+    if updated != original:
+        claude_path.write_text(updated, encoding="utf-8")
+
+    return claude_path
 
 
 def load_manifest(manifest_path: Path) -> dict:
@@ -188,32 +255,36 @@ def sync_skills(
     installs: list[dict],
     manifest_path: Path,
     legacy_manifest_path: Path,
-) -> Path:
-    skills_root = target_repo / DEFAULT_SKILLS_DIR
-    skills_root.mkdir(parents=True, exist_ok=True)
+) -> list[Path]:
+    skills_roots = [target_repo / relative_dir for relative_dir in MANAGED_SKILLS_DIRS]
+    for skills_root in skills_roots:
+        skills_root.mkdir(parents=True, exist_ok=True)
 
     previous_names = load_managed_skill_names([manifest_path, legacy_manifest_path])
     current_names = {entry["installed_as"] for entry in installs}
 
     for removed_name in sorted(previous_names - current_names):
-        safe_rmtree(skills_root / removed_name, skills_root)
+        for skills_root in skills_roots:
+            safe_rmtree(skills_root / removed_name, skills_root)
 
     for install in installs:
         source_dir = GLOBAL_SKILLS_ROOT / install["source"]
-        dest_dir = skills_root / install["installed_as"]
-        safe_rmtree(dest_dir, skills_root)
-        shutil.copytree(
-            source_dir,
-            dest_dir,
-            ignore=shutil.ignore_patterns(".git", "__pycache__"),
-        )
+        for skills_root in skills_roots:
+            dest_dir = skills_root / install["installed_as"]
+            safe_rmtree(dest_dir, skills_root)
+            shutil.copytree(
+                source_dir,
+                dest_dir,
+                ignore=shutil.ignore_patterns(".git", "__pycache__"),
+            )
 
     manifest = {
         "source_root": str(GLOBAL_SKILLS_ROOT),
+        "managed_skill_dirs": [str(path) for path in MANAGED_SKILLS_DIRS],
         "skills": installs,
     }
     manifest_path.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    return skills_root
+    return skills_roots
 
 
 def main() -> int:
@@ -229,13 +300,17 @@ def main() -> int:
     legacy_manifest_path = target_repo / LEGACY_AGENT_CONTEXT_DIRNAME / LEGACY_MANIFEST_NAME
 
     agents_path = ensure_agents_file(target_repo, REPO_ROOT)
+    claude_path = ensure_claude_file(target_repo)
     installs = discover_global_skills(GLOBAL_SKILLS_ROOT)
-    skills_root = sync_skills(target_repo, installs, manifest_path, legacy_manifest_path)
+    skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_path)
     cleanup_legacy_bootstrap(target_repo)
 
     print(f"Initialized project repo: {target_repo}")
     print(f"Updated AGENTS file: {agents_path}")
-    print(f"Installed {len(installs)} global skills into: {skills_root}")
+    print(f"Updated CLAUDE file: {claude_path}")
+    print(f"Installed {len(installs)} global skills into:")
+    for skills_root in skills_roots:
+        print(f"- {skills_root}")
     return 0
 
 

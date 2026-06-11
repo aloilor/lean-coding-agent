@@ -1,6 +1,6 @@
 ---
 name: initialize-project-agent
-description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with a local AGENTS.md that references this repo, create `agent-context`, and copy the installable skills from this repo's `global-skills/` folder into the target repo's `.codex/skills`.
+description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with a local AGENTS.md that references this repo, create `agent-context`, add a local `CLAUDE.md`, and copy the installable skills from this repo's `global-skills/` folder into the target repo's `.codex/skills` and `.claude/skills`.
 ---
 
 # Initialize Project Agent
@@ -13,9 +13,10 @@ Use the shared bootstrap script instead of recreating the setup manually.
 2. Run `python scripts/init_project_agent.py <target-repo>` from this repo root.
 3. Verify the target repo now contains:
    - `AGENTS.md` with a relative reference back to this repo's `AGENTS.md`
+   - `CLAUDE.md` that tells Claude to read the local `AGENTS.md`
    - `agent-context/`
    - `agent-context/global-skills-installed.json`
-   - `.codex/skills/` with the copied skill folders from this repo's `global-skills/`
+   - `.codex/skills/` and `.claude/skills/` with the copied skill folders from this repo's `global-skills/`
 4. Tell the user which skills were installed.
 
 ## Notes

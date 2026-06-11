@@ -6,4 +6,4 @@ I updated a shared skill in `global-skills/` without also making sure the same m
 
 ## Rule
 
-Whenever a skill in `global-skills/` is updated, sync that skill into every maintained matching `.codex/skills/<skill>` directory in this repo and sibling project repos under `../`.
+Whenever a skill in `global-skills/` is updated, sync that skill into every maintained matching `.codex/skills/<skill>` and `.claude/skills/<skill>` directory in this repo and sibling project repos under `../`.

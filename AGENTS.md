@@ -80,28 +80,30 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## 7. Self-Improvement Loop
 
-- After any correction from the user, add a new lesson in the current project's `.codex/lessons/` folder
-- Never keep a single `lessons.md`; create one short, descriptive file per lesson, such as `.codex/lessons/avoid-broad-git-add.md`
-- Keep a `.codex/lessons/LESSONS.md` index that lists every lesson file with a short title and one-line summary
-- When adding a new lesson file, also add a matching entry to `.codex/lessons/LESSONS.md`
+- Keep the lessons structure mirrored in both `.codex/lessons/` and `.claude/lessons/`
+- After any correction from the user, add the same new lesson in both `.codex/lessons/` and `.claude/lessons/`
+- Never keep a single `lessons.md`; create one short, descriptive file per lesson, such as `.codex/lessons/avoid-broad-git-add.md` and `.claude/lessons/avoid-broad-git-add.md`
+- Keep a `LESSONS.md` index in both lessons folders that lists every lesson file with a short title and one-line summary
+- When adding a new lesson file, also add a matching entry to both `LESSONS.md` indexes
 - Populate each index entry as a markdown link to the lesson file followed by a brief summary of the rule or mistake pattern
 - In each lesson file, write the mistake pattern and the rule that should prevent the same mistake next time
 - Ruthlessly iterate on these lessons until the mistake rate drops
-- Review `.codex/lessons/LESSONS.md` and the relevant linked lesson files at the start of each session for the current project
+- Review the lessons index and the relevant linked lesson files for both tool folders at the start of each session for the current project
 
 
 ## Task Management
 
-- The `.codex/tasks/` folder is project-local: use the `.codex/tasks/` directory inside the specific project you are working on, not this shared repo
-- Files inside `.codex/tasks/` are local working notes and should never be committed
-- Plan First: Write the plan in the current project's daily task file, for example `.codex/tasks/todo_20260520.md`
-- Use one task file per day: keep all tasks for that date in the same `.codex/tasks/todo_YYYYMMDD.md` file, and append new tasks to that existing file
+- Store task notes in the current tool's project-local tasks folder: use `.codex/tasks/` when working in Codex, and `.claude/tasks/` when working in Claude Code
+- The tasks folder is project-local: use the current project's tasks directory, not this shared repo unless this repo is the project being changed
+- Files inside `.codex/tasks/` or `.claude/tasks/` are local working notes and should never be committed
+- Plan First: Write the plan in the current project's daily task file, for example `.codex/tasks/todo_20260520.md` or `.claude/tasks/todo_20260520.md`
+- Use one task file per day: keep all tasks for that date in the same `todo_YYYYMMDD.md` file inside the current tool's tasks folder, and append new tasks to that existing file
 - Each task entry must include `planned on: YYYY-MM-DD` and `ran on: YYYY-MM-DD`
 - Verify Plan: Check in before starting implementation
 - Track Progress: Mark items complete as you go
 - Explain Changes: High-level summary at each step
-- Document Results: Add a review section to the same project-local `.codex/tasks/todo_YYYYMMDD.md` file
-- Capture Lessons: Store lessons in the current project's `.codex/lessons/` folder as separate files like `.codex/lessons/descriptive-lesson-name.md`, and keep `.codex/lessons/LESSONS.md` in sync
+- Document Results: Add a review section to the same project-local daily task file
+- Capture Lessons: Store each lesson in both `.codex/lessons/` and `.claude/lessons/` with matching filenames, and keep both `LESSONS.md` indexes in sync
 
 
 ---

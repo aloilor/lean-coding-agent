@@ -9,15 +9,18 @@ from pathlib import Path
 SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parent.parent
 GLOBAL_SKILLS_ROOT = REPO_ROOT / "global-skills"
-LOCAL_SKILLS_ROOT = REPO_ROOT / ".codex" / "skills"
 SIBLINGS_ROOT = REPO_ROOT.parent
+MANAGED_SKILLS_DIRS = [
+    Path(".codex") / "skills",
+    Path(".claude") / "skills",
+]
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Sync shared skills from global-skills into matching .codex/skills "
-            "directories in this repo and sibling repos under ../."
+            "and .claude/skills directories in this repo and sibling repos under ../."
         )
     )
     parser.add_argument(
@@ -84,18 +87,21 @@ def main() -> int:
     skipped: list[str] = []
 
     for repo in repos:
-        skills_root = repo / ".codex" / "skills"
-        if not skills_root.exists():
-            skipped.append(f"{repo}: missing .codex/skills")
-            continue
-
-        for source_dir in source_dirs:
-            target_dir = skills_root / source_dir.name
-            if not target_dir.exists():
-                skipped.append(f"{repo}: {source_dir.name} not maintained locally")
+        for relative_dir in MANAGED_SKILLS_DIRS:
+            skills_root = repo / relative_dir
+            if not skills_root.exists():
+                skipped.append(f"{repo}: missing {relative_dir.as_posix()}")
                 continue
-            sync_skill(source_dir, target_dir)
-            updated.append(f"{repo}: {source_dir.name}")
+
+            for source_dir in source_dirs:
+                target_dir = skills_root / source_dir.name
+                if not target_dir.exists():
+                    skipped.append(
+                        f"{repo}: {relative_dir.as_posix()}/{source_dir.name} not maintained locally"
+                    )
+                    continue
+                sync_skill(source_dir, target_dir)
+                updated.append(f"{repo}: {relative_dir.as_posix()}/{source_dir.name}")
 
     if updated:
         print("Updated skill copies:")
