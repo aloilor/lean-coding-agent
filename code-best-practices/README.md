@@ -11,6 +11,7 @@ This folder is the top-level index for the reusable best-practice guides in this
 - [Observability](./observability/README.md): guidelines for logging, monitoring, alerting, tracing, and correlating production signals.
 - [Git](./git/README.md): guidelines for branching, commits, rebasing, tagging, and safe history management.
 - [Python](./python/README.md): guidelines for readable Python style, maintainable modules, typing, exceptions, and practical testing habits.
+- [Testing](./testing/README.md): guidelines for test strategy, test data, and reliable environments.
 
 ## Use
 
