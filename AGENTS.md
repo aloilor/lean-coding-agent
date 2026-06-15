@@ -6,6 +6,13 @@
 - No Laziness: Find root causes. No temporary fixes. Senior developer standards.
 - Minimal Impact: Changes should only touch what's necessary. Avoid introducing bugs.
 
+## Local Project Context
+
+- Treat this file as the shared default baseline.
+- Read project-specific shared context from `agent-context/` when it exists.
+- Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
+- Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
+
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**

@@ -21,20 +21,20 @@ MANIFEST_NAME = "global-skills-installed.json"
 LEGACY_MANIFEST_NAME = "awesome-codex-skills-installed.json"
 LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
+AGENT_CONTEXT_README_NAME = "README.md"
 LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
-AGENTS_MARKER_START = "<!-- shared-agents-reference:start -->"
-AGENTS_MARKER_END = "<!-- shared-agents-reference:end -->"
-CLAUDE_MARKER_START = "<!-- shared-claude-reference:start -->"
-CLAUDE_MARKER_END = "<!-- shared-claude-reference:end -->"
+BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
+OVERRIDE_FILENAMES = ["AGENTS.override.md", "CLAUDE.override.md"]
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Initialize a project repo so it uses this shared agents repo, creates "
-            "agent-context, and installs this repo's global skills into the target "
-            "repo's .codex/skills and .claude/skills directories."
+            "Initialize a project repo with this shared agent baseline, creates "
+            "private override files and agent-context, and installs this repo's "
+            "global skills into the target repo's .codex/skills and .claude/skills "
+            "directories."
         )
     )
     parser.add_argument(
@@ -58,117 +58,84 @@ def ensure_global_skills_root(global_skills_root: Path) -> None:
         raise SystemExit(f"Global skills path is not a directory: {global_skills_root}")
 
 
-def shared_agents_block(target_repo: Path, shared_agents_path: Path) -> str:
-    link_path = Path(os.path.relpath(shared_agents_path, target_repo)).as_posix()
-    lines = [
-        AGENTS_MARKER_START,
-        "## Shared Baseline",
-        "",
-        f"Follow the shared baseline in [{link_path}]({link_path}).",
-        "",
-        "Keep project-specific rules below this block.",
-        AGENTS_MARKER_END,
-    ]
-    return "\n".join(lines)
+def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]:
+    copied_paths: list[Path] = []
+
+    for filename in BASELINE_FILENAMES:
+        source_path = shared_repo_root / filename
+        if not source_path.exists():
+            raise SystemExit(f"Shared baseline file does not exist: {source_path}")
+
+        target_path = target_repo / filename
+        shutil.copy2(source_path, target_path)
+        copied_paths.append(target_path)
+
+    return copied_paths
 
 
-def shared_claude_block() -> str:
-    lines = [
-        CLAUDE_MARKER_START,
-        "## Shared Baseline",
-        "",
-        "Read and follow [AGENTS.md](AGENTS.md) before making changes in this repo.",
-        "",
-        "Keep Claude-specific instructions below this block.",
-        CLAUDE_MARKER_END,
-    ]
-    return "\n".join(lines)
+def override_file_content(filename: str) -> str:
+    return "\n".join(
+        [
+            f"# {filename}",
+            "",
+            "Local private overrides for this project.",
+            "",
+            "This file is ignored by git and is safe for machine-specific notes.",
+            "",
+        ]
+    )
 
 
-def replace_or_append_managed_block(
-    original: str,
-    block: str,
-    marker_start: str,
-    marker_end: str,
-) -> str:
-    if marker_start in original and marker_end in original:
-        start = original.index(marker_start)
-        end = original.index(marker_end) + len(marker_end)
-        return original[:start] + block + original[end:]
+def ensure_override_files(target_repo: Path) -> list[Path]:
+    override_paths: list[Path] = []
 
-    if block in original:
-        return original
+    for filename in OVERRIDE_FILENAMES:
+        override_path = target_repo / filename
+        if not override_path.exists():
+            override_path.write_text(override_file_content(filename), encoding="utf-8")
+        override_paths.append(override_path)
 
-    return original.rstrip() + "\n\n" + block + "\n"
+    return override_paths
 
 
-def ensure_agents_file(target_repo: Path, shared_repo_root: Path) -> Path:
-    agents_path = target_repo / "AGENTS.md"
-    shared_agents_path = shared_repo_root / "AGENTS.md"
-    block = shared_agents_block(target_repo, shared_agents_path)
+def ensure_override_gitignore(target_repo: Path) -> Path:
+    gitignore_path = target_repo / ".gitignore"
+    existing = gitignore_path.read_text(encoding="utf-8") if gitignore_path.exists() else ""
+    existing_lines = set(existing.splitlines())
+    missing_lines = [filename for filename in OVERRIDE_FILENAMES if filename not in existing_lines]
 
-    if not agents_path.exists():
+    if missing_lines:
+        prefix = "" if not existing or existing.endswith("\n") else "\n"
+        addition = "\n".join(missing_lines) + "\n"
+        gitignore_path.write_text(existing + prefix + addition, encoding="utf-8")
+
+    return gitignore_path
+
+
+def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
+    readme_path = agent_context_dir / AGENT_CONTEXT_README_NAME
+    if not readme_path.exists():
         content = "\n".join(
             [
-                "# AGENTS.md",
+                "# Project Agent Context",
                 "",
-                block,
+                "Add shared project-specific context here.",
                 "",
-                "## Project-Specific Rules",
+                "Good starting points:",
                 "",
-                "- Add project-specific instructions here.",
+                "- folder structure",
+                "- tech stack",
+                "- architecture conventions",
+                "- testing expectations",
+                "- project-specific workflows",
+                "",
+                "Keep private or machine-specific notes in the root override files instead.",
                 "",
             ]
         )
-        agents_path.write_text(content, encoding="utf-8")
-        return agents_path
+        readme_path.write_text(content, encoding="utf-8")
 
-    original = agents_path.read_text(encoding="utf-8")
-    updated = replace_or_append_managed_block(
-        original,
-        block,
-        AGENTS_MARKER_START,
-        AGENTS_MARKER_END,
-    )
-
-    if updated != original:
-        agents_path.write_text(updated, encoding="utf-8")
-
-    return agents_path
-
-
-def ensure_claude_file(target_repo: Path) -> Path:
-    claude_path = target_repo / "CLAUDE.md"
-    block = shared_claude_block()
-
-    if not claude_path.exists():
-        content = "\n".join(
-            [
-                "# CLAUDE.md",
-                "",
-                block,
-                "",
-                "## Project-Specific Claude Notes",
-                "",
-                "- Add Claude-specific instructions here.",
-                "",
-            ]
-        )
-        claude_path.write_text(content, encoding="utf-8")
-        return claude_path
-
-    original = claude_path.read_text(encoding="utf-8")
-    updated = replace_or_append_managed_block(
-        original,
-        block,
-        CLAUDE_MARKER_START,
-        CLAUDE_MARKER_END,
-    )
-
-    if updated != original:
-        claude_path.write_text(updated, encoding="utf-8")
-
-    return claude_path
+    return readme_path
 
 
 def load_manifest(manifest_path: Path) -> dict:
@@ -296,18 +263,26 @@ def main() -> int:
 
     agent_context_dir = target_repo / AGENT_CONTEXT_DIRNAME
     agent_context_dir.mkdir(parents=True, exist_ok=True)
+    agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     manifest_path = agent_context_dir / MANIFEST_NAME
     legacy_manifest_path = target_repo / LEGACY_AGENT_CONTEXT_DIRNAME / LEGACY_MANIFEST_NAME
 
-    agents_path = ensure_agents_file(target_repo, REPO_ROOT)
-    claude_path = ensure_claude_file(target_repo)
+    baseline_paths = copy_baseline_files(target_repo, REPO_ROOT)
+    override_paths = ensure_override_files(target_repo)
+    gitignore_path = ensure_override_gitignore(target_repo)
     installs = discover_global_skills(GLOBAL_SKILLS_ROOT)
     skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_path)
     cleanup_legacy_bootstrap(target_repo)
 
     print(f"Initialized project repo: {target_repo}")
-    print(f"Updated AGENTS file: {agents_path}")
-    print(f"Updated CLAUDE file: {claude_path}")
+    print("Copied baseline files:")
+    for baseline_path in baseline_paths:
+        print(f"- {baseline_path}")
+    print("Ensured private override files:")
+    for override_path in override_paths:
+        print(f"- {override_path}")
+    print(f"Ensured project context file: {agent_context_readme_path}")
+    print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} global skills into:")
     for skills_root in skills_roots:
         print(f"- {skills_root}")

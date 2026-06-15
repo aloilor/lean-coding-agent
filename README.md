@@ -1,12 +1,12 @@
-# agents
+# dev-agent-baseline
 
 This repository is the shared base I want to reuse across all of my projects.
 
 It contains the general agent guidance that should apply everywhere, regardless of stack, folder structure, or project type. The goal is to keep one central set of broad rules and standards that I can reference from each individual project.
 
-The shared baseline stays in `AGENTS.md`, and this repo now bootstraps both Codex and Claude-friendly project files around that same baseline.
+The shared baseline stays in `AGENTS.md` and `CLAUDE.md`. This repo bootstraps both files into each project as exact copies of the shared defaults.
 
-Each project will then have its own custom `AGENTS.md` with more specific instructions for that codebase, such as:
+Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
@@ -14,10 +14,18 @@ Each project will then have its own custom `AGENTS.md` with more specific instru
 - testing expectations
 - project-specific workflows
 
+Each project can also keep private local overrides in:
+
+- `AGENTS.override.md`
+- `CLAUDE.override.md`
+
+Those override files are ignored by git and are meant for local-only notes.
+
 In other words:
 
 - this repo defines the default baseline
-- each project can extend it with its own local rules
+- each project documents shared project-specific context in `agent-context/`
+- each machine can keep private overrides in the override files
 
 This setup keeps the global guidance consistent while still allowing every project to document what makes it unique.
 
@@ -31,15 +39,18 @@ python scripts/init_project_agent.py ../your-project-repo
 
 The script will:
 
-- create or update the target repo's `AGENTS.md` so it references this repo's shared `AGENTS.md`
-- create or update the target repo's `CLAUDE.md` so Claude is told to read the local `AGENTS.md`
+- copy this repo's `AGENTS.md` into the target repo
+- copy this repo's `CLAUDE.md` into the target repo
+- create `AGENTS.override.md` and `CLAUDE.override.md` when they do not already exist
+- add the override files to the target repo's `.gitignore`
 - create `agent-context/` in the target repo
+- create `agent-context/README.md` when it does not already exist
 - copy every installable skill from this repo's `global-skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
 - write `agent-context/global-skills-installed.json` so the setup can be rerun cleanly
 
-To change which skills get installed into future projects, add or remove skill folders in [global-skills](/C:/Users/Craas/Desktop/projects/agents/global-skills).
+To change which skills get installed into future projects, add or remove skill folders in [global-skills](global-skills).
 
-Repo-only skills for maintaining this shared repo are kept in [.codex/skills](/C:/Users/Craas/Desktop/projects/agents/.codex/skills) and mirrored into [.claude/skills](/C:/Users/Craas/Desktop/projects/agents/.claude/skills) so both tools can use them locally. Do not place repo-only skills in `global-skills/`, because everything installable there is copied into new project repos.
+Repo-only skills for maintaining this shared repo are kept in [.codex/skills](.codex/skills) and mirrored into [.claude/skills](.claude/skills) so both tools can use them locally. Do not place repo-only skills in `global-skills/`, because everything installable there is copied into new project repos.
 
 Why both skill folders:
 
