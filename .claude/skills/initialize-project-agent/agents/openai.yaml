@@ -1,4 +1,4 @@
 interface:
   display_name: "Initialize Project Agent"
   short_description: "Bootstrap a project repo with shared agent setup"
-  default_prompt: "Use $initialize-project-agent to bootstrap a project repo with AGENTS.md, agent-context, and the repo-local global skills."
+  default_prompt: "Use $initialize-project-agent to bootstrap a project repo with AGENTS.md, agent-context, and the repo-local shared skills."

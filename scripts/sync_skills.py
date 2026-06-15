@@ -8,7 +8,7 @@ from pathlib import Path
 
 SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parent.parent
-GLOBAL_SKILLS_ROOT = REPO_ROOT / "global-skills"
+SHARED_SKILLS_ROOT = REPO_ROOT / "skills"
 SIBLINGS_ROOT = REPO_ROOT.parent
 MANAGED_SKILLS_DIRS = [
     Path(".codex") / "skills",
@@ -19,23 +19,23 @@ MANAGED_SKILLS_DIRS = [
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Sync shared skills from global-skills into matching .codex/skills "
+            "Sync shared skills from this repo's skills folder into matching .codex/skills "
             "and .claude/skills directories in this repo and sibling repos under ../."
         )
     )
     parser.add_argument(
         "skills",
         nargs="*",
-        help="Optional skill names to sync. Defaults to all installable global skills.",
+        help="Optional skill names to sync. Defaults to all installable shared skills.",
     )
     return parser.parse_args()
 
 
-def discover_global_skills(requested: list[str]) -> list[Path]:
+def discover_shared_skills(requested: list[str]) -> list[Path]:
     if requested:
-        sources = [GLOBAL_SKILLS_ROOT / name for name in requested]
+        sources = [SHARED_SKILLS_ROOT / name for name in requested]
     else:
-        sources = sorted(path for path in GLOBAL_SKILLS_ROOT.iterdir() if path.is_dir())
+        sources = sorted(path for path in SHARED_SKILLS_ROOT.iterdir() if path.is_dir())
 
     installable: list[Path] = []
     missing: list[Path] = []
@@ -47,10 +47,10 @@ def discover_global_skills(requested: list[str]) -> list[Path]:
 
     if missing:
         missing_names = ", ".join(path.name for path in missing)
-        raise SystemExit(f"These global skills are missing or not installable: {missing_names}")
+        raise SystemExit(f"These shared skills are missing or not installable: {missing_names}")
 
     if not installable:
-        raise SystemExit(f"No installable global skills found in {GLOBAL_SKILLS_ROOT}")
+        raise SystemExit(f"No installable shared skills found in {SHARED_SKILLS_ROOT}")
 
     return installable
 
@@ -80,7 +80,7 @@ def sync_skill(source_dir: Path, target_dir: Path) -> None:
 
 def main() -> int:
     args = parse_args()
-    source_dirs = discover_global_skills(args.skills)
+    source_dirs = discover_shared_skills(args.skills)
     repos = iter_target_repos()
 
     updated: list[str] = []

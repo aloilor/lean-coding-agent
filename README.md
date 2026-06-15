@@ -45,12 +45,12 @@ The script will:
 - add the override files to the target repo's `.gitignore`
 - create `agent-context/` in the target repo
 - create `agent-context/README.md` when it does not already exist
-- copy every installable skill from this repo's `global-skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
-- write `agent-context/global-skills-installed.json` so the setup can be rerun cleanly
+- copy every installable skill from this repo's `skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
+- write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 
-To change which skills get installed into future projects, add or remove skill folders in [global-skills](global-skills).
+To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
-Repo-only skills for maintaining this shared repo are kept in [.codex/skills](.codex/skills) and mirrored into [.claude/skills](.claude/skills) so both tools can use them locally. Do not place repo-only skills in `global-skills/`, because everything installable there is copied into new project repos.
+Repo-only skills for maintaining this shared repo are kept in [.codex/skills](.codex/skills) and mirrored into [.claude/skills](.claude/skills) so both tools can use them locally. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
 
 Why both skill folders:
 
@@ -60,16 +60,16 @@ Why both skill folders:
 
 ## Sync Updated Shared Skills
 
-When you want to propagate an updated shared skill from `global-skills/`, sync that change into any maintained copies in this repo and sibling project repos under `../`:
+When you want to propagate an updated shared skill from `skills/`, sync that change into any maintained copies in this repo and sibling project repos under `../`:
 
 ```bash
-python scripts/sync_global_skills.py
+python scripts/sync_skills.py
 ```
 
 To sync only one shared skill:
 
 ```bash
-python scripts/sync_global_skills.py git-conventional-commit
+python scripts/sync_skills.py git-conventional-commit
 ```
 
 The sync script only updates matching `.codex/skills/<skill>/` and `.claude/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.

@@ -8,5 +8,5 @@
 - [Add New Lessons To Both Codex And Claude](add-new-lessons-to-both-codex-and-claude.md) - Whenever this repo gets a new lesson, add the same file and index entry in both lesson trees.
 - [Fix Skill Behavior In The Skill, Not In Lessons](fix-skill-behavior-in-the-skill-not-in-lessons.md) - When a skill behaves wrongly or ambiguously, fix the skill itself instead of adding lessons as a workaround.
 - [Mirror Project Operating Files Across Supported Tools](mirror-project-operating-files-across-supported-tools.md) - When this repo supports multiple agent tools, keep lessons, task notes, and repo-local skills aligned across them.
-- [Sync Updated Global Skills To Local And Sibling Repos](sync-updated-global-skills-to-local-and-sibling-repos.md) - Whenever a skill in `global-skills/` is updated, sync that skill into every maintained matching `.codex/skills/<skill>` and `.claude/skills/<skill>` copy in this repo and sibling repos under `../`.
+- [Sync Updated Shared Skills To Local And Sibling Repos](sync-updated-shared-skills-to-local-and-sibling-repos.md) - Whenever a skill in `skills/` is updated, sync that skill into every maintained matching `.codex/skills/<skill>` and `.claude/skills/<skill>` copy in this repo and sibling repos under `../`.
 

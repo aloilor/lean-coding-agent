@@ -12,13 +12,15 @@ from pathlib import Path
 
 SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parent.parent
-GLOBAL_SKILLS_ROOT = REPO_ROOT / "global-skills"
+SHARED_SKILLS_ROOT = REPO_ROOT / "skills"
 MANAGED_SKILLS_DIRS = [
     Path(".codex") / "skills",
     Path(".claude") / "skills",
 ]
-MANIFEST_NAME = "global-skills-installed.json"
-LEGACY_MANIFEST_NAME = "awesome-codex-skills-installed.json"
+MANIFEST_NAME = "skills-installed.json"
+LEGACY_MANIFEST_NAMES = [
+    "awesome-codex-skills-installed.json",
+]
 LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
@@ -33,7 +35,7 @@ def parse_args() -> argparse.Namespace:
         description=(
             "Initialize a project repo with this shared agent baseline, creates "
             "private override files and agent-context, and installs this repo's "
-            "global skills into the target repo's .codex/skills and .claude/skills "
+            "shared skills into the target repo's .codex/skills and .claude/skills "
             "directories."
         )
     )
@@ -51,11 +53,11 @@ def ensure_target_repo(target_repo: Path) -> None:
         raise SystemExit(f"Target repo is not a directory: {target_repo}")
 
 
-def ensure_global_skills_root(global_skills_root: Path) -> None:
-    if not global_skills_root.exists():
-        raise SystemExit(f"Global skills directory does not exist: {global_skills_root}")
-    if not global_skills_root.is_dir():
-        raise SystemExit(f"Global skills path is not a directory: {global_skills_root}")
+def ensure_shared_skills_root(shared_skills_root: Path) -> None:
+    if not shared_skills_root.exists():
+        raise SystemExit(f"Shared skills directory does not exist: {shared_skills_root}")
+    if not shared_skills_root.is_dir():
+        raise SystemExit(f"Shared skills path is not a directory: {shared_skills_root}")
 
 
 def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]:
@@ -148,10 +150,10 @@ def load_manifest(manifest_path: Path) -> dict:
         raise SystemExit(f"Managed skills manifest is not valid JSON: {manifest_path}") from exc
 
 
-def discover_global_skills(global_skills_root: Path) -> list[dict]:
+def discover_shared_skills(shared_skills_root: Path) -> list[dict]:
     installs: list[dict] = []
 
-    for source_dir in sorted(path for path in global_skills_root.iterdir() if path.is_dir()):
+    for source_dir in sorted(path for path in shared_skills_root.iterdir() if path.is_dir()):
         if not (source_dir / "SKILL.md").exists():
             continue
         installs.append(
@@ -162,7 +164,7 @@ def discover_global_skills(global_skills_root: Path) -> list[dict]:
         )
 
     if not installs:
-        raise SystemExit(f"No installable skills found in: {global_skills_root}")
+        raise SystemExit(f"No installable skills found in: {shared_skills_root}")
 
     return installs
 
@@ -208,7 +210,7 @@ def cleanup_legacy_bootstrap(target_repo: Path) -> None:
     if legacy_clone_dir.exists():
         safe_rmtree(legacy_clone_dir, legacy_agent_context_dir)
 
-    for legacy_name in [LEGACY_CONFIG_NAME, LEGACY_MANIFEST_NAME]:
+    for legacy_name in [LEGACY_CONFIG_NAME, *LEGACY_MANIFEST_NAMES]:
         legacy_path = legacy_agent_context_dir / legacy_name
         if legacy_path.exists():
             legacy_path.unlink()
@@ -221,13 +223,13 @@ def sync_skills(
     target_repo: Path,
     installs: list[dict],
     manifest_path: Path,
-    legacy_manifest_path: Path,
+    legacy_manifest_paths: list[Path],
 ) -> list[Path]:
     skills_roots = [target_repo / relative_dir for relative_dir in MANAGED_SKILLS_DIRS]
     for skills_root in skills_roots:
         skills_root.mkdir(parents=True, exist_ok=True)
 
-    previous_names = load_managed_skill_names([manifest_path, legacy_manifest_path])
+    previous_names = load_managed_skill_names([manifest_path, *legacy_manifest_paths])
     current_names = {entry["installed_as"] for entry in installs}
 
     for removed_name in sorted(previous_names - current_names):
@@ -235,7 +237,7 @@ def sync_skills(
             safe_rmtree(skills_root / removed_name, skills_root)
 
     for install in installs:
-        source_dir = GLOBAL_SKILLS_ROOT / install["source"]
+        source_dir = SHARED_SKILLS_ROOT / install["source"]
         for skills_root in skills_roots:
             dest_dir = skills_root / install["installed_as"]
             safe_rmtree(dest_dir, skills_root)
@@ -246,7 +248,7 @@ def sync_skills(
             )
 
     manifest = {
-        "source_root": str(GLOBAL_SKILLS_ROOT),
+        "source_root": str(SHARED_SKILLS_ROOT),
         "managed_skill_dirs": [str(path) for path in MANAGED_SKILLS_DIRS],
         "skills": installs,
     }
@@ -259,19 +261,25 @@ def main() -> int:
     target_repo = Path(args.target_repo).expanduser().resolve()
 
     ensure_target_repo(target_repo)
-    ensure_global_skills_root(GLOBAL_SKILLS_ROOT)
+    ensure_shared_skills_root(SHARED_SKILLS_ROOT)
 
     agent_context_dir = target_repo / AGENT_CONTEXT_DIRNAME
     agent_context_dir.mkdir(parents=True, exist_ok=True)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     manifest_path = agent_context_dir / MANIFEST_NAME
-    legacy_manifest_path = target_repo / LEGACY_AGENT_CONTEXT_DIRNAME / LEGACY_MANIFEST_NAME
+    legacy_manifest_paths = [
+        agent_context_dir / legacy_name for legacy_name in LEGACY_MANIFEST_NAMES
+    ]
+    legacy_manifest_paths.extend(
+        target_repo / LEGACY_AGENT_CONTEXT_DIRNAME / legacy_name
+        for legacy_name in LEGACY_MANIFEST_NAMES
+    )
 
     baseline_paths = copy_baseline_files(target_repo, REPO_ROOT)
     override_paths = ensure_override_files(target_repo)
     gitignore_path = ensure_override_gitignore(target_repo)
-    installs = discover_global_skills(GLOBAL_SKILLS_ROOT)
-    skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_path)
+    installs = discover_shared_skills(SHARED_SKILLS_ROOT)
+    skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_paths)
     cleanup_legacy_bootstrap(target_repo)
 
     print(f"Initialized project repo: {target_repo}")
@@ -283,7 +291,7 @@ def main() -> int:
         print(f"- {override_path}")
     print(f"Ensured project context file: {agent_context_readme_path}")
     print(f"Updated ignore rules: {gitignore_path}")
-    print(f"Installed {len(installs)} global skills into:")
+    print(f"Installed {len(installs)} shared skills into:")
     for skills_root in skills_roots:
         print(f"- {skills_root}")
     return 0
