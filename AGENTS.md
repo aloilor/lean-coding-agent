@@ -10,6 +10,7 @@
 
 - Treat this file as the shared default baseline.
 - Read project-specific shared context from `agent-context/` when it exists.
+- Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
 - Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
 
@@ -87,15 +88,15 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 ## 7. Self-Improvement Loop
 
-- Keep the lessons structure mirrored in both `.codex/lessons/` and `.claude/lessons/`
-- After any correction from the user, add the same new lesson in both `.codex/lessons/` and `.claude/lessons/`
-- Never keep a single `lessons.md`; create one short, descriptive file per lesson, such as `.codex/lessons/avoid-broad-git-add.md` and `.claude/lessons/avoid-broad-git-add.md`
-- Keep a `LESSONS.md` index in both lessons folders that lists every lesson file with a short title and one-line summary
-- When adding a new lesson file, also add a matching entry to both `LESSONS.md` indexes
+- Keep shared agent lessons in `.agents/lessons/`
+- After any correction from the user, add one new lesson file in `.agents/lessons/`
+- Never keep a single `lessons.md`; create one short, descriptive file per lesson, such as `.agents/lessons/avoid-broad-git-add.md`
+- Keep a `LESSONS.md` index in `.agents/lessons/` that lists every lesson file with a short title and one-line summary
+- When adding a new lesson file, also add a matching entry to `.agents/lessons/LESSONS.md`
 - Populate each index entry as a markdown link to the lesson file followed by a brief summary of the rule or mistake pattern
 - In each lesson file, write the mistake pattern and the rule that should prevent the same mistake next time
 - Ruthlessly iterate on these lessons until the mistake rate drops
-- Review the lessons index and the relevant linked lesson files for both tool folders at the start of each session for the current project
+- Review the shared lessons index and the relevant linked lesson files at the start of each session for the current project
 
 
 ## Task Management
@@ -110,7 +111,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Track Progress: Mark items complete as you go
 - Explain Changes: High-level summary at each step
 - Document Results: Add a review section to the same project-local daily task file
-- Capture Lessons: Store each lesson in both `.codex/lessons/` and `.claude/lessons/` with matching filenames, and keep both `LESSONS.md` indexes in sync
+- Capture Lessons: Store each lesson in `.agents/lessons/` and keep `.agents/lessons/LESSONS.md` in sync
 
 
 ---

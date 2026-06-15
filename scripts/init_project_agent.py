@@ -24,6 +24,9 @@ LEGACY_MANIFEST_NAMES = [
 LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
+AGENTS_DIRNAME = ".agents"
+LESSONS_DIRNAME = "lessons"
+LESSONS_INDEX_NAME = "LESSONS.md"
 LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
@@ -34,7 +37,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Initialize a project repo with this shared agent baseline, creates "
-            "private override files and agent-context, and installs this repo's "
+            "private override files, agent-context, shared lessons, and installs this repo's "
             "shared skills into the target repo's .codex/skills and .claude/skills "
             "directories."
         )
@@ -138,6 +141,25 @@ def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
         readme_path.write_text(content, encoding="utf-8")
 
     return readme_path
+
+
+def ensure_lessons_index(target_repo: Path) -> Path:
+    lessons_dir = target_repo / AGENTS_DIRNAME / LESSONS_DIRNAME
+    lessons_dir.mkdir(parents=True, exist_ok=True)
+
+    index_path = lessons_dir / LESSONS_INDEX_NAME
+    if not index_path.exists():
+        content = "\n".join(
+            [
+                "# Lessons",
+                "",
+                "Add shared agent lessons here.",
+                "",
+            ]
+        )
+        index_path.write_text(content, encoding="utf-8")
+
+    return index_path
 
 
 def load_manifest(manifest_path: Path) -> dict:
@@ -266,6 +288,7 @@ def main() -> int:
     agent_context_dir = target_repo / AGENT_CONTEXT_DIRNAME
     agent_context_dir.mkdir(parents=True, exist_ok=True)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
+    lessons_index_path = ensure_lessons_index(target_repo)
     manifest_path = agent_context_dir / MANIFEST_NAME
     legacy_manifest_paths = [
         agent_context_dir / legacy_name for legacy_name in LEGACY_MANIFEST_NAMES
@@ -290,6 +313,7 @@ def main() -> int:
     for override_path in override_paths:
         print(f"- {override_path}")
     print(f"Ensured project context file: {agent_context_readme_path}")
+    print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} shared skills into:")
     for skills_root in skills_roots:

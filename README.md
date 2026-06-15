@@ -45,6 +45,7 @@ The script will:
 - add the override files to the target repo's `.gitignore`
 - create `agent-context/` in the target repo
 - create `agent-context/README.md` when it does not already exist
+- create `.agents/lessons/LESSONS.md` when it does not already exist
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 
