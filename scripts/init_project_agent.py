@@ -143,6 +143,33 @@ def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
     return readme_path
 
 
+def copy_agent_context_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
+    source_dir = shared_repo_root / AGENT_CONTEXT_DIRNAME
+    target_dir = target_repo / AGENT_CONTEXT_DIRNAME
+    copied_paths: list[Path] = []
+
+    if not source_dir.exists():
+        return copied_paths
+
+    if source_dir.resolve() == target_dir.resolve():
+        return copied_paths
+
+    for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
+        if source_path.name == MANIFEST_NAME:
+            continue
+
+        relative_path = source_path.relative_to(source_dir)
+        target_path = target_dir / relative_path
+        if target_path.exists():
+            continue
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, target_path)
+        copied_paths.append(target_path)
+
+    return copied_paths
+
+
 def ensure_lessons_index(target_repo: Path) -> Path:
     lessons_dir = target_repo / AGENTS_DIRNAME / LESSONS_DIRNAME
     lessons_dir.mkdir(parents=True, exist_ok=True)
@@ -287,6 +314,7 @@ def main() -> int:
 
     agent_context_dir = target_repo / AGENT_CONTEXT_DIRNAME
     agent_context_dir.mkdir(parents=True, exist_ok=True)
+    copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     lessons_index_path = ensure_lessons_index(target_repo)
     manifest_path = agent_context_dir / MANIFEST_NAME
@@ -313,6 +341,10 @@ def main() -> int:
     for override_path in override_paths:
         print(f"- {override_path}")
     print(f"Ensured project context file: {agent_context_readme_path}")
+    if copied_context_paths:
+        print("Copied baseline project context files:")
+        for context_path in copied_context_paths:
+            print(f"- {context_path}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} shared skills into:")

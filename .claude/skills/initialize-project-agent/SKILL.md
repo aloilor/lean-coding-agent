@@ -18,6 +18,7 @@ Use the shared bootstrap script instead of recreating the setup manually.
    - `CLAUDE.override.md` for local-private Claude overrides
    - `.gitignore` entries for both override files
    - `agent-context/`
+   - baseline context files copied from this repo's `agent-context/`
    - `agent-context/README.md` as a shared project-specific context starter
    - `.agents/lessons/`
    - `.agents/lessons/LESSONS.md` as a shared agent lessons index
@@ -33,6 +34,7 @@ Use the shared bootstrap script instead of recreating the setup manually.
 - The bootstrap script is idempotent for the managed pieces:
   - It recopies the shared `AGENTS.md` and `CLAUDE.md` baseline files.
   - It creates override files only when they do not already exist.
+  - It copies missing baseline context files from this repo's `agent-context/`.
   - It creates `agent-context/README.md` only when it does not already exist.
   - It creates `.agents/lessons/LESSONS.md` only when it does not already exist.
   - It recopies the current repo-local shared skills into the target repo.

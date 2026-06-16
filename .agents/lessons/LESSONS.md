@@ -4,6 +4,11 @@
 - [Keep Practical Examples In Guides](keep-practical-examples-in-guides.md) - Keep short concrete examples in reusable guides when they make the rules easier to apply correctly.
 - [Make README Indexes Clickable](make-readme-indexes-clickable.md) - When a README serves as an index, link the referenced files so the document is directly navigable.
 - [Prefer Plainer Explanations In Guides](prefer-plainer-explanations-in-guides.md) - Prefer the simplest wording that still preserves the concept when writing reusable guides.
+- [Preserve Named Source Guidance When Adapting](preserve-named-source-guidance-when-adapting.md) - When adapting a guide, compare source and target headings so named rules are not accidentally compressed away.
+- [Place Content In The Active Target Context](place-content-in-active-target-context.md) - When a thread is focused on a destination tree, add new content there instead of a related source/reference tree.
+- [Place Domain Context Guides At Agent Context Root](place-domain-context-guides-at-agent-context-root.md) - Put broad API, architecture, and project-context guides under `agent-context/`, not `agent-context/coding-style/`.
+- [Honor Exact Copy Requests](honor-exact-copy-requests.md) - When asked to copy a file exactly, preserve its content verbatim instead of adapting or improving it.
+- [Use Copied Guide Folder Format For Coding Style](use-copied-guide-folder-format-for-coding-style.md) - New `agent-context/coding-style/` additions should use the compact copied-guide folder format unless explicitly told otherwise.
 - [Keep Lessons General And Reusable](keep-lessons-general-and-reusable.md) - Save lessons only when they capture a broader rule that can be reused across different tasks, not a one-off omission.
 - [Add New Lessons To Shared Agent Lessons](add-new-lessons-to-shared-agents-lessons.md) - Whenever this repo gets a new lesson, add one file and index entry in `.agents/lessons/`.
 - [Fix Skill Behavior In The Skill, Not In Lessons](fix-skill-behavior-in-the-skill-not-in-lessons.md) - When a skill behaves wrongly or ambiguously, fix the skill itself instead of adding lessons as a workaround.
