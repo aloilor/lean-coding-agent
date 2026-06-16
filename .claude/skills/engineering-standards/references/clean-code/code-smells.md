@@ -318,7 +318,7 @@ class StripeProcessor implements PaymentProcessor {
 ## Prevention Strategies
 
 1. **Follow Object Calisthenics** - Rules prevent most smells
-2. **Practice TDD** - Tests reveal design problems early
+2. **Use tests as design feedback** - Tests reveal design problems early
 3. **Review in pairs** - Fresh eyes catch smells
 4. **Refactor continuously** - Don't let smells accumulate
 5. **Apply SOLID** - Prevents structural smells

@@ -55,7 +55,7 @@ Code should communicate clearly. Names, structure, tests all contribute.
 Do the simplest thing that could possibly work.
 
 ### 3. Feedback
-Fast feedback loops catch complexity early. TDD, CI, code review.
+Fast feedback loops catch complexity early: tests, CI, code review, and small reviewable changes.
 
 ### 4. Courage
 Refactor aggressively. Don't let complexity accumulate.
