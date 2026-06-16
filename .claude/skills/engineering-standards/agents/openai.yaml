@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Standards"
+  short_description: "Apply shared coding and design standards"
+  default_prompt: "Use $engineering-standards to implement this change with the shared engineering baseline."

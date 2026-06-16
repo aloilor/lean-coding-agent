@@ -6,7 +6,7 @@ It contains the general agent guidance that should apply everywhere, regardless 
 
 The shared baseline stays in `AGENTS.md` and `CLAUDE.md`. This repo bootstraps both files into each project as exact copies of the shared defaults.
 
-Each project should keep its shared project-specific context in `agent-context/`, such as:
+Reusable coding, design, API, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
@@ -44,7 +44,7 @@ The script will:
 - create `AGENTS.override.md` and `CLAUDE.override.md` when they do not already exist
 - add the override files to the target repo's `.gitignore`
 - create `agent-context/` in the target repo
-- copy missing baseline context files from this repo's `agent-context/`
+- copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`

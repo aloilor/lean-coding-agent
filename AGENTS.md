@@ -10,6 +10,7 @@
 
 - Treat this file as the shared default baseline.
 - Read project-specific shared context from `agent-context/` when it exists.
+- When available, use the `engineering-standards` skill for reusable coding, design, API, refactoring, debugging, and review guidance.
 - Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
 - Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
