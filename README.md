@@ -84,6 +84,8 @@ The bootstrap installs or refreshes these upstream skills on every run:
 - `find-skills` from `vercel-labs/skills`
 - `grill-me`, `grill-with-docs`, `tdd`, `diagnose`, and `improve-codebase-architecture` from `mattpocock/skills`
 - `changelog-automation` from `wshobson/agents`
+- `codebase-onboarding` from `alirezarezvani/claude-skills`
+- `create-readme`, `git-commit`, `prd`, `refactor`, `sql-code-review`, and `sql-optimization` from `github/awesome-copilot`
 
 The equivalent manual commands are:
 
@@ -91,6 +93,8 @@ The equivalent manual commands are:
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
 npx skills add https://github.com/mattpocock/skills --skill grill-me grill-with-docs tdd diagnose improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
+npx skills add https://github.com/alirezarezvani/claude-skills --skill codebase-onboarding --agent codex claude-code --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-readme git-commit prd refactor sql-code-review sql-optimization --agent codex claude-code --copy -y
 ```
 
 The Skills CLI writes the project lock file and installs universal/Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap then mirrors each upstream copy into `.codex/skills/<skill>`, which is this baseline's Codex skill location.

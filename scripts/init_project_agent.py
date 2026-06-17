@@ -59,6 +59,21 @@ UPSTREAM_SKILL_GROUPS = [
         "source": "https://github.com/wshobson/agents",
         "skills": ["changelog-automation"],
     },
+    {
+        "source": "https://github.com/alirezarezvani/claude-skills",
+        "skills": ["codebase-onboarding"],
+    },
+    {
+        "source": "https://github.com/github/awesome-copilot",
+        "skills": [
+            "create-readme",
+            "git-commit",
+            "prd",
+            "refactor",
+            "sql-code-review",
+            "sql-optimization",
+        ],
+    },
 ]
 PACKAGE_MANAGER_COMMANDS = {
     "npm": ["npm", "install", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
