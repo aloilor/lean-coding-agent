@@ -70,7 +70,6 @@ UPSTREAM_SKILL_GROUPS = [
         "source": "https://github.com/github/awesome-copilot",
         "skills": [
             "create-readme",
-            "git-commit",
             "prd",
             "sql-code-review",
             "sql-optimization",
