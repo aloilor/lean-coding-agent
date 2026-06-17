@@ -323,6 +323,58 @@ const order = new OrderBuilder()
 
 ---
 
+## Reliability and Determinism
+
+A flaky test erodes trust in the whole suite. Make tests pass or fail for one reason, every time.
+
+### Isolate State
+
+Reset or scope anything a test mutates: databases, queues, caches, files, module-level singletons.
+
+```typescript
+afterEach(async () => {
+  await db.truncateAll();      // or wrap each test in a rolled-back transaction
+});
+```
+
+- Prefer unique IDs, transactions, or disposable resources (temp dirs, ephemeral containers) over shared named records.
+- No test should rely on another test running first, or on suite ordering.
+
+### Control Time
+
+Inject a clock; do not read the system time deep inside business logic.
+
+```typescript
+// Avoid: order.createdAt = new Date()  — reads the wall clock internally
+const order = createOrder({ now: fixedClock.now() });
+```
+
+Test time zones, daylight-saving transitions, expiry windows, and clock skew when they affect behavior.
+
+### Control Randomness
+
+Fix the seed when randomness is part of the behavior under test, so a failure reproduces.
+
+### Don't Sleep — Wait On Conditions
+
+In async and end-to-end tests, wait for the state or event you expect, never an arbitrary delay. Fixed sleeps are the single most common source of flake and slowness.
+
+```typescript
+// Avoid: await sleep(2000)
+await expect.poll(() => page.textContent('h1')).toBe('Order Confirmed');
+```
+
+### Run In Parallel Safely
+
+Avoid shared ports, accounts, fixed filenames, or named records so the suite can parallelize without collisions.
+
+### Use Safe, Realistic Data
+
+- Fixtures should match production shapes, limits, encodings, and relationships, and include edge cases (empty strings, long strings, missing optional fields, time zones).
+- Do not use production personal data unless it is legally allowed, minimized, and anonymized. Prefer synthetic fixtures.
+
+---
+
 ## Common Testing Mistakes
 
 | Mistake | Problem | Solution |

@@ -21,23 +21,23 @@ it('when adding 2 + 3, returns 5', () => { ... });
 ```
 
 ### GREEN Phase
-Write the **simplest possible code** to make the test pass. Two strategies:
+Write the simplest code that makes the test pass. Two strategies:
 
-1. **Fake It** - Return a hardcoded value
-   ```typescript
-   add(a: number, b: number): number {
-     return 5; // Simplest thing!
-   }
-   ```
-
-2. **Obvious Implementation** - If you know the solution
+1. **Obvious Implementation** - When you know the solution, just write it. This is the default.
    ```typescript
    add(a: number, b: number): number {
      return a + b;
    }
    ```
 
-**Prefer Fake It** when learning or unsure. Let more tests drive the real implementation.
+2. **Fake It** - Return a hardcoded value, then let later tests force generalization.
+   ```typescript
+   add(a: number, b: number): number {
+     return 5; // forced general by the next test case
+   }
+   ```
+
+**Default to Obvious Implementation.** Reach for Fake It only when the real implementation is genuinely unclear and you want a test to pull it into shape. Never leave a faked value in once a test exists that should generalize it — a green suite built on a hardcoded return proves nothing.
 
 ### REFACTOR Phase
 This is where **design happens**. Look for:
@@ -54,9 +54,7 @@ This is where **design happens**. Look for:
 
 ## The Rule of Three
 
-**Only extract duplication when you see it THREE times.**
-
-Why? Wrong abstractions are worse than duplication. Wait for the pattern to emerge.
+Lean toward extracting duplication only once you've seen it about three times. A wrong abstraction is costlier to unwind than duplication, so let the pattern prove itself first.
 
 ```typescript
 // Duplication #1 - Leave it
@@ -64,27 +62,17 @@ Why? Wrong abstractions are worse than duplication. Wait for the pattern to emer
 // Duplication #3 - NOW extract it
 ```
 
+This is a heuristic, not a hard rule. Use judgment: extract obvious, identical logic sooner, and never *add* duplication just to satisfy the count.
+
 ## Triangulation
 
 Each new test "sculpts" the solution toward a general, robust implementation.
 
 Think of **degrees of freedom** - like a car that needs forward/back, left/right, and rotation. Each test carves out one degree of freedom until the implementation handles all cases.
 
-## Transformation Priority Premise
+## Prefer Simpler Transformations
 
-When going from RED to GREEN, prefer simpler transformations:
-
-| Priority | Transformation |
-|----------|----------------|
-| 1 | {} → nil |
-| 2 | nil → constant |
-| 3 | constant → variable |
-| 4 | unconditional → conditional |
-| 5 | scalar → collection |
-| 6 | statement → recursion |
-| 7 | value → mutated value |
-
-Higher priority = simpler. Avoid jumping to complex transformations too early.
+When moving from RED to GREEN, prefer the simplest code change that passes: a constant over a variable, a single branch over a loop, a loop over recursion. Reach for more complex constructs only when a test actually forces them. This keeps each step small and each test meaningful.
 
 ## Arrange-Act-Assert And Test Naming
 
