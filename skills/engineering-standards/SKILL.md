@@ -1,6 +1,6 @@
 ---
 name: engineering-standards
-description: Use this skill when writing code, implementing features, refactoring, planning architecture, designing systems, reviewing code, debugging, creating tests, or making design decisions. This skill applies this repo's shared engineering baseline through clean code, code quality, object-oriented design, simple design, testing strategy, and maintainability guidance.
+description: Use this skill when writing code, implementing features, refactoring, planning architecture, designing systems, reviewing code, debugging, or making design decisions. This skill applies this repo's shared engineering baseline through clean code, code quality, object-oriented design, simple design, and maintainability guidance.
 ---
 
 # Engineering Standards: Professional Software Engineering
@@ -18,7 +18,6 @@ Keep project-specific facts in `agent-context/`. Use this skill for reusable, cr
 - Planning or designing architecture
 - Reviewing code quality
 - Debugging issues
-- Creating tests
 - Making design decisions
 
 ## Core Philosophy
@@ -194,38 +193,6 @@ See: `references/clean-code/code-smells.md`
 **Warning:** Do not force patterns. Let them emerge from real design pressure.
 
 See: `references/object-oriented-design/design-patterns.md`
-
-## Testing Strategy
-
-**Test types, from inner to outer:**
-
-1. **Unit tests** - single class/function, fast, isolated
-2. **Integration tests** - multiple components together
-3. **E2E/acceptance tests** - full system, user perspective
-
-**Arrange-Act-Assert pattern:**
-
-```typescript
-// Arrange - set up test state
-const calculator = new Calculator();
-
-// Act - execute the behavior
-const result = calculator.add(2, 3);
-
-// Assert - verify the outcome
-expect(result).toBe(5);
-```
-
-**Test naming:**
-
-Use concrete examples, not abstract statements.
-
-```typescript
-// Avoid: "can add numbers"
-// Prefer: "when adding 2 + 3, returns 5"
-```
-
-Create or update tests when behavior changes, risk is meaningful, or a bug needs reproduction.
 
 ## Behavioral Principles
 

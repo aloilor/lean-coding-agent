@@ -6,7 +6,7 @@ It contains the general agent guidance that should apply everywhere, regardless 
 
 The shared baseline stays in `AGENTS.md` and `CLAUDE.md`. This repo bootstraps both files into each project as exact copies of the shared defaults.
 
-Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. REST API contract guidance lives in the installable `rest-api-design` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
+Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `testing-standards` skill. REST API contract guidance lives in the installable `rest-api-design` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
