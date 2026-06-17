@@ -81,11 +81,22 @@ The CLI automatically loads `.playwright/cli.config.json` when present. Generate
 
 The bootstrap installs or refreshes these upstream skills on every run:
 
-- `find-skills` from `vercel-labs/skills`
-- `grill-me`, `grill-with-docs`, `tdd`, `diagnose`, and `improve-codebase-architecture` from `mattpocock/skills`
-- `changelog-automation` from `wshobson/agents`
-- `codebase-onboarding` from `alirezarezvani/claude-skills`
-- `create-readme`, `git-commit`, `prd`, `refactor`, `sql-code-review`, and `sql-optimization` from `github/awesome-copilot`
+| Skill | Source | Purpose |
+| --- | --- | --- |
+| `find-skills` | `vercel-labs/skills` | Search the skills ecosystem and install useful skills. |
+| `grill-me` | `mattpocock/skills` | Challenge an idea, plan, or implementation with critical questions. |
+| `grill-with-docs` | `mattpocock/skills` | Review work against referenced documentation. |
+| `tdd` | `mattpocock/skills` | Guide test-driven development loops. |
+| `diagnose` | `mattpocock/skills` | Investigate bugs and failures before changing code. |
+| `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
+| `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
+| `codebase-onboarding` | `alirezarezvani/claude-skills` | Explore a new codebase and produce onboarding documentation. |
+| `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
+| `git-commit` | `github/awesome-copilot` | Create conventional commits from the current diff. |
+| `prd` | `github/awesome-copilot` | Draft product requirements documents from project context. |
+| `refactor` | `github/awesome-copilot` | Plan and apply focused refactors. |
+| `sql-code-review` | `github/awesome-copilot` | Review SQL for correctness, security, maintainability, and performance. |
+| `sql-optimization` | `github/awesome-copilot` | Optimize SQL queries, indexes, and execution patterns. |
 
 The equivalent manual commands are:
 
