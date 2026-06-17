@@ -15,7 +15,7 @@ SCRIPT_PATH = Path(__file__).resolve()
 REPO_ROOT = SCRIPT_PATH.parent.parent
 SHARED_SKILLS_ROOT = REPO_ROOT / "skills"
 MANAGED_SKILLS_DIRS = [
-    Path(".codex") / "skills",
+    Path(".agents") / "skills",
     Path(".claude") / "skills",
 ]
 MANIFEST_NAME = "skills-installed.json"
@@ -88,7 +88,7 @@ def parse_args() -> argparse.Namespace:
         description=(
             "Initialize a project repo with this shared agent baseline, creates "
             "private override files, agent-context, shared lessons, and installs this repo's "
-            "shared skills into the target repo's .codex/skills and .claude/skills "
+            "shared skills into the target repo's .agents/skills and .claude/skills "
             "directories."
         )
     )
@@ -266,19 +266,6 @@ def upstream_skills_install_command(source: str, skill_names: list[str]) -> list
     ]
 
 
-def mirror_upstream_skill_to_codex(target_repo: Path, skill_name: str) -> None:
-    universal_skill_dir = target_repo / AGENTS_DIRNAME / "skills" / skill_name
-    codex_skills_root = target_repo / Path(".codex") / "skills"
-    codex_skill_dir = codex_skills_root / skill_name
-
-    if not universal_skill_dir.exists():
-        raise SystemExit(f"Upstream skill install did not create expected path: {universal_skill_dir}")
-
-    codex_skills_root.mkdir(parents=True, exist_ok=True)
-    safe_rmtree(codex_skill_dir, codex_skills_root)
-    shutil.copytree(universal_skill_dir, codex_skill_dir)
-
-
 def install_upstream_skills(target_repo: Path) -> str:
     installed_skill_names: list[str] = []
 
@@ -298,9 +285,6 @@ def install_upstream_skills(target_repo: Path) -> str:
             ) from exc
 
         installed_skill_names.extend(skill_names)
-
-    for skill_name in installed_skill_names:
-        mirror_upstream_skill_to_codex(target_repo, skill_name)
 
     return "installed from upstream with npx: " + ", ".join(installed_skill_names)
 

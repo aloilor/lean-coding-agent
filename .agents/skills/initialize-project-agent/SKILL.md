@@ -1,6 +1,6 @@
 ---
 name: initialize-project-agent
-description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private override files, `agent-context`, shared `.agents/lessons`, and copied installable skills from this repo's `skills/` folder into the target repo's `.codex/skills` and `.claude/skills`.
+description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private override files, `agent-context`, shared `.agents/lessons`, and copied installable skills from this repo's `skills/` folder into the target repo's `.agents/skills` and `.claude/skills`.
 ---
 
 # Initialize Project Agent
@@ -23,13 +23,13 @@ Use the shared bootstrap script instead of recreating the setup manually.
    - `.agents/lessons/`
    - `.agents/lessons/LESSONS.md` as a shared agent lessons index
    - `agent-context/skills-installed.json`
-   - `.codex/skills/` and `.claude/skills/` with the copied skill folders from this repo's `skills/`
+   - `.agents/skills/` and `.claude/skills/` with the copied skill folders from this repo's `skills/`
 4. Tell the user which skills were installed.
 
 ## Notes
 
 - Keep the folder name `agent-context` exactly as requested by this repo's convention.
-- Keep this skill in this repo's `.codex/skills/` folder because it is only for maintaining this shared repo itself.
+- Keep this skill in this repo's `.agents/skills/` folder because it is only for maintaining this shared repo itself.
 - Do not place this skill in `skills/`, because `skills/` is the source copied into initialized project repos.
 - The bootstrap script is idempotent for the managed pieces:
   - It recopies the shared `AGENTS.md` and `CLAUDE.md` baseline files.

@@ -47,7 +47,7 @@ The script will:
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
-- copy every installable skill from this repo's `skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
+- copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
 - copy missing Playwright CLI baseline files from `.playwright/`
 - install `@playwright/cli` as a dev dependency
@@ -97,17 +97,17 @@ npx skills add https://github.com/alirezarezvani/claude-skills --skill codebase-
 npx skills add https://github.com/github/awesome-copilot --skill create-readme git-commit prd refactor sql-code-review sql-optimization --agent codex claude-code --copy -y
 ```
 
-The Skills CLI writes the project lock file and installs universal/Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap then mirrors each upstream copy into `.codex/skills/<skill>`, which is this baseline's Codex skill location.
+The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 
 Rerun the bootstrap to refresh upstream skills in a project.
 
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
-Repo-only skills for maintaining this shared repo are kept in [.codex/skills](.codex/skills) and mirrored into [.claude/skills](.claude/skills) so both tools can use them locally. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
+Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
 
 Why both skill folders:
 
-- Codex looks for repo-local skills under `.codex/skills/`
+- Codex looks for repo-local skills under `.agents/skills/`
 - Claude Code looks for repo-local skills under `.claude/skills/`
 - the shared `SKILL.md` format works for both, so this repo installs the same shared skills into each tool's expected location
 
@@ -125,4 +125,4 @@ To sync only one shared skill:
 python scripts/sync_skills.py initialize-project-agent
 ```
 
-The sync script only updates matching `.codex/skills/<skill>/` and `.claude/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.
+The sync script only updates matching `.agents/skills/<skill>/` and `.claude/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.

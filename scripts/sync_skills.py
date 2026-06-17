@@ -11,7 +11,7 @@ REPO_ROOT = SCRIPT_PATH.parent.parent
 SHARED_SKILLS_ROOT = REPO_ROOT / "skills"
 SIBLINGS_ROOT = REPO_ROOT.parent
 MANAGED_SKILLS_DIRS = [
-    Path(".codex") / "skills",
+    Path(".agents") / "skills",
     Path(".claude") / "skills",
 ]
 
@@ -19,7 +19,7 @@ MANAGED_SKILLS_DIRS = [
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
-            "Sync shared skills from this repo's skills folder into matching .codex/skills "
+            "Sync shared skills from this repo's skills folder into matching .agents/skills "
             "and .claude/skills directories in this repo and sibling repos under ../."
         )
     )
