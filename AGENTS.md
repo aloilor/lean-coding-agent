@@ -14,6 +14,7 @@
 - Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
 - Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
+- At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
 
 ## 1. Think Before Coding
 
