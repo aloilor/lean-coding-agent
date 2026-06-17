@@ -91,6 +91,9 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 - Keep shared agent lessons in `.agents/lessons/`
 - After any correction from the user, add one new lesson file in `.agents/lessons/`
+- Handle lesson capture autonomously when the correction reveals a generalizable agent behavior rule
+- If the correction is ambiguous, task-specific, or preference-like, ask before writing a lesson
+- Do not add lessons for one-off task details that will not prevent a repeatable mistake
 - Never keep a single `lessons.md`; create one short, descriptive file per lesson, such as `.agents/lessons/avoid-broad-git-add.md`
 - Keep a `LESSONS.md` index in `.agents/lessons/` that lists every lesson file with a short title and one-line summary
 - When adding a new lesson file, also add a matching entry to `.agents/lessons/LESSONS.md`
@@ -103,7 +106,6 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 ## Task Management
 
 - Store task notes in the current tool's project-local tasks folder: use `.codex/tasks/` when working in Codex, and `.claude/tasks/` when working in Claude Code
-- The tasks folder is project-local: use the current project's tasks directory, not this shared repo unless this repo is the project being changed
 - Files inside `.codex/tasks/` or `.claude/tasks/` are local working notes and should never be committed
 - Plan First: Write the plan in the current project's daily task file, for example `.codex/tasks/todo_20260520.md` or `.claude/tasks/todo_20260520.md`
 - Use one task file per day: keep all tasks for that date in the same `todo_YYYYMMDD.md` file inside the current tool's tasks folder, and append new tasks to that existing file
