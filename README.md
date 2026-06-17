@@ -6,7 +6,7 @@ It contains the general agent guidance that should apply everywhere, regardless 
 
 The shared baseline stays in `AGENTS.md` and `CLAUDE.md`. This repo bootstraps both files into each project as exact copies of the shared defaults.
 
-Reusable coding, design, API, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
+Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. REST API contract guidance lives in the installable `rest-api-design` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
@@ -90,6 +90,7 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `diagnose` | `mattpocock/skills` | Investigate bugs and failures before changing code. |
 | `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
+| `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
 | `codebase-onboarding` | `alirezarezvani/claude-skills` | Explore a new codebase and produce onboarding documentation. |
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
 | `git-commit` | `github/awesome-copilot` | Create conventional commits from the current diff. |
@@ -104,6 +105,7 @@ The equivalent manual commands are:
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
 npx skills add https://github.com/mattpocock/skills --skill grill-me grill-with-docs tdd diagnose improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
+npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
 npx skills add https://github.com/alirezarezvani/claude-skills --skill codebase-onboarding --agent codex claude-code --copy -y
 npx skills add https://github.com/github/awesome-copilot --skill create-readme git-commit prd refactor sql-code-review sql-optimization --agent codex claude-code --copy -y
 ```

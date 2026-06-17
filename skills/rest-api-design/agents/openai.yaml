@@ -1,0 +1,4 @@
+interface:
+  display_name: "REST API Design"
+  short_description: "Design consistent REST API contracts"
+  default_prompt: "Use $rest-api-design to design or review this REST API contract."

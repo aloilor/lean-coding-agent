@@ -1,6 +1,6 @@
 # REST API Design Rules
 
-Load this file only for REST API creation or changes, in addition to the normal engineering baseline.
+Load this file for REST API creation, changes, review, or documentation. Pair it with `engineering-standards` when the task also involves implementation quality, refactoring, tests, or broader code design.
 
 ## Rules
 

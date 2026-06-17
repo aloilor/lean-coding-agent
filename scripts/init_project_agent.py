@@ -60,6 +60,10 @@ UPSTREAM_SKILL_GROUPS = [
         "skills": ["changelog-automation"],
     },
     {
+        "source": "https://github.com/hardikpandya/stop-slop",
+        "skills": ["stop-slop"],
+    },
+    {
         "source": "https://github.com/alirezarezvani/claude-skills",
         "skills": ["codebase-onboarding"],
     },

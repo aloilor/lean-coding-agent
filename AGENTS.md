@@ -95,7 +95,8 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 - Treat this file as the shared default baseline.
 - Read project-specific shared context from `agent-context/` when it exists.
-- When available, use the `engineering-standards` skill for reusable coding, design, API, refactoring, debugging, and review guidance.
+- When available, use the `engineering-standards` skill for reusable coding, design, refactoring, debugging, and review guidance.
+- When available, use the `rest-api-design` skill for REST API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, documentation, and API contract tests.
 - Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
 - Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.

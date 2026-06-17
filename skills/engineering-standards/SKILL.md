@@ -1,6 +1,6 @@
 ---
 name: engineering-standards
-description: Use this skill when writing code, implementing features, refactoring, planning architecture, designing systems, reviewing code, debugging, creating tests, or making design decisions. This skill applies this repo's shared engineering baseline through clean code, code quality, object-oriented design, simple design, and REST API standards when applicable.
+description: Use this skill when writing code, implementing features, refactoring, planning architecture, designing systems, reviewing code, debugging, creating tests, or making design decisions. This skill applies this repo's shared engineering baseline through clean code, code quality, object-oriented design, simple design, testing strategy, and maintainability guidance.
 ---
 
 # Engineering Standards: Professional Software Engineering
@@ -35,10 +35,6 @@ Read these compact rule indexes together before code/design/review work:
 
 - `references/clean-code/RULES.md`
 - `references/object-oriented-design/RULES.md`
-
-For REST API creation or changes, also read:
-
-- `references/rest-api-design/RULES.md`
 
 Do not load the entire references folder by default. Open detailed files only when they are relevant to the current task.
 
@@ -157,29 +153,6 @@ See:
 
 - `references/object-oriented-design/solid-principles.md`
 - `references/clean-code/complexity.md`
-
-### 7. Add REST API Standards For REST Work
-
-For REST API creation or changes, apply REST rules in addition to every baseline rule above.
-
-Use REST standards to design:
-
-- Resource modeling
-- HTTP semantics
-- Validation and errors
-- Querying and responses
-- Versioning and security
-- Documentation and operations
-
-See:
-
-- `references/rest-api-design/RULES.md`
-- `references/rest-api-design/resource-modeling.md`
-- `references/rest-api-design/http-semantics.md`
-- `references/rest-api-design/validation-and-errors.md`
-- `references/rest-api-design/querying-and-responses.md`
-- `references/rest-api-design/versioning-and-security.md`
-- `references/rest-api-design/documentation-and-operations.md`
 
 ## The Four Elements Of Simple Design
 
@@ -305,7 +278,6 @@ After the code works:
 - Adding features "just in case"
 - Depending on concrete implementations from high-level policy without a project reason
 - Data bags that force callers to own domain behavior
-- REST APIs with action URLs, unstable error shapes, unbounded collections, or unclear authorization
 
 ## Remember
 
