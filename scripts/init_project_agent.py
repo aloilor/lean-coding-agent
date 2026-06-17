@@ -39,27 +39,33 @@ PLAYWRIGHT_IGNORE_LINES = [
     ".playwright/*.local.json",
 ]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
-FIND_SKILLS_SOURCE = "https://github.com/vercel-labs/skills"
-FIND_SKILLS_NAME = "find-skills"
+UPSTREAM_SKILL_AGENTS = ["codex", "claude-code"]
+UPSTREAM_SKILL_GROUPS = [
+    {
+        "source": "https://github.com/vercel-labs/skills",
+        "skills": ["find-skills"],
+    },
+    {
+        "source": "https://github.com/mattpocock/skills",
+        "skills": [
+            "grill-me",
+            "grill-with-docs",
+            "tdd",
+            "diagnose",
+            "improve-codebase-architecture",
+        ],
+    },
+    {
+        "source": "https://github.com/wshobson/agents",
+        "skills": ["changelog-automation"],
+    },
+]
 PACKAGE_MANAGER_COMMANDS = {
     "npm": ["npm", "install", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
     "pnpm": ["pnpm", "add", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
     "yarn": ["yarn", "add", "--dev", PLAYWRIGHT_CLI_PACKAGE],
     "bun": ["bun", "add", "--dev", PLAYWRIGHT_CLI_PACKAGE],
 }
-FIND_SKILLS_INSTALL_COMMAND = [
-    "npx",
-    "skills",
-    "add",
-    FIND_SKILLS_SOURCE,
-    "--skill",
-    FIND_SKILLS_NAME,
-    "--agent",
-    "codex",
-    "claude-code",
-    "--copy",
-    "-y",
-]
 
 
 def parse_args() -> argparse.Namespace:
@@ -230,29 +236,58 @@ def install_playwright_cli(target_repo: Path) -> str:
     return f"installed with {manager_name}"
 
 
-def install_find_skills(target_repo: Path) -> str:
-    command = FIND_SKILLS_INSTALL_COMMAND.copy()
-    command[0] = executable_name(command[0])
+def upstream_skills_install_command(source: str, skill_names: list[str]) -> list[str]:
+    return [
+        "npx",
+        "skills",
+        "add",
+        source,
+        "--skill",
+        *skill_names,
+        "--agent",
+        *UPSTREAM_SKILL_AGENTS,
+        "--copy",
+        "-y",
+    ]
 
-    try:
-        subprocess.run(command, cwd=target_repo, check=True)
-    except FileNotFoundError as exc:
-        raise SystemExit("Could not install find-skills: npx is not available on PATH.") from exc
-    except subprocess.CalledProcessError as exc:
-        raise SystemExit(f"Could not install find-skills with npx in {target_repo}.") from exc
 
-    universal_skill_dir = target_repo / AGENTS_DIRNAME / "skills" / FIND_SKILLS_NAME
+def mirror_upstream_skill_to_codex(target_repo: Path, skill_name: str) -> None:
+    universal_skill_dir = target_repo / AGENTS_DIRNAME / "skills" / skill_name
     codex_skills_root = target_repo / Path(".codex") / "skills"
-    codex_skill_dir = codex_skills_root / FIND_SKILLS_NAME
+    codex_skill_dir = codex_skills_root / skill_name
 
     if not universal_skill_dir.exists():
-        raise SystemExit(f"find-skills install did not create expected path: {universal_skill_dir}")
+        raise SystemExit(f"Upstream skill install did not create expected path: {universal_skill_dir}")
 
     codex_skills_root.mkdir(parents=True, exist_ok=True)
     safe_rmtree(codex_skill_dir, codex_skills_root)
     shutil.copytree(universal_skill_dir, codex_skill_dir)
 
-    return "installed from upstream with npx"
+
+def install_upstream_skills(target_repo: Path) -> str:
+    installed_skill_names: list[str] = []
+
+    for group in UPSTREAM_SKILL_GROUPS:
+        source = group["source"]
+        skill_names = group["skills"]
+        command = upstream_skills_install_command(source, skill_names)
+        command[0] = executable_name(command[0])
+
+        try:
+            subprocess.run(command, cwd=target_repo, check=True)
+        except FileNotFoundError as exc:
+            raise SystemExit("Could not install upstream skills: npx is not available on PATH.") from exc
+        except subprocess.CalledProcessError as exc:
+            raise SystemExit(
+                f"Could not install upstream skills from {source} with npx in {target_repo}."
+            ) from exc
+
+        installed_skill_names.extend(skill_names)
+
+    for skill_name in installed_skill_names:
+        mirror_upstream_skill_to_codex(target_repo, skill_name)
+
+    return "installed from upstream with npx: " + ", ".join(installed_skill_names)
 
 
 def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
@@ -471,7 +506,7 @@ def main() -> int:
     gitignore_path = ensure_override_gitignore(target_repo)
     installs = discover_shared_skills(SHARED_SKILLS_ROOT)
     skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_paths)
-    find_skills_install = install_find_skills(target_repo)
+    upstream_skills_install = install_upstream_skills(target_repo)
     cleanup_legacy_bootstrap(target_repo)
 
     print(f"Initialized project repo: {target_repo}")
@@ -491,7 +526,7 @@ def main() -> int:
         for playwright_path in copied_playwright_paths:
             print(f"- {playwright_path}")
     print(f"Playwright CLI dependency: {playwright_cli_install}")
-    print(f"find-skills skill: {find_skills_install}")
+    print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} shared skills into:")

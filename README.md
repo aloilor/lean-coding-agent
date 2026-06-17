@@ -48,12 +48,12 @@ The script will:
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
-- install or refresh `find-skills` from `vercel-labs/skills` with `npx skills add`
+- install or refresh upstream skills with `npx skills add`
 - copy missing Playwright CLI baseline files from `.playwright/`
 - install `@playwright/cli` as a dev dependency
 - add Playwright CLI generated-artifact paths to the target repo's `.gitignore`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
-- write `skills-lock.json` for the upstream `find-skills` install
+- write `skills-lock.json` for upstream skill installs
 
 ## Playwright CLI Baseline
 
@@ -79,15 +79,23 @@ The CLI automatically loads `.playwright/cli.config.json` when present. Generate
 
 ## Upstream Skills
 
-The bootstrap installs or refreshes `find-skills` from upstream on every run:
+The bootstrap installs or refreshes these upstream skills on every run:
+
+- `find-skills` from `vercel-labs/skills`
+- `grill-me`, `grill-with-docs`, `tdd`, `diagnose`, and `improve-codebase-architecture` from `mattpocock/skills`
+- `changelog-automation` from `wshobson/agents`
+
+The equivalent manual commands are:
 
 ```bash
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
+npx skills add https://github.com/mattpocock/skills --skill grill-me grill-with-docs tdd diagnose improve-codebase-architecture --agent codex claude-code --copy -y
+npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 ```
 
-The Skills CLI writes the project lock file and installs the universal/Codex copy under `.agents/skills/find-skills` plus the Claude Code copy under `.claude/skills/find-skills`. The bootstrap then mirrors the same upstream copy into `.codex/skills/find-skills`, which is this baseline's Codex skill location.
+The Skills CLI writes the project lock file and installs universal/Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap then mirrors each upstream copy into `.codex/skills/<skill>`, which is this baseline's Codex skill location.
 
-Rerun the bootstrap to refresh `find-skills` in a project.
+Rerun the bootstrap to refresh upstream skills in a project.
 
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
