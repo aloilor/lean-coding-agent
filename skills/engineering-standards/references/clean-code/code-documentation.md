@@ -61,6 +61,33 @@ export class BillingInvoiceClient {
 
 ---
 
+## Use Docstrings For Caller Contracts
+
+### Problem It Solves
+
+Blanket docstrings create noise, but missing docs on caller-facing code make contracts implicit and easy to misuse.
+
+### How to Apply
+
+Use docstrings, JSDoc, or equivalent API comments for public or shared modules, classes, functions, commands, endpoints, extension points, and cross-module helpers when callers depend on behavior beyond the name and type signature. Document the promises callers need: inputs, outputs, constraints, side effects, failure modes, idempotency, ordering, mutation, domain rules, or a small usage example. Skip docstrings for tiny private helpers when names, types, and nearby code make the usage obvious.
+
+```python
+def reserve_inventory(order_id: str) -> Reservation:
+    """Reserve stock for an order.
+
+    Idempotent for the same order_id. Raises OutOfStockError when any item
+    cannot be reserved; no partial reservations are kept.
+    """
+```
+
+### Detection Questions
+
+- Is this code public, exported, shared across modules, or used as an extension point?
+- Would a caller need to know effects, errors, constraints, or ordering before calling it?
+- Would the docstring only repeat the name, types, or obvious implementation?
+
+---
+
 ## Write For The Reader's Next Question
 
 ### Problem It Solves
@@ -227,6 +254,7 @@ const requiresManualReview = invoice.total.greaterThan(reviewThreshold);
 ## Practical Checks
 
 - Can callers use the code safely without reading the implementation?
+- Do docstrings document caller contracts instead of obvious private helpers?
 - Are side effects, failure modes, and edge cases clear where they matter?
 - Is documentation close enough to the code to stay current?
 - Are examples small, real, and copy-safe?
@@ -240,6 +268,7 @@ const requiresManualReview = invoice.total.greaterThan(reviewThreshold);
 |------|------|----------|
 | Public Contract | Inputs, outputs, errors, effects | Callers must read implementation |
 | Close To Code | JSDoc/docstring near API | Only in a stale wiki |
+| Docstrings | Caller contracts, constraints, effects | Obvious helper narration |
 | Stable Facts | Behavior and constraints | Helper-by-helper narration |
 | Edge Cases | Partial failure, idempotency, destructive operations | Hidden retry or data-loss risks |
 | Examples | Small real usage | Huge toy setup |

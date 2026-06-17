@@ -19,6 +19,7 @@ Load this file for general code work, complexity checks, smell detection, refact
 | Keep Comments Accurate | Update or delete comments when behavior changes or the comment loses its job. | [inline-comments.md](./inline-comments.md) |
 | Document The Public Contract First | Public APIs should explain inputs, outputs, errors, effects, and constraints. | [code-documentation.md](./code-documentation.md) |
 | Keep Documentation Close To The Code | Put docs where maintainers will update them with behavior changes. | [code-documentation.md](./code-documentation.md) |
+| Use Docstrings For Caller Contracts | Add docstrings or API comments when callers need behavior, constraints, effects, or failure modes beyond names and types. | [code-documentation.md](./code-documentation.md) |
 | Write For The Reader's Next Question | Add the next useful fact, example, or constraint a caller will need. | [code-documentation.md](./code-documentation.md) |
 | Prefer Stable Facts Over Temporary Narration | Document behavior and contracts, not fragile implementation steps. | [code-documentation.md](./code-documentation.md) |
 | Explain Edge Cases And Failure Modes | Call out recovery, retry, validation, data-loss, partial-failure, and consistency behavior. | [code-documentation.md](./code-documentation.md) |
