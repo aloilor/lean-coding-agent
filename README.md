@@ -48,7 +48,46 @@ The script will:
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.codex/skills/` and `.claude/skills/`
+- install or refresh `find-skills` from `vercel-labs/skills` with `npx skills add`
+- copy missing Playwright CLI baseline files from `.playwright/`
+- install `@playwright/cli` as a dev dependency
+- add Playwright CLI generated-artifact paths to the target repo's `.gitignore`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
+- write `skills-lock.json` for the upstream `find-skills` install
+
+## Playwright CLI Baseline
+
+The bootstrap copies `.playwright/cli.config.json` and `.playwright/README.md` into each target project when those files are missing.
+
+The bootstrap installs Playwright CLI as a dev dependency using the package manager implied by `packageManager` or the existing lockfile. When no `package.json` or lockfile exists, it defaults to npm, which creates the package metadata during installation.
+
+The equivalent manual npm command is:
+
+```bash
+npm install --save-dev @playwright/cli@latest
+```
+
+Use the project-local command:
+
+```bash
+npx playwright-cli --help
+npx playwright-cli config-print
+npx playwright-cli open http://localhost:3000 --headed
+```
+
+The CLI automatically loads `.playwright/cli.config.json` when present. Generated snapshots and output are ignored by the bootstrap-managed `.gitignore` entries.
+
+## Upstream Skills
+
+The bootstrap installs or refreshes `find-skills` from upstream on every run:
+
+```bash
+npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
+```
+
+The Skills CLI writes the project lock file and installs the universal/Codex copy under `.agents/skills/find-skills` plus the Claude Code copy under `.claude/skills/find-skills`. The bootstrap then mirrors the same upstream copy into `.codex/skills/find-skills`, which is this baseline's Codex skill location.
+
+Rerun the bootstrap to refresh `find-skills` in a project.
 
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 

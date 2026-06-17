@@ -6,6 +6,7 @@ import json
 import os
 import stat
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -24,6 +25,7 @@ LEGACY_MANIFEST_NAMES = [
 LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
+PLAYWRIGHT_DIRNAME = ".playwright"
 AGENTS_DIRNAME = ".agents"
 LESSONS_DIRNAME = "lessons"
 LESSONS_INDEX_NAME = "LESSONS.md"
@@ -31,6 +33,33 @@ LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
 OVERRIDE_FILENAMES = ["AGENTS.override.md", "CLAUDE.override.md"]
+PLAYWRIGHT_IGNORE_LINES = [
+    ".playwright-cli/",
+    ".playwright/output/",
+    ".playwright/*.local.json",
+]
+PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
+FIND_SKILLS_SOURCE = "https://github.com/vercel-labs/skills"
+FIND_SKILLS_NAME = "find-skills"
+PACKAGE_MANAGER_COMMANDS = {
+    "npm": ["npm", "install", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
+    "pnpm": ["pnpm", "add", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
+    "yarn": ["yarn", "add", "--dev", PLAYWRIGHT_CLI_PACKAGE],
+    "bun": ["bun", "add", "--dev", PLAYWRIGHT_CLI_PACKAGE],
+}
+FIND_SKILLS_INSTALL_COMMAND = [
+    "npx",
+    "skills",
+    "add",
+    FIND_SKILLS_SOURCE,
+    "--skill",
+    FIND_SKILLS_NAME,
+    "--agent",
+    "codex",
+    "claude-code",
+    "--copy",
+    "-y",
+]
 
 
 def parse_args() -> argparse.Namespace:
@@ -107,7 +136,8 @@ def ensure_override_gitignore(target_repo: Path) -> Path:
     gitignore_path = target_repo / ".gitignore"
     existing = gitignore_path.read_text(encoding="utf-8") if gitignore_path.exists() else ""
     existing_lines = set(existing.splitlines())
-    missing_lines = [filename for filename in OVERRIDE_FILENAMES if filename not in existing_lines]
+    managed_lines = [*OVERRIDE_FILENAMES, *PLAYWRIGHT_IGNORE_LINES]
+    missing_lines = [line for line in managed_lines if line not in existing_lines]
 
     if missing_lines:
         prefix = "" if not existing or existing.endswith("\n") else "\n"
@@ -115,6 +145,114 @@ def ensure_override_gitignore(target_repo: Path) -> Path:
         gitignore_path.write_text(existing + prefix + addition, encoding="utf-8")
 
     return gitignore_path
+
+
+def copy_playwright_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
+    source_dir = shared_repo_root / PLAYWRIGHT_DIRNAME
+    target_dir = target_repo / PLAYWRIGHT_DIRNAME
+    copied_paths: list[Path] = []
+
+    if not source_dir.exists():
+        return copied_paths
+
+    if source_dir.resolve() == target_dir.resolve():
+        return copied_paths
+
+    for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
+        relative_path = source_path.relative_to(source_dir)
+        target_path = target_dir / relative_path
+        if target_path.exists():
+            continue
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, target_path)
+        copied_paths.append(target_path)
+
+    return copied_paths
+
+
+def load_package_json(package_json_path: Path) -> dict:
+    try:
+        package_json = json.loads(package_json_path.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError as exc:
+        raise SystemExit(f"Target package.json is not valid JSON: {package_json_path}") from exc
+
+    if not isinstance(package_json, dict):
+        raise SystemExit(f"Target package.json must contain a JSON object: {package_json_path}")
+
+    return package_json
+
+
+def detect_package_manager(target_repo: Path, package_json: dict) -> str:
+    package_manager = package_json.get("packageManager")
+    if isinstance(package_manager, str):
+        manager_name = package_manager.split("@", 1)[0]
+        if manager_name in PACKAGE_MANAGER_COMMANDS:
+            return manager_name
+
+    lockfile_managers = [
+        ("pnpm-lock.yaml", "pnpm"),
+        ("yarn.lock", "yarn"),
+        ("bun.lock", "bun"),
+        ("bun.lockb", "bun"),
+        ("package-lock.json", "npm"),
+        ("npm-shrinkwrap.json", "npm"),
+    ]
+    for lockfile_name, manager_name in lockfile_managers:
+        if (target_repo / lockfile_name).exists():
+            return manager_name
+
+    return "npm"
+
+
+def executable_name(command_name: str) -> str:
+    return f"{command_name}.cmd" if os.name == "nt" else command_name
+
+
+def install_playwright_cli(target_repo: Path) -> str:
+    package_json_path = target_repo / "package.json"
+    package_json = load_package_json(package_json_path) if package_json_path.exists() else {}
+    manager_name = detect_package_manager(target_repo, package_json)
+    command = PACKAGE_MANAGER_COMMANDS[manager_name].copy()
+    command[0] = executable_name(command[0])
+
+    try:
+        subprocess.run(command, cwd=target_repo, check=True)
+    except FileNotFoundError as exc:
+        raise SystemExit(
+            f"Could not install {PLAYWRIGHT_CLI_PACKAGE}: {manager_name} is not available on PATH."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        raise SystemExit(
+            f"Could not install {PLAYWRIGHT_CLI_PACKAGE} with {manager_name} in {target_repo}."
+        ) from exc
+
+    return f"installed with {manager_name}"
+
+
+def install_find_skills(target_repo: Path) -> str:
+    command = FIND_SKILLS_INSTALL_COMMAND.copy()
+    command[0] = executable_name(command[0])
+
+    try:
+        subprocess.run(command, cwd=target_repo, check=True)
+    except FileNotFoundError as exc:
+        raise SystemExit("Could not install find-skills: npx is not available on PATH.") from exc
+    except subprocess.CalledProcessError as exc:
+        raise SystemExit(f"Could not install find-skills with npx in {target_repo}.") from exc
+
+    universal_skill_dir = target_repo / AGENTS_DIRNAME / "skills" / FIND_SKILLS_NAME
+    codex_skills_root = target_repo / Path(".codex") / "skills"
+    codex_skill_dir = codex_skills_root / FIND_SKILLS_NAME
+
+    if not universal_skill_dir.exists():
+        raise SystemExit(f"find-skills install did not create expected path: {universal_skill_dir}")
+
+    codex_skills_root.mkdir(parents=True, exist_ok=True)
+    safe_rmtree(codex_skill_dir, codex_skills_root)
+    shutil.copytree(universal_skill_dir, codex_skill_dir)
+
+    return "installed from upstream with npx"
 
 
 def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
@@ -315,6 +453,8 @@ def main() -> int:
     agent_context_dir = target_repo / AGENT_CONTEXT_DIRNAME
     agent_context_dir.mkdir(parents=True, exist_ok=True)
     copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
+    copied_playwright_paths = copy_playwright_baseline(target_repo, REPO_ROOT)
+    playwright_cli_install = install_playwright_cli(target_repo)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     lessons_index_path = ensure_lessons_index(target_repo)
     manifest_path = agent_context_dir / MANIFEST_NAME
@@ -331,6 +471,7 @@ def main() -> int:
     gitignore_path = ensure_override_gitignore(target_repo)
     installs = discover_shared_skills(SHARED_SKILLS_ROOT)
     skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_paths)
+    find_skills_install = install_find_skills(target_repo)
     cleanup_legacy_bootstrap(target_repo)
 
     print(f"Initialized project repo: {target_repo}")
@@ -345,6 +486,12 @@ def main() -> int:
         print("Copied baseline project context files:")
         for context_path in copied_context_paths:
             print(f"- {context_path}")
+    if copied_playwright_paths:
+        print("Copied Playwright CLI baseline files:")
+        for playwright_path in copied_playwright_paths:
+            print(f"- {playwright_path}")
+    print(f"Playwright CLI dependency: {playwright_cli_install}")
+    print(f"find-skills skill: {find_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} shared skills into:")
