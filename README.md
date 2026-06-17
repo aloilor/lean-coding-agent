@@ -122,7 +122,7 @@ python scripts/sync_skills.py
 To sync only one shared skill:
 
 ```bash
-python scripts/sync_skills.py git-conventional-commit
+python scripts/sync_skills.py initialize-project-agent
 ```
 
 The sync script only updates matching `.codex/skills/<skill>/` and `.claude/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.

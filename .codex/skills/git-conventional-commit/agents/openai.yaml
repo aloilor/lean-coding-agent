@@ -1,4 +1,0 @@
-interface:
-  display_name: "Git Conventional Commit"
-  short_description: "Review diffs and create safe conventional commits"
-  default_prompt: "Use $git-conventional-commit to review the diff, choose a Conventional Commit message, and commit only the intended files safely."
