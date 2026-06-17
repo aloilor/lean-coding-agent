@@ -6,16 +6,6 @@
 - No Laziness: Find root causes. No temporary fixes. Senior developer standards.
 - Minimal Impact: Changes should only touch what's necessary. Avoid introducing bugs.
 
-## Local Project Context
-
-- Treat this file as the shared default baseline.
-- Read project-specific shared context from `agent-context/` when it exists.
-- When available, use the `engineering-standards` skill for reusable coding, design, API, refactoring, debugging, and review guidance.
-- Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
-- Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
-- Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
-- At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
-
 ## 1. Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
@@ -79,14 +69,12 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Skip this for simple, obvious fixes - don't over-engineer
 - Challenge your own work before presenting it
 
-
 ## 6. Autonomous Bug Fixing
 
 - When given a bug report: just fix it. Don’t ask for hand-holding
 - Point at logs, errors, failing tests — then resolve them
 - Zero context switching is required from the user
 - Go fix failing CI tests without being told how
-
 
 ## 7. Self-Improvement Loop
 
@@ -103,6 +91,15 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Ruthlessly iterate on these lessons until the mistake rate drops
 - Review the shared lessons index and the relevant linked lesson files at the start of each session for the current project
 
+## Local Project Context
+
+- Treat this file as the shared default baseline.
+- Read project-specific shared context from `agent-context/` when it exists.
+- When available, use the `engineering-standards` skill for reusable coding, design, API, refactoring, debugging, and review guidance.
+- Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
+- Read `AGENTS.override.md` when it exists; it is local, private, and ignored by git.
+- Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
+- At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
 
 ## Task Management
 
