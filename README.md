@@ -86,7 +86,6 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `find-skills` | `vercel-labs/skills` | Search the skills ecosystem and install useful skills. |
 | `grill-me` | `mattpocock/skills` | Challenge an idea, plan, or implementation with critical questions. |
 | `grill-with-docs` | `mattpocock/skills` | Review work against referenced documentation. |
-| `tdd` | `mattpocock/skills` | Guide test-driven development loops. |
 | `diagnose` | `mattpocock/skills` | Investigate bugs and failures before changing code. |
 | `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
@@ -95,7 +94,6 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
 | `git-commit` | `github/awesome-copilot` | Create conventional commits from the current diff. |
 | `prd` | `github/awesome-copilot` | Draft product requirements documents from project context. |
-| `refactor` | `github/awesome-copilot` | Plan and apply focused refactors. |
 | `sql-code-review` | `github/awesome-copilot` | Review SQL for correctness, security, maintainability, and performance. |
 | `sql-optimization` | `github/awesome-copilot` | Optimize SQL queries, indexes, and execution patterns. |
 
@@ -103,11 +101,11 @@ The equivalent manual commands are:
 
 ```bash
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
-npx skills add https://github.com/mattpocock/skills --skill grill-me grill-with-docs tdd diagnose improve-codebase-architecture --agent codex claude-code --copy -y
+npx skills add https://github.com/mattpocock/skills --skill grill-me grill-with-docs diagnose improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
 npx skills add https://github.com/alirezarezvani/claude-skills --skill codebase-onboarding --agent codex claude-code --copy -y
-npx skills add https://github.com/github/awesome-copilot --skill create-readme git-commit prd refactor sql-code-review sql-optimization --agent codex claude-code --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-readme git-commit prd sql-code-review sql-optimization --agent codex claude-code --copy -y
 ```
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.

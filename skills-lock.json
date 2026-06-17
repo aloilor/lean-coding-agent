@@ -31,12 +31,6 @@
       "skillPath": "skills/prd/SKILL.md",
       "computedHash": "1f3e1f005fc40fda85d250ae906c8ee4f7e8e833e23adfeca6542c19609fd7cd"
     },
-    "refactor": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
-      "skillPath": "skills/refactor/SKILL.md",
-      "computedHash": "87789a786b96f99ba0680e89345a975106e10e7db1071c7cdc2e76d507c449d6"
-    },
     "sql-code-review": {
       "source": "github/awesome-copilot",
       "sourceType": "github",

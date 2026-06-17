@@ -50,7 +50,6 @@ UPSTREAM_SKILL_GROUPS = [
         "skills": [
             "grill-me",
             "grill-with-docs",
-            "tdd",
             "diagnose",
             "improve-codebase-architecture",
         ],
@@ -73,7 +72,6 @@ UPSTREAM_SKILL_GROUPS = [
             "create-readme",
             "git-commit",
             "prd",
-            "refactor",
             "sql-code-review",
             "sql-optimization",
         ],
