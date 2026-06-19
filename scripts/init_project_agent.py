@@ -69,10 +69,13 @@ UPSTREAM_SKILL_GROUPS = [
     {
         "source": "https://github.com/github/awesome-copilot",
         "skills": [
+            "create-architectural-decision-record",
             "create-readme",
+            "create-specification",
             "prd",
             "sql-code-review",
             "sql-optimization",
+            "update-specification",
         ],
     },
 ]
