@@ -107,13 +107,13 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 - Store task notes in the current tool's project-local tasks folder: use `.codex/tasks/` when working in Codex, and `.claude/tasks/` when working in Claude Code
 - Files inside `.codex/tasks/` or `.claude/tasks/` are local working notes and should never be committed
-- Plan First: Write the plan in the current project's daily task file, for example `.codex/tasks/todo_20260520.md` or `.claude/tasks/todo_20260520.md`
-- Use one task file per day: keep all tasks for that date in the same `todo_YYYYMMDD.md` file inside the current tool's tasks folder, and append new tasks to that existing file
+- Plan First: Write the plan in a task-specific file in the current project's tasks folder, for example `.codex/tasks/todo_20260520_update_login_validation.md` or `.claude/tasks/todo_20260520_update_login_validation.md`
+- Create one task file per task: name it `todo_YYYYMMDD_synthetic_task_description.md`, using the run date and a short lowercase description of the task or feature with words separated by underscores
 - Each task entry must include `planned on: YYYY-MM-DD` and `ran on: YYYY-MM-DD`
 - Verify Plan: Check in before starting implementation
 - Track Progress: Mark items complete as you go
 - Explain Changes: High-level summary at each step
-- Document Results: Add a review section to the same project-local daily task file
+- Document Results: Add a review section to the same project-local task file
 - Capture Lessons: Store each lesson in `.agents/lessons/` and keep `.agents/lessons/LESSONS.md` in sync
 
 
