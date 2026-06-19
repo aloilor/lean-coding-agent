@@ -1,84 +1,84 @@
 ---
-name: "codebase-onboarding"
-description: "Analyze a codebase and generate onboarding documentation for engineers, tech leads, and contractors. Fast fact-gathering and repeatable onboarding outputs. Use when onboarding a new engineer, writing architecture-overview docs for a new project, or producing tech-lead briefings for unfamiliar repos."
+name: codebase-onboarding
+description: Analyze a repository and create or update structured agent-context documentation for agent onboarding. Use when filling agent-context/, onboarding agents or engineers to a codebase, refreshing project context docs, or documenting architecture, folder structure, workflows, testing, and domain language from repo evidence.
 ---
 
 # Codebase Onboarding
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** Documentation / Developer Experience
+Use this skill to fill `agent-context/` with precise, structured, evidence-backed documentation. The output is not a single onboarding guide; it is a set of focused project-context files that future agents can read quickly.
 
----
+## Core Rule
 
-## Overview
+Document facts from repo evidence. If a fact is inferred, mark it as inferred. If a fact cannot be found, write `Unknown` or add a short `Open Questions` item instead of guessing.
 
-Analyze a codebase and generate onboarding documentation for engineers, tech leads, and contractors. This skill is optimized for fast fact-gathering and repeatable onboarding outputs.
+## Required References
 
-## Core Capabilities
+Read `references/evidence-checklist.md` before discovery.
 
-- Architecture and stack discovery from repository signals
-- Key file and config inventory for new contributors
-- Local setup and common-task guidance generation
-- Audience-aware documentation framing
-- Debugging and contribution checklist scaffolding
+Read the reference for each file before creating or updating that file:
 
----
+- `references/readme.md` for `agent-context/README.md`.
+- `references/domain.md` for `agent-context/domain.md`.
+- `references/folder-structure.md` for `agent-context/folder-structure.md`.
+- `references/architecture.md` for `agent-context/architecture.md`.
+- `references/workflows.md` for `agent-context/workflows.md`.
+- `references/testing.md` for `agent-context/testing.md`.
+- `references/api.md` for optional `agent-context/api.md`.
+- `references/data.md` for optional `agent-context/data.md`.
+- `references/operations.md` for optional `agent-context/operations.md`.
+- `references/security.md` for optional `agent-context/security.md`.
 
-## When to Use
+## Workflow
 
-- Onboarding a new team member or contractor
-- Rebuilding stale project docs after large refactors
-- Preparing internal handoff documentation
-- Creating a standardized onboarding packet for services
+1. Inspect the repo state and existing context.
+   - Run `git status --short`.
+   - List existing context files with `rg --files agent-context` when the folder exists.
+   - Read `AGENTS.md`, `AGENTS.override.md` when present, `agent-context/README.md` when present, and any existing `agent-context/*.md` files relevant to the update.
 
----
+2. Gather evidence before writing.
+   - Use `rg --files` to map source, tests, config, docs, scripts, CI, deployment, and package files.
+   - Read the smallest set of files needed to support each documented claim.
+   - Prefer existing project docs and config over assumptions from file names.
 
-## Quick Start
+3. Create or update the standard `agent-context/` files.
+   - `README.md`: index and orientation.
+   - `domain.md`: project-specific domain language only.
+   - `folder-structure.md`: important directories and ownership notes.
+   - `architecture.md`: system shape, boundaries, data flow, dependencies, and constraints.
+   - `workflows.md`: setup, build, run, review, release, and operational workflows.
+   - `testing.md`: test commands, frameworks, fixtures, naming, and verification expectations.
 
-```bash
-# 1) Gather codebase facts
-python3 scripts/codebase_analyzer.py /path/to/repo
+4. Add optional files only when evidence supports them.
+   - `api.md` for API contracts and endpoint conventions.
+   - `data.md` for schemas, migrations, seed data, or storage conventions.
+   - `operations.md` for deployment, monitoring, incidents, jobs, queues, or runbooks.
+   - `security.md` for auth, authorization, secrets, privacy, or compliance constraints.
 
-# 2) Export machine-readable output
-python3 scripts/codebase_analyzer.py /path/to/repo --json
+5. Keep edits scoped.
+   - Update only `agent-context/` docs unless the user explicitly asks for broader docs.
+   - Preserve useful existing content, but reorganize it into the required structure when needed.
+   - Add examples that come from the repo, such as actual commands, paths, endpoints, config keys, test names, or module names.
 
-# 3) Use the template to draft onboarding docs
-# See references/onboarding-template.md
-```
+6. Verify.
+   - Check that every created file follows its matching file reference in `references/`.
+   - Run `rg -n "TBD|TODO|Unknown|Open Questions" agent-context` and ensure unresolved items are intentional.
+   - Run `git diff -- agent-context` and confirm the changes are documentation-only and evidence-backed.
 
----
+## Writing Standards
 
-## Recommended Workflow
+- Use concise, scannable sections.
+- Prefer tables for path inventories, commands, and interfaces.
+- Include references as relative links to source files or directories.
+- Include short examples when they make a rule actionable.
+- Do not document generic programming concepts in `domain.md`.
+- Do not describe implementation classes unless they are stable public extension points or central architectural boundaries.
+- Do not invent setup, test, or deployment commands.
 
-1. Run `scripts/codebase_analyzer.py` against the target repository.
-2. Capture key signals: file counts, detected languages, config files, top-level structure.
-3. Fill the onboarding template in `references/onboarding-template.md`.
-4. Tailor output depth by audience:
-   - Junior: setup + guardrails
-   - Senior: architecture + operational concerns
-   - Contractor: scoped ownership + integration boundaries
+## Completion Output
 
----
+When done, report:
 
-## Onboarding Document Template
-
-Detailed template and section examples live in:
-- `references/onboarding-template.md`
-- `references/output-format-templates.md`
-
----
-
-## Common Pitfalls
-
-- Writing docs without validating setup commands on a clean environment
-- Mixing architecture deep-dives into contractor-oriented docs
-- Omitting troubleshooting and verification steps
-- Letting onboarding docs drift from current repo state
-
-## Best Practices
-
-1. Keep setup instructions executable and time-bounded.
-2. Document the "why" for key architectural decisions.
-3. Update docs in the same PR as behavior changes.
-4. Treat onboarding docs as living operational assets, not one-time deliverables.
+- files created or updated in `agent-context/`;
+- the main evidence sources consulted;
+- unresolved open questions;
+- verification performed.

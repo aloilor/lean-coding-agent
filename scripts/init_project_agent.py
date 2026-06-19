@@ -49,7 +49,6 @@ UPSTREAM_SKILL_GROUPS = [
         "source": "https://github.com/mattpocock/skills",
         "skills": [
             "grill-me",
-            "grill-with-docs",
             "diagnose",
             "improve-codebase-architecture",
         ],
@@ -61,10 +60,6 @@ UPSTREAM_SKILL_GROUPS = [
     {
         "source": "https://github.com/hardikpandya/stop-slop",
         "skills": ["stop-slop"],
-    },
-    {
-        "source": "https://github.com/alirezarezvani/claude-skills",
-        "skills": ["codebase-onboarding"],
     },
     {
         "source": "https://github.com/github/awesome-copilot",

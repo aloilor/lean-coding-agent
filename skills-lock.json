@@ -1,12 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "codebase-onboarding": {
-      "source": "alirezarezvani/claude-skills",
-      "sourceType": "github",
-      "skillPath": "engineering/skills/codebase-onboarding/SKILL.md",
-      "computedHash": "0fa46b41dedcb7e735aa16e75b3f2f4f6754af95a75861c84cc7e00c4de29dd4"
-    },
     "create-architectural-decision-record": {
       "source": "github/awesome-copilot",
       "sourceType": "github",
