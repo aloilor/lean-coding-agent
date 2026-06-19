@@ -19,3 +19,4 @@
 - [Store Codex Skills In Agents](store-codex-skills-in-agents.md) - Keep Codex skills in `.agents/skills` and do not mirror them into `.codex/skills`.
 - [Preserve Upstream Skill Shape When Customizing](preserve-upstream-skill-shape-when-customizing.md) - When asked to adapt an upstream skill, preserve its behavior and change only the requested local references or paths.
 - [Split Skill References By Output File](split-skill-references-by-output-file.md) - When a skill generates multiple named output files, keep one reference per output file for cleaner loading and maintenance.
+- [Honor Referenced Skill Structure](honor-referenced-skill-structure.md) - When a user points to a source skill, mirror its workflow and examples before applying requested local adaptations.

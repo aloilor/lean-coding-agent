@@ -1,21 +1,27 @@
 ---
 name: codebase-onboarding
-description: Analyze a repository and create or update structured agent-context documentation for agent onboarding. Use when filling agent-context/, onboarding agents or engineers to a codebase, refreshing project context docs, or documenting architecture, folder structure, workflows, testing, and domain language from repo evidence.
+description: Analyze an unfamiliar codebase and generate structured agent-context documentation with architecture map, key entry points, conventions, workflows, testing guidance, and domain language. Use when joining a new project, filling agent-context/, or asking to understand, onboard to, or walk through a repo.
 ---
 
 # Codebase Onboarding
 
-Use this skill to fill `agent-context/` with precise, structured, evidence-backed documentation. The output is not a single onboarding guide; it is a set of focused project-context files that future agents can read quickly.
+Systematically analyze an unfamiliar codebase and produce structured `agent-context/` documentation. Designed for developers and agents joining a new project or refreshing project context in an existing repo.
 
-## Core Rule
+Do not create or update `CLAUDE.md` as part of this skill. Put durable shared project context in `agent-context/`.
 
-Document facts from repo evidence. If a fact is inferred, mark it as inferred. If a fact cannot be found, write `Unknown` or add a short `Open Questions` item instead of guessing.
+## When to Use
 
-## Required References
+- First time opening a project.
+- Joining a new team or repository.
+- User asks "help me understand this codebase".
+- User asks to fill or refresh `agent-context/`.
+- User says "onboard me" or "walk me through this repo".
+
+## References
 
 Read `references/evidence-checklist.md` before discovery.
 
-Read the reference for each file before creating or updating that file:
+Read the matching reference before creating or updating each file:
 
 - `references/readme.md` for `agent-context/README.md`.
 - `references/domain.md` for `agent-context/domain.md`.
@@ -28,57 +34,198 @@ Read the reference for each file before creating or updating that file:
 - `references/operations.md` for optional `agent-context/operations.md`.
 - `references/security.md` for optional `agent-context/security.md`.
 
-## Workflow
+## How It Works
 
-1. Inspect the repo state and existing context.
-   - Run `git status --short`.
-   - List existing context files with `rg --files agent-context` when the folder exists.
-   - Read `AGENTS.md`, `AGENTS.override.md` when present, `agent-context/README.md` when present, and any existing `agent-context/*.md` files relevant to the update.
+### Phase 1: Reconnaissance
 
-2. Gather evidence before writing.
-   - Use `rg --files` to map source, tests, config, docs, scripts, CI, deployment, and package files.
-   - Read the smallest set of files needed to support each documented claim.
-   - Prefer existing project docs and config over assumptions from file names.
+Gather raw signals about the project without reading every file. Run these checks in parallel:
 
-3. Create or update the standard `agent-context/` files.
-   - `README.md`: index and orientation.
-   - `domain.md`: project-specific domain language only.
-   - `folder-structure.md`: important directories and ownership notes.
-   - `architecture.md`: system shape, boundaries, data flow, dependencies, and constraints.
-   - `workflows.md`: setup, build, run, review, release, and operational workflows.
-   - `testing.md`: test commands, frameworks, fixtures, naming, and verification expectations.
+```text
+1. Package manifest detection
+   -> package.json, go.mod, Cargo.toml, pyproject.toml, pom.xml, build.gradle,
+      Gemfile, composer.json, mix.exs, pubspec.yaml
 
-4. Add optional files only when evidence supports them.
-   - `api.md` for API contracts and endpoint conventions.
-   - `data.md` for schemas, migrations, seed data, or storage conventions.
-   - `operations.md` for deployment, monitoring, incidents, jobs, queues, or runbooks.
-   - `security.md` for auth, authorization, secrets, privacy, or compliance constraints.
+2. Framework fingerprinting
+   -> next.config.*, nuxt.config.*, angular.json, vite.config.*,
+      django settings, flask app factory, fastapi main, rails config
 
-5. Keep edits scoped.
-   - Update only `agent-context/` docs unless the user explicitly asks for broader docs.
-   - Preserve useful existing content, but reorganize it into the required structure when needed.
-   - Add examples that come from the repo, such as actual commands, paths, endpoints, config keys, test names, or module names.
+3. Entry point identification
+   -> main.*, index.*, app.*, server.*, cmd/, src/main/
 
-6. Verify.
-   - Check that every created file follows its matching file reference in `references/`.
-   - Run `rg -n "TBD|TODO|Unknown|Open Questions" agent-context` and ensure unresolved items are intentional.
-   - Run `git diff -- agent-context` and confirm the changes are documentation-only and evidence-backed.
+4. Directory structure snapshot
+   -> Top 2 levels of the directory tree, ignoring node_modules, vendor,
+      .git, dist, build, __pycache__, .next
 
-## Writing Standards
+5. Config and tooling detection
+   -> .eslintrc*, .prettierrc*, tsconfig.json, Makefile, Dockerfile,
+      docker-compose*, .github/workflows/, .env.example, CI configs
 
-- Use concise, scannable sections.
-- Prefer tables for path inventories, commands, and interfaces.
-- Include references as relative links to source files or directories.
-- Include short examples when they make a rule actionable.
-- Do not document generic programming concepts in `domain.md`.
-- Do not describe implementation classes unless they are stable public extension points or central architectural boundaries.
-- Do not invent setup, test, or deployment commands.
+6. Test structure detection
+   -> tests/, test/, __tests__/, *_test.go, *.spec.ts, *.test.js,
+      pytest.ini, jest.config.*, vitest.config.*
+```
 
-## Completion Output
+Also inspect existing `agent-context/` docs before writing. Preserve useful content and update it in place.
 
-When done, report:
+### Phase 2: Architecture Mapping
 
-- files created or updated in `agent-context/`;
-- the main evidence sources consulted;
-- unresolved open questions;
-- verification performed.
+From the reconnaissance data, identify:
+
+**Tech Stack**
+- Language(s) and version constraints.
+- Framework(s) and major libraries.
+- Database(s) and ORMs.
+- Build tools and bundlers.
+- CI/CD platform.
+
+**Architecture Pattern**
+- Monolith, monorepo, microservices, or serverless.
+- Frontend/backend split or full-stack.
+- API style: REST, GraphQL, gRPC, tRPC.
+
+**Key Directories**
+Map the top-level directories to their purpose:
+
+```text
+src/components/  -> React UI components
+src/api/         -> API route handlers
+src/lib/         -> Shared utilities
+src/db/          -> Database models and migrations
+tests/           -> Test suites
+scripts/         -> Build and deployment scripts
+```
+
+**Data Flow**
+Trace one request from entry to response:
+- Where does a request enter? router, handler, controller.
+- How is it validated? middleware, schemas, guards.
+- Where is business logic? services, models, use cases.
+- How does it reach the database? ORM, raw queries, repositories.
+
+### Phase 3: Convention Detection
+
+Identify patterns the codebase already follows:
+
+**Naming Conventions**
+- File naming: kebab-case, camelCase, PascalCase, snake_case.
+- Component/class naming patterns.
+- Test file naming: `*.test.ts`, `*.spec.ts`, `*_test.go`.
+
+**Code Patterns**
+- Error handling style: try/catch, Result types, error codes.
+- Dependency injection or direct imports.
+- State management approach.
+- Async patterns: callbacks, promises, async/await, channels.
+
+**Git Conventions**
+- Branch naming from recent branches.
+- Commit message style from recent commits.
+- PR workflow: squash, merge, rebase.
+- If the repo has no commits yet or only a shallow history, skip this section and note "Git history unavailable or too shallow to detect conventions".
+
+### Phase 4: Generate Agent Context Artifacts
+
+Create or update structured docs inside `agent-context/`. Use the per-file references above for the exact structure.
+
+| Source insight | Agent-context target |
+| --- | --- |
+| Overview and where to start | `agent-context/README.md` |
+| Project-specific terms and ambiguity | `agent-context/domain.md` |
+| Key directories and where to look | `agent-context/folder-structure.md` |
+| Tech stack, architecture pattern, entry points, data flow | `agent-context/architecture.md` |
+| Common tasks, build/run commands, git and review conventions | `agent-context/workflows.md` |
+| Test stack, test locations, naming, verification commands | `agent-context/testing.md` |
+| API style, endpoints, contracts | `agent-context/api.md` when evidence exists |
+| Databases, schemas, migrations, seed data | `agent-context/data.md` when evidence exists |
+| Deployment, runtime config, jobs, monitoring | `agent-context/operations.md` when evidence exists |
+| Auth, secrets, sensitive data, compliance | `agent-context/security.md` when evidence exists |
+
+The resulting docs should collectively cover the same information as the onboarding guide:
+
+```markdown
+# Onboarding Guide: [Project Name]
+
+## Overview
+[2-3 sentences: what this project does and who it serves]
+
+## Tech Stack
+| Layer | Technology | Version |
+| --- | --- | --- |
+| Language | TypeScript | 5.x |
+| Framework | Next.js | 14.x |
+| Database | PostgreSQL | 16 |
+| ORM | Prisma | 5.x |
+| Testing | Jest + Playwright | - |
+
+## Architecture
+[Diagram or description of how components connect]
+
+## Key Entry Points
+- **API routes**: `src/app/api/` - Next.js route handlers
+- **UI pages**: `src/app/(dashboard)/` - authenticated pages
+- **Database**: `prisma/schema.prisma` - data model source of truth
+- **Config**: `next.config.ts` - build and runtime config
+
+## Directory Map
+[Top-level directory -> purpose mapping]
+
+## Request Lifecycle
+[Trace one API request from entry to response]
+
+## Conventions
+- [File naming pattern]
+- [Error handling approach]
+- [Testing patterns]
+- [Git workflow]
+
+## Common Tasks
+- **Run dev server**: `npm run dev`
+- **Run tests**: `npm test`
+- **Run linter**: `npm run lint`
+- **Database migrations**: `npx prisma migrate dev`
+- **Build for production**: `npm run build`
+
+## Where to Look
+| I want to... | Look at... |
+| --- | --- |
+| Add an API endpoint | `src/app/api/` |
+| Add a UI page | `src/app/(dashboard)/` |
+| Add a database table | `prisma/schema.prisma` |
+| Add a test | `tests/` matching the source path |
+| Change build config | `next.config.ts` |
+```
+
+Do not print a standalone onboarding guide unless the user explicitly asks for one. Persist the durable version in `agent-context/`.
+
+## Best Practices
+
+1. **Don't read everything** - reconnaissance should use `rg --files`, `rg`, and targeted file reads, not reading every file. Read selectively only for ambiguous signals.
+2. **Verify, don't guess** - if a framework is detected from config but the actual code uses something different, trust the code.
+3. **Respect existing `agent-context/` docs** - enhance them rather than replacing useful project-specific content. Call out major reorganizations in the final summary.
+4. **Stay concise** - each context doc should be scannable. Details belong in code and references, not duplicated in prose.
+5. **Flag unknowns** - if a convention cannot be confidently detected, say so rather than guessing. "Could not determine test runner" is better than a wrong answer.
+
+## Anti-Patterns to Avoid
+
+- Updating `CLAUDE.md` from this skill.
+- Listing every dependency - highlight only the ones that shape how agents should work.
+- Describing obvious directory names - `src/` does not need an explanation unless this repo gives it a specific role.
+- Copying the README - `agent-context/` docs add structural insight the README lacks.
+- Writing one giant onboarding document when the information belongs in separate `agent-context/` files.
+
+## Examples
+
+### Example 1: First time in a new repo
+**User**: "Onboard me to this codebase"
+**Action**: Run full 4-phase workflow, then create or update the standard `agent-context/` docs.
+**Output**: `agent-context/README.md`, `domain.md`, `folder-structure.md`, `architecture.md`, `workflows.md`, and `testing.md`, plus optional docs when evidence exists.
+
+### Example 2: Fill agent-context for an existing project
+**User**: "Fill agent-context for this project"
+**Action**: Run Phases 1-3, read existing `agent-context/` docs, then update each file using its matching reference.
+**Output**: Updated `agent-context/` docs with detected conventions and open questions.
+
+### Example 3: Refresh project conventions
+**User**: "Update the project context with current conventions"
+**Action**: Run convention detection, update `folder-structure.md`, `workflows.md`, and `testing.md`; update other docs only when evidence changed.
+**Output**: Focused `agent-context/` updates, with unchanged docs left alone.
