@@ -103,6 +103,16 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
 - At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
 
+## Feature Requirements And Specification Workflow
+
+Use this workflow when drafting requirements and specifications for a new feature. This is a requirements and contracts workflow, not a deep technical design or OOP class design workflow.
+
+1. `grill-with-docs`: Provide enough context first, including what the user wants, who it is for, rough scope, and relevant repo docs. Challenge the idea against existing repo docs and context. Check whether it conflicts with existing rules, misses requirements, duplicates an existing pattern, or has edge cases implied by the repo.
+2. `prd`: Write the PRD with the improved inputs so the product intent, users, scope, non-goals, workflows, requirements, and acceptance criteria are clear.
+3. `create-specification`: Convert the clarified PRD into implementable requirements and contracts, such as behavior, inputs, outputs, data formats, validation rules, APIs, persistence rules, and test criteria.
+
+Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
+
 ## Task Management
 
 - Store task notes in the current tool's project-local tasks folder: use `.codex/tasks/` when working in Codex, and `.claude/tasks/` when working in Claude Code
