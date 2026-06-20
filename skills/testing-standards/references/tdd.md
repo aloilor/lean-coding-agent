@@ -20,6 +20,13 @@ it('can add numbers', () => { ... });
 it('when adding 2 + 3, returns 5', () => { ... });
 ```
 
+**Run the test and watch it fail before writing any production code.** This is not optional — a test you never saw fail proves nothing. Confirm two things from the actual output:
+
+1. **It fails for the right reason.** The failure must be the *assertion* — the expected behavior is missing or wrong (e.g. `expected 5, received undefined`). A compile error, import error, missing symbol, or typo is a broken test, not a RED. Fix that first, then get a real assertion failure.
+2. **Only this test's behavior is missing.** If the new test passes immediately, stop — the behavior already exists, the test asserts nothing meaningful, or it's testing the wrong thing. Investigate before moving on.
+
+Writing the test and the implementation together and running once at the end is not TDD. The point of RED is to prove the test can detect the absence of the behavior; you only get that proof by running it red first.
+
 ### GREEN Phase
 Write the simplest code that makes the test pass. Two strategies:
 
@@ -38,6 +45,10 @@ Write the simplest code that makes the test pass. Two strategies:
    ```
 
 **Default to Obvious Implementation.** Reach for Fake It only when the real implementation is genuinely unclear and you want a test to pull it into shape. Never leave a faked value in once a test exists that should generalize it — a green suite built on a hardcoded return proves nothing.
+
+**Get to green by changing the production code, never by weakening the test.** When a test won't pass, the failure is the signal — fix the code. Do not loosen the assertion, delete the failing case, mark it `.skip`/`xit`/pending, widen an expected value to match actual output, or wrap it in a try/catch that swallows the failure. Each of these produces a green suite that proves nothing, which is worse than a red one because it hides the gap.
+
+The only legitimate reason to edit a failing test is that the test itself is genuinely wrong — it asserts the wrong behavior, encodes a stale contract, or has a bug. When that's the case, say so explicitly, explain why the expectation is wrong, and correct it deliberately — don't quietly soften it to get past a failure you don't understand. If you can't explain why a test is failing, you are not yet allowed to change it.
 
 ### REFACTOR Phase
 This is where **design happens**. Look for:

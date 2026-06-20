@@ -11,6 +11,22 @@ Use this skill for test strategy and test shape. When the task calls for a test-
 
 The principles here are language-agnostic. Examples use TypeScript/Jest to illustrate; adapt them to your stack's idioms (naming, framework, assertion style).
 
+## Match The Repo's Existing Test Setup
+
+Before writing any test, discover the project's existing testing setup and mirror it. Do not introduce a new framework, directory layout, or naming convention into a repo that already has one.
+
+1. **Check `agent-context/testing.md` first.** It records this project's test commands, expectations, and fixture conventions. Treat it as the source of truth when present.
+2. **Then inspect the repo** to confirm and fill gaps. Identify:
+   - The test framework and runner, and the exact command to run tests.
+   - Where tests live and how files are named (e.g., `*.test.ts`, `*_test.go`, `tests/`).
+   - The assertion style and the mocking/fixture approach already in use.
+   - Existing builders, factories, fixtures, and helpers — reuse them instead of inventing new ones.
+3. **Match what you find.** Put new tests where the existing ones live, name them the way the repo does, and use the established assertion and double styles.
+
+Only introduce a new framework or convention when the task explicitly calls for it. If the repo has no test setup at all, propose the smallest reasonable one and flag it rather than assuming.
+
+See: `references/RULES.md` (Match The Repo's Existing Test Setup) and `references/testing.md` (Match The Repo's Existing Test Setup).
+
 ## Choose The Right Test
 
 Start from risk: prioritize behavior that would hurt users, money, data, security, or operations if it broke. Then pick the smallest test that gives useful confidence:
@@ -82,6 +98,19 @@ A test that fails intermittently is worse than no test: it trains people to igno
 
 See: `references/RULES.md` (Reliability Rules) and `references/testing.md` (Reliability and Determinism — isolation, fakes, and test data).
 
+## Make Hard-To-Test Code Testable
+
+Hard-to-test code is a design signal, not a reason to skip the test. When behavior is buried in a side effect or a hidden dependency, create a seam and test through it:
+
+- **Inject dependencies** (clock, database, HTTP, mailer, randomness) instead of constructing them inside the unit, so tests can pass fakes.
+- **Return a value** instead of only performing an effect.
+- **Surface the effect** through an injected collaborator you can spy on, or an observable result/event.
+- **Separate decision from action:** unit-test the logic as a pure function, keep a thin I/O wrapper for a small integration test.
+
+Make it testable rather than asserting on private internals, monkeypatching globals, or scraping logs. If you truly cannot within the task's scope, flag it — don't silently drop the test.
+
+See: `references/RULES.md` (Make Hard-To-Test Code Testable) and `references/testing.md` (Make Hard-To-Test Code Testable).
+
 ## Deeper References
 
 Start from the compact rule index, then open detail files only when the task needs examples or deeper guidance:
@@ -94,10 +123,12 @@ Start from the compact rule index, then open detail files only when the task nee
 
 Before finishing testing work, check:
 
-1. Does the test fail for the bug or missing behavior it is meant to guard?
-2. Does the test assert observable behavior instead of implementation details?
-3. Is the test level appropriate for the risk?
-4. Is the test deterministic and isolated (no shared state, wall-clock time, unseeded randomness, or fixed sleeps)?
-5. Is setup clear and minimal?
-6. Does the name explain the scenario and expected result?
-7. Do relevant test commands pass?
+1. Did you run the test and watch it fail on the assertion (not a compile/import error) before writing the production code?
+2. Does the test fail for the bug or missing behavior it is meant to guard?
+3. Does the test assert observable behavior instead of implementation details?
+4. Is the test level appropriate for the risk?
+5. Is the test deterministic and isolated (no shared state, wall-clock time, unseeded randomness, or fixed sleeps)?
+6. Is setup clear and minimal?
+7. Does the name explain the scenario and expected result?
+8. Did you reach green by fixing the code rather than weakening, skipping, or deleting the test?
+9. Do relevant test commands pass?

@@ -6,6 +6,7 @@ Load this file when planning, writing, reviewing, or updating tests. Open the de
 
 | Rule | Summary | Details |
 |------|---------|---------|
+| Match The Repo's Existing Test Setup | Before writing tests, discover the framework, run command, file layout, naming, and fixtures (check `agent-context/testing.md` first, then the repo) and mirror them. | [testing.md](./testing.md) |
 | Choose The Smallest Useful Test | Prefer lower-level tests; use broader tests only when the risk lives in integration, wiring, framework behavior, or user workflows. | [testing.md](./testing.md) |
 | Follow The Testing Pyramid | Many fast unit tests, some integration and contract tests, few brittle end-to-end tests. | [testing.md](./testing.md) |
 | Start From Risk | Prioritize behavior that would hurt users, money, data, security, or operations if it broke. | [testing.md](./testing.md) |
@@ -16,6 +17,7 @@ Load this file when planning, writing, reviewing, or updating tests. Open the de
 | Focus Integration Tests On High Value | Cover boundaries, critical paths such as money and security, and complex queries. | [testing.md](./testing.md) |
 | Use Contract Tests Across Implementations | Run one shared test suite against every implementation of an interface. | [testing.md](./testing.md) |
 | Build Test Objects With Builders | Use builders to construct test data clearly without exposing irrelevant setup. | [testing.md](./testing.md) |
+| Make Hard-To-Test Code Testable | Treat hard-to-test behavior as a design signal: inject dependencies, return values, surface effects, and separate decision from action instead of skipping the test. | [testing.md](./testing.md) |
 | Avoid Common Testing Mistakes | Do not test implementation, over-mock, share state, skip assertions, or test trivia. | [testing.md](./testing.md) |
 
 ## Test Double Rules
@@ -45,7 +47,9 @@ Load this file when planning, writing, reviewing, or updating tests. Open the de
 |------|---------|---------|
 | Follow Red-Green-Refactor | Write a failing test, make it pass simply, then improve the design. | [tdd.md](./tdd.md) |
 | Write A Concrete Failing Test First | In RED, describe the wanted behavior with a concrete example in domain language. | [tdd.md](./tdd.md) |
+| Run It Red Before Implementing | In RED, run the test and confirm it fails on the assertion (not a compile/import error) before writing any production code. | [tdd.md](./tdd.md) |
 | Make It Pass Simply | In GREEN, default to the obvious implementation; use Fake It only when the solution is unclear. | [tdd.md](./tdd.md) |
+| Never Weaken A Test To Get To Green | Get to green by fixing the code, never by loosening, skipping, or deleting the test; only change a test when it is genuinely wrong, and say why. | [tdd.md](./tdd.md) |
 | Refactor While Tests Stay Green | In REFACTOR, remove meaningful duplication and improve names without changing behavior. | [tdd.md](./tdd.md) |
 | Obey The Three Laws Of TDD | No production code, no extra test code, and no extra production code beyond what the failing test needs. | [tdd.md](./tdd.md) |
 | Apply The Rule Of Three As A Heuristic | Lean toward extracting duplication near the third occurrence; use judgment and never add duplication to comply. | [tdd.md](./tdd.md) |

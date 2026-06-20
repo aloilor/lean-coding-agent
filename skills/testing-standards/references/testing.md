@@ -1,5 +1,29 @@
 # Testing Strategy
 
+## Match The Repo's Existing Test Setup
+
+A test only helps if it fits the project it lands in. Before writing anything, discover the existing setup and conform to it — a Jest file dropped into a Vitest/pytest/Go suite, tests placed in the wrong directory, or a new naming scheme all create friction and often won't even run.
+
+**Discover, in order:**
+
+1. **`agent-context/testing.md`** — the project's documented test commands, expectations, and fixture conventions. When it exists, it is the source of truth.
+2. **The repo itself** — to confirm the docs and fill gaps. Look for:
+
+| What to find | Why it matters |
+|--------------|----------------|
+| Framework and runner | Determines syntax, structure, and how doubles work. |
+| Run command (incl. single-file/filtered) | You need to run the narrowest test fast during the loop. |
+| Test file location and naming | New tests must sit where the suite discovers them. |
+| Assertion style | Match `expect`, `assert`, table-driven, etc. |
+| Mocking / fixture approach | Reuse the established double and setup style. |
+| Existing builders, factories, fixtures, helpers | Reuse them instead of inventing parallel ones. |
+
+**Then mirror it.** Place new tests alongside existing ones, name them the project's way, and use the established assertion and double styles. Reuse existing fixtures and builders before adding new ones.
+
+**Only deviate deliberately.** Introduce a new framework, layout, or convention only when the task explicitly requires it. If the repo has no test setup at all, propose the smallest reasonable one and flag the choice rather than silently establishing a precedent.
+
+---
+
 ## The Testing Pyramid
 
 ```
@@ -168,6 +192,42 @@ class InMemoryUserRepo implements UserRepo {
 ```
 
 ---
+
+## Make Hard-To-Test Code Testable
+
+If a behavior is hard to test, that is a design signal, not a reason to skip the test. The usual cause is logic buried in a side effect or reaching for a hidden dependency. Create a seam and test through it:
+
+- **Inject the dependency.** Pass the clock, database, HTTP client, mailer, or random source in as an argument instead of constructing or importing it inside the unit. Now a test can supply a fake or stub.
+- **Return a value instead of only performing an effect.** A function that computes and returns a result is trivially testable; one that only writes to a file, log, or queue forces you to test the effect.
+- **Surface the effect.** When the effect *is* the behavior (an email must be sent), route it through an injected collaborator you can spy on, or emit an observable result/event, rather than firing it deep inside.
+- **Separate decision from action.** Pull the logic (what to do) out of the I/O (doing it). Unit-test the decision as a pure function; keep a thin I/O wrapper for a small integration test.
+
+```typescript
+// Hard to test: reads the clock and sends email internally
+async function expireTrial(userId: string) {
+  const user = await db.users.find(userId);
+  if (Date.now() > user.trialEndsAt) {
+    await sendgrid.send(user.email, 'Trial expired');
+  }
+}
+
+// Testable: decision is pure, dependencies are injected
+function isTrialExpired(user: User, now: number): boolean {
+  return now > user.trialEndsAt;            // unit-test this directly
+}
+
+async function expireTrial(
+  userId: string,
+  deps: { now: () => number; mailer: Mailer; repo: UserRepo },
+) {
+  const user = await deps.repo.find(userId);
+  if (isTrialExpired(user, deps.now())) {
+    await deps.mailer.send(user.email, 'Trial expired');  // spy on this
+  }
+}
+```
+
+Prefer making the seam over testing private internals, monkeypatching globals, or asserting on log output. If you genuinely cannot make the behavior testable within the task's scope, say so and flag it — do not silently drop the test.
 
 ## Testing Strategies by Layer
 
