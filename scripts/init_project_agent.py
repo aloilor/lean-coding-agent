@@ -26,6 +26,7 @@ LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
 PLAYWRIGHT_DIRNAME = ".playwright"
+SHARED_AGENTS_DIRNAME = "agents"
 AGENTS_DIRNAME = ".agents"
 LESSONS_DIRNAME = "lessons"
 LESSONS_INDEX_NAME = "LESSONS.md"
@@ -170,6 +171,30 @@ def ensure_override_gitignore(target_repo: Path) -> Path:
 def copy_playwright_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
     source_dir = shared_repo_root / PLAYWRIGHT_DIRNAME
     target_dir = target_repo / PLAYWRIGHT_DIRNAME
+    copied_paths: list[Path] = []
+
+    if not source_dir.exists():
+        return copied_paths
+
+    if source_dir.resolve() == target_dir.resolve():
+        return copied_paths
+
+    for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
+        relative_path = source_path.relative_to(source_dir)
+        target_path = target_dir / relative_path
+        if target_path.exists():
+            continue
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, target_path)
+        copied_paths.append(target_path)
+
+    return copied_paths
+
+
+def copy_shared_agents_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
+    source_dir = shared_repo_root / SHARED_AGENTS_DIRNAME
+    target_dir = target_repo / SHARED_AGENTS_DIRNAME
     copied_paths: list[Path] = []
 
     if not source_dir.exists():
@@ -486,6 +511,7 @@ def main() -> int:
     agent_context_dir = target_repo / AGENT_CONTEXT_DIRNAME
     agent_context_dir.mkdir(parents=True, exist_ok=True)
     copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
+    copied_agent_paths = copy_shared_agents_baseline(target_repo, REPO_ROOT)
     copied_playwright_paths = copy_playwright_baseline(target_repo, REPO_ROOT)
     playwright_cli_install = install_playwright_cli(target_repo)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
@@ -519,6 +545,10 @@ def main() -> int:
         print("Copied baseline project context files:")
         for context_path in copied_context_paths:
             print(f"- {context_path}")
+    if copied_agent_paths:
+        print("Copied shared agent files:")
+        for agent_path in copied_agent_paths:
+            print(f"- {agent_path}")
     if copied_playwright_paths:
         print("Copied Playwright CLI baseline files:")
         for playwright_path in copied_playwright_paths:

@@ -43,6 +43,7 @@ The script will:
 - copy this repo's `CLAUDE.md` into the target repo
 - create `AGENTS.override.md` and `CLAUDE.override.md` when they do not already exist
 - add the override files to the target repo's `.gitignore`
+- copy missing shared subagent files from this repo's `agents/`
 - create `agent-context/` in the target repo
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
@@ -110,6 +111,14 @@ npx skills add https://github.com/github/awesome-copilot --skill create-architec
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
 
 `codebase-onboarding` is installed from this repo's [skills/codebase-onboarding](skills/codebase-onboarding) instead of upstream so it fills `agent-context/` with structured, evidence-backed project documentation.
+
+## Shared Subagents
+
+Shared subagent source files live in [agents](agents). The bootstrap copies missing files from this folder into each target repo's `agents/` directory without overwriting project-local versions.
+
+The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then `prd`, then `create-specification`, then an implementation plan. It saves PRDs as `docs/prd/YYYYMMDD_feature_name.md` and implementation plans as `docs/implementation-plans/YYYYMMDD_feature_name.md`.
+
+The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved plans and routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, and `rest-api-design` for API changes.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 
