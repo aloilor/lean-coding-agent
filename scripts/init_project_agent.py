@@ -40,7 +40,8 @@ PLAYWRIGHT_IGNORE_LINES = [
     ".playwright/*.local.json",
 ]
 SHARED_AGENT_IGNORE_LINES = [
-    ".agents/reviews/",
+    ".agents/code-reviews/",
+    ".agents/implementation-reports/",
 ]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
 UPSTREAM_SKILL_AGENTS = ["codex", "claude-code"]
@@ -71,7 +72,6 @@ UPSTREAM_SKILL_GROUPS = [
             "create-architectural-decision-record",
             "create-readme",
             "create-specification",
-            "prd",
             "sql-code-review",
             "sql-optimization",
             "update-specification",

@@ -48,7 +48,7 @@ The script will:
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
-- add `.agents/reviews/` to the target repo's `.gitignore` for shared local review reports
+- add `.agents/code-reviews/` and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
 - copy missing Playwright CLI baseline files from `.playwright/`
@@ -93,8 +93,7 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
 | `create-architectural-decision-record` | `github/awesome-copilot` | Create ADRs for durable architectural decision history. |
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
-| `create-specification` | `github/awesome-copilot` | Create durable AI-ready specifications before implementation planning. |
-| `prd` | `github/awesome-copilot` | Draft product requirements documents from project context. |
+| `create-specification` | `github/awesome-copilot` | Create durable AI-ready specifications before implementation. |
 | `sql-code-review` | `github/awesome-copilot` | Review SQL for correctness, security, maintainability, and performance. |
 | `sql-optimization` | `github/awesome-copilot` | Optimize SQL queries, indexes, and execution patterns. |
 | `update-specification` | `github/awesome-copilot` | Keep existing specifications aligned with new requirements and code changes. |
@@ -106,7 +105,7 @@ npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent
 npx skills add https://github.com/mattpocock/skills --skill grill-me diagnose improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
-npx skills add https://github.com/github/awesome-copilot --skill create-architectural-decision-record create-readme create-specification prd sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-architectural-decision-record create-readme create-specification sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
 ```
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
@@ -117,11 +116,11 @@ npx skills add https://github.com/github/awesome-copilot --skill create-architec
 
 Shared subagent source files live in [agents](agents). The bootstrap copies missing files from this folder into each target repo's `agents/` directory without overwriting project-local versions.
 
-The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then `create-specification`, then an implementation plan. It saves specifications under `spec/` and implementation plans as `docs/implementation-plans/YYYYMMDD_feature_name.md`.
+The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then `create-specification`. It saves specifications under `spec/`.
 
-The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved plans and routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, and `rest-api-design` for API changes. When `code-reviewer` returns findings, the implementer fixes only those findings, reruns verification, and hands the updated touched file list back for another review pass.
+The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved specifications and routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, and `rest-api-design` for API changes. It creates or updates `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md` as the shared handoff artifact. When `code-reviewer` returns findings, the implementer fixes only those findings, reruns verification, updates the implementation report, and hands the updated touched file list back for another review pass.
 
-The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification, applies `engineering-standards`, and routes database changes through `sql-code-review` and `sql-optimization` when relevant. It stays review-only, returns `APPROVE`, `WARNING`, or `BLOCK` for the shared review-fix loop, and saves every review pass as `.agents/reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report.
+The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification and shared implementation report, applies `engineering-standards`, and routes database changes through `sql-code-review` and `sql-optimization` when relevant. It stays review-only, returns `APPROVE`, `WARNING`, or `BLOCK` for the shared review-fix loop, and saves every review pass as `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 

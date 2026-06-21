@@ -112,11 +112,22 @@ Use this workflow when drafting requirements and specifications for a new featur
 
 Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 
+## Feature Development Loop
+
+For feature implementation work:
+
+1. `planner` creates the specification.
+2. `implementer` reads the specification, writes code, runs verification, loops internally until the selected tests/checks pass, and produces a shared implementation report.
+3. `code-reviewer` reviews the planner specification plus the implementer report and touched files.
+4. If `code-reviewer` returns `BLOCK`, `implementer` reads the shared review file, fixes only those findings, reruns verification, and returns updated touched files.
+5. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
+6. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
+
 ## Review Fix Loop
 
 For implementation work that uses `planner`, `implementer`, and `code-reviewer`:
 
-1. Run `implementer` from the approved specification and implementation plan.
+1. Run `implementer` from the approved specification.
 2. Pass the planner specification and implementer-touched files to `code-reviewer`.
 3. If `code-reviewer` returns findings, send the review report back to `implementer`.
 4. `implementer` must fix only the reported findings, rerun relevant verification, and update its touched file list.
