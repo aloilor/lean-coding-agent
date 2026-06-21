@@ -108,8 +108,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 Use this workflow when drafting requirements and specifications for a new feature. This is a requirements and contracts workflow, not a deep technical design or OOP class design workflow.
 
 1. `grill-with-docs`: Provide enough context first, including what the user wants, who it is for, rough scope, and relevant repo docs. Challenge the idea against existing repo docs and context. Check whether it conflicts with existing rules, misses requirements, duplicates an existing pattern, or has edge cases implied by the repo.
-2. `prd`: Write the PRD with the improved inputs so the product intent, users, scope, non-goals, workflows, requirements, and acceptance criteria are clear.
-3. `create-specification`: Convert the clarified PRD into implementable requirements and contracts, such as behavior, inputs, outputs, data formats, validation rules, APIs, persistence rules, and test criteria.
+2. `create-specification`: Convert the clarified inputs into implementable requirements and contracts, such as behavior, inputs, outputs, data formats, validation rules, APIs, persistence rules, and test criteria.
 
 Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 
