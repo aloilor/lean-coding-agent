@@ -48,6 +48,7 @@ The script will:
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
+- add `.agents/reviews/` to the target repo's `.gitignore` for shared local review reports
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
 - copy missing Playwright CLI baseline files from `.playwright/`
@@ -118,9 +119,9 @@ Shared subagent source files live in [agents](agents). The bootstrap copies miss
 
 The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then `create-specification`, then an implementation plan. It saves specifications under `spec/` and implementation plans as `docs/implementation-plans/YYYYMMDD_feature_name.md`.
 
-The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved plans and routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, and `rest-api-design` for API changes.
+The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved plans and routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, and `rest-api-design` for API changes. When `code-reviewer` returns findings, the implementer fixes only those findings, reruns verification, and hands the updated touched file list back for another review pass.
 
-The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification, applies `engineering-standards`, and routes database changes through `sql-code-review` and `sql-optimization` when relevant.
+The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification, applies `engineering-standards`, and routes database changes through `sql-code-review` and `sql-optimization` when relevant. It stays review-only, returns `APPROVE`, `WARNING`, or `BLOCK` for the shared review-fix loop, and saves every review pass as `.agents/reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 

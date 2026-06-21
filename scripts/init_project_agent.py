@@ -39,6 +39,9 @@ PLAYWRIGHT_IGNORE_LINES = [
     ".playwright/output/",
     ".playwright/*.local.json",
 ]
+SHARED_AGENT_IGNORE_LINES = [
+    ".agents/reviews/",
+]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
 UPSTREAM_SKILL_AGENTS = ["codex", "claude-code"]
 UPSTREAM_SKILL_GROUPS = [
@@ -157,7 +160,7 @@ def ensure_override_gitignore(target_repo: Path) -> Path:
     gitignore_path = target_repo / ".gitignore"
     existing = gitignore_path.read_text(encoding="utf-8") if gitignore_path.exists() else ""
     existing_lines = set(existing.splitlines())
-    managed_lines = [*OVERRIDE_FILENAMES, *PLAYWRIGHT_IGNORE_LINES]
+    managed_lines = [*OVERRIDE_FILENAMES, *SHARED_AGENT_IGNORE_LINES, *PLAYWRIGHT_IGNORE_LINES]
     missing_lines = [line for line in managed_lines if line not in existing_lines]
 
     if missing_lines:

@@ -293,6 +293,12 @@ End every review with:
 Verdict: WARNING — 2 HIGH issues should be resolved before merge.
 ```
 
+Use these exact verdict tokens so the review-fix loop can consume them:
+
+- `APPROVE`: no findings that should be fixed before handoff.
+- `WARNING`: findings exist, but they are not automatically blocking; fix when tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap.
+- `BLOCK`: critical issues, required specification mismatches, serious correctness/security risks, or missing required review inputs.
+
 ## Approval Criteria
 
 - **Approve**: No CRITICAL or HIGH issues, including clean reviews with zero
@@ -301,6 +307,16 @@ Verdict: WARNING — 2 HIGH issues should be resolved before merge.
 - **Block**: CRITICAL issues found — must fix before merge
 
 Do not withhold approval to appear rigorous. If the diff is clean, approve it.
+
+## Review Fix Loop Contract
+
+The reviewer does not edit files. When the verdict is `BLOCK`, return concrete findings for `implementer` to fix and expect another review pass with the same planner specification and updated implementer-touched file list.
+
+For `WARNING`, make clear whether each finding is tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap. Those warnings may be sent back to `implementer`; optional polish should stay as residual risk.
+
+Return `APPROVE` only when there are no remaining findings that should be fixed before handoff.
+
+Save every review pass as its own shared review file before handing the result back. Use `.agents/reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report. Increment `N` for each pass in the same review-fix loop and keep the report content in the same format as the review output.
 
 ## Project-Specific Guidelines
 

@@ -1,5 +1,6 @@
 .codex/tasks/
 .claude/tasks/
+.agents/reviews/
 .claude/settings.local.json
 AGENTS.override.md
 CLAUDE.override.md

@@ -129,6 +129,22 @@ When you stop, report the failing test, the actual error, what you tried, and yo
 - Confirm requirements and acceptance criteria are satisfied.
 - Document any residual risks, manual checks, skipped tests, or follow-up work.
 
+## Code Review Fix Mode
+
+When given a `code-reviewer` report, expect the input to include the shared review file path under `.agents/reviews/review_YYYYMMDD_feature_name_pass_N.md`.
+
+- Read the shared review file before changing code.
+- Treat the review file as the source of truth for findings in that fix pass.
+- Fix only concrete findings from the report.
+- Do not refactor unrelated code.
+- Preserve the planner specification unless the finding exposes a specification conflict.
+- Add or update tests when the finding is behavioral, security-sensitive, or regression-prone.
+- Rerun the narrowest relevant verification after each fix pass.
+- Update the touched file list when review fixes change additional files.
+- Report which findings were fixed, which files changed, and what verification passed.
+
+Loop back to `code-reviewer` after each fix pass. Stop and surface a blocker when the same finding remains after 3 fix attempts, the fix requires scope beyond the specification, verification fails for a reason you do not understand, or fixing would require weakening tests.
+
 ## Implementation Report Format
 
 ```markdown

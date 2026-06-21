@@ -112,6 +112,26 @@ Use this workflow when drafting requirements and specifications for a new featur
 
 Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 
+## Review Fix Loop
+
+For implementation work that uses `planner`, `implementer`, and `code-reviewer`:
+
+1. Run `implementer` from the approved specification and implementation plan.
+2. Pass the planner specification and implementer-touched files to `code-reviewer`.
+3. If `code-reviewer` returns findings, send the review report back to `implementer`.
+4. `implementer` must fix only the reported findings, rerun relevant verification, and update its touched file list.
+5. Run `code-reviewer` again with the same specification and updated touched files.
+6. Repeat until `code-reviewer` returns `APPROVE`.
+
+Automatically loop on `BLOCK`. Treat `WARNING` as a judgment call: fix it when the finding is tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap; otherwise report it as residual risk.
+
+Stop and surface a blocker when:
+
+- The same finding remains after 3 fix attempts.
+- The fix requires changing the specification or expanding scope.
+- Verification fails for a reason that is not understood.
+- Fixing would require weakening tests or hiding a failure.
+
 ## Task Management
 
 - Store task notes in the current tool's project-local tasks folder: use `.codex/tasks/` when working in Codex, and `.claude/tasks/` when working in Claude Code
