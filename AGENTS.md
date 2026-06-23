@@ -100,7 +100,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - When available, use the `refactor` skill for behavior-preserving internal restructuring and code-smell driven improvements.
 - When available, use the `rest-api-design` skill for REST API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, documentation, and API contract tests.
 - Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
-- Read `AGENTS.local.md` when it exists; it is local, private, and ignored by git.
+- Read `AGENTS.local.md` or `CLAUDE.local.md` when it exists; it is local, private, and ignored by git.
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
 - At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
 
@@ -113,32 +113,39 @@ Use this section to choose the right workflow from the user's latest request. Wh
 | User input pattern | Apply this workflow | Rule |
 | --- | --- | --- |
 | User asks to define, draft, clarify, or update requirements, acceptance criteria, contracts, or a feature specification before implementation. | Feature Requirements And Specification Workflow | Use this when the deliverable is requirements or a specification, not production code. |
-| User asks to build, add, implement, or change product behavior for a feature. | Feature Development Loop | Use this when code changes are expected and the requested behavior is externally observable. |
+| User asks to build, add, implement, or change product behavior for a feature. | Feature Development Workflow | Use this when code changes are expected and the requested behavior is externally observable. |
 | User asks to refactor, restructure, clean up, extract, rename, or simplify code while preserving behavior. | Refactor Workflow | Use this only when the intended outcome is internal structure change with no behavior change. If behavior changes are requested too, treat it as feature work. |
-| User asks to fix findings from `code-reviewer`, continue after review feedback, or loop until approval. | Review Fix Loop | Use this after planner, implementer, and code-reviewer have already been used for the same implementation or refactor task. |
-| User asks for a code review, review, audit, or risk assessment without asking for edits. | Review stance | Lead with findings and file/line references. Do not enter the Review Fix Loop unless the user asks to fix the findings. |
-| User reports a bug, failing test, CI failure, runtime error, or regression. | Autonomous Bug Fixing | Reproduce or inspect the failure, fix the root cause, and verify. Use Feature Development Loop only when the fix expands into feature-level behavior or contract work. |
+| User asks for a code review, review, audit, or risk assessment without asking for edits. | Review Workflow | Use this when the deliverable is review findings, not code changes. |
+| User reports a bug, failing test, CI failure, runtime error, or regression. | Autonomous Bug Fixing | Reproduce or inspect the failure, fix the root cause, and verify. Use Feature Development Workflow only when the fix expands into feature-level behavior or contract work. |
 | User asks a direct question, requests a small documentation edit, or asks for a narrow mechanical change. | Normal task execution | Do the smallest useful thing. Do not force planner, implementer, or code-reviewer workflows unless the change grows into one of the rows above. |
 
 ### Feature Requirements And Specification Workflow
 
 Use this workflow when drafting requirements and specifications for a new feature. This is a requirements and contracts workflow, not a deep technical design or OOP class design workflow.
 
-1. `grill-with-docs`: Provide enough context first, including what the user wants, who it is for, rough scope, and relevant repo docs. Challenge the idea against existing repo docs and context. Check whether it conflicts with existing rules, misses requirements, duplicates an existing pattern, or has edge cases implied by the repo.
-2. `create-specification`: Convert the clarified inputs into implementable requirements and contracts, such as behavior, inputs, outputs, data formats, validation rules, APIs, persistence rules, and test criteria.
+1. `planner`: Create the requirements and specification, including behavior, inputs, outputs, data formats, validation rules, APIs, persistence rules, and test criteria.
 
 Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 
-### Feature Development Loop
+### Feature Development Workflow
 
 For feature implementation work:
 
 1. `planner` creates the specification.
 2. `implementer` reads the specification, writes code, runs verification, loops internally until the selected tests/checks pass, and produces a shared implementation report.
 3. `code-reviewer` reviews the planner specification plus the implementer report and touched files.
-4. If `code-reviewer` returns `BLOCK`, `implementer` reads the shared review file, fixes only those findings, reruns verification, and returns updated touched files.
-5. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
+4. If `code-reviewer` returns `BLOCK`, give the review report back to `implementer`. `implementer` fixes only the reported findings, keeps the original specification unchanged, reruns the relevant verification, and updates the implementation report with the new touched files and test results.
+5. Send the updated implementation report and touched files back to `code-reviewer`. Repeat this review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the blocker conditions below.
 6. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
+
+Treat `WARNING` as a judgment call: fix it when the finding is tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap; otherwise report it as residual risk.
+
+Stop and surface a blocker when:
+
+- The same finding remains after 3 fix attempts.
+- The fix requires changing the specification or expanding scope.
+- Verification fails for a reason that is not understood.
+- Fixing would require weakening tests or hiding a failure.
 
 ### Refactor Workflow
 
@@ -155,30 +162,18 @@ Use this workflow when changing internal structure without intended behavior cha
 3. `implementer` keeps changes surgical, runs the planned verification, and produces a shared implementation report.
 4. `code-reviewer` reviews the refactor brief plus the implementer report and touched files with `engineering-standards`, `testing-standards`, and `refactor` for behavior drift, scope creep, missed tests, and unnecessary abstraction. Use `sql-code-review` and `sql-optimization` when the touched files include the SQL or database concerns listed above.
 5. If `code-reviewer` returns `BLOCK`, `implementer` reads the shared review file, fixes only those findings, reruns relevant verification, and returns updated touched files.
-6. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
+6. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the same blocker conditions listed in Feature Development Workflow.
 7. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 
 A refactor is successful only if externally observable behavior is unchanged, unless the user explicitly approves a behavior change.
 
-### Review Fix Loop
+### Review Workflow
 
-For implementation work that uses `planner`, `implementer`, and `code-reviewer`:
+Use this workflow when the user asks for a code review, audit, or risk assessment without asking for edits.
 
-1. Run `implementer` from the approved specification.
-2. Pass the planner specification and implementer-touched files to `code-reviewer`.
-3. If `code-reviewer` returns findings, send the review report back to `implementer`.
-4. `implementer` must fix only the reported findings, rerun relevant verification, and update its touched file list.
-5. Run `code-reviewer` again with the same specification and updated touched files.
-6. Repeat until `code-reviewer` returns `APPROVE`.
-
-Automatically loop on `BLOCK`. Treat `WARNING` as a judgment call: fix it when the finding is tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap; otherwise report it as residual risk.
-
-Stop and surface a blocker when:
-
-- The same finding remains after 3 fix attempts.
-- The fix requires changing the specification or expanding scope.
-- Verification fails for a reason that is not understood.
-- Fixing would require weakening tests or hiding a failure.
+1. `code-reviewer` reviews the requested scope.
+2. Report findings first, ordered by severity, with file/line references when available.
+3. Do not make edits, run `implementer`, or enter a fix loop unless the user explicitly asks to fix the findings.
 
 ## Task Management
 
