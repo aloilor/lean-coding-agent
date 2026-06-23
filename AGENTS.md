@@ -123,6 +123,24 @@ For feature implementation work:
 5. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
 6. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 
+## Refactor Workflow
+
+Use this workflow when changing internal structure without intended behavior changes.
+
+1. `planner` writes a refactor brief:
+   - Current behavior to preserve.
+   - Files, modules, or boundaries in scope.
+   - Files, modules, or boundaries out of scope.
+   - Verification plan, including baseline checks when feasible.
+   - Rollback risks or behavior-drift risks.
+2. `implementer` performs only the approved refactor, keeps changes surgical, runs the planned verification, and produces a shared implementation report.
+3. `code-reviewer` reviews the refactor brief plus the implementer report and touched files for behavior drift, scope creep, missed tests, and unnecessary abstraction.
+4. If `code-reviewer` returns `BLOCK`, `implementer` reads the shared review file, fixes only those findings, reruns relevant verification, and returns updated touched files.
+5. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
+6. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
+
+A refactor is successful only if externally observable behavior is unchanged, unless the user explicitly approves a behavior change.
+
 ## Review Fix Loop
 
 For implementation work that uses `planner`, `implementer`, and `code-reviewer`:
