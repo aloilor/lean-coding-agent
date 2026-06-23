@@ -55,7 +55,6 @@ UPSTREAM_SKILL_GROUPS = [
     {
         "source": "https://github.com/mattpocock/skills",
         "skills": [
-            "grill-me",
             "diagnose",
             "improve-codebase-architecture",
         ],

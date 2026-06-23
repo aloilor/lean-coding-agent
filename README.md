@@ -88,7 +88,6 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | Skill | Source | Purpose |
 | --- | --- | --- |
 | `find-skills` | `vercel-labs/skills` | Search the skills ecosystem and install useful skills. |
-| `grill-me` | `mattpocock/skills` | Challenge an idea, plan, or implementation with critical questions. |
 | `diagnose` | `mattpocock/skills` | Investigate bugs and failures before changing code. |
 | `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
@@ -104,7 +103,7 @@ The equivalent manual commands are:
 
 ```bash
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
-npx skills add https://github.com/mattpocock/skills --skill grill-me diagnose improve-codebase-architecture --agent codex claude-code --copy -y
+npx skills add https://github.com/mattpocock/skills --skill diagnose improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
 npx skills add https://github.com/github/awesome-copilot --skill create-architectural-decision-record create-readme create-specification sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
