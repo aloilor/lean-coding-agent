@@ -44,6 +44,8 @@ The script will:
 - create `AGENTS.override.md` and `CLAUDE.override.md` when they do not already exist
 - add the override files to the target repo's `.gitignore`
 - copy missing shared subagent files from this repo's `agents/`
+- install missing Claude Code subagent files into `.claude/agents/`
+- install missing Codex custom agent files into `.codex/agents/`
 - create `agent-context/` in the target repo
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
@@ -114,7 +116,7 @@ npx skills add https://github.com/github/awesome-copilot --skill create-architec
 
 ## Shared Subagents
 
-Shared subagent source files live in [agents](agents). The bootstrap copies missing files from this folder into each target repo's `agents/` directory without overwriting project-local versions.
+Shared subagent source files live in [agents](agents). The bootstrap copies missing files from this folder into each target repo's `agents/` directory without overwriting project-local versions. It also installs missing Claude Code subagents under `.claude/agents/*.md` and missing Codex custom agents under `.codex/agents/*.toml`.
 
 The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then `create-specification`. It saves specifications under `spec/`.
 

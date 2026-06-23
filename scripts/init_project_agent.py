@@ -27,6 +27,8 @@ AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
 PLAYWRIGHT_DIRNAME = ".playwright"
 SHARED_AGENTS_DIRNAME = "agents"
+CLAUDE_AGENTS_DIR = Path(".claude") / "agents"
+CODEX_AGENTS_DIR = Path(".codex") / "agents"
 AGENTS_DIRNAME = ".agents"
 LESSONS_DIRNAME = "lessons"
 LESSONS_INDEX_NAME = "LESSONS.md"
@@ -217,6 +219,101 @@ def copy_shared_agents_baseline(target_repo: Path, shared_repo_root: Path) -> li
         copied_paths.append(target_path)
 
     return copied_paths
+
+
+def parse_agent_source(source_path: Path) -> tuple[dict[str, str], str]:
+    text = source_path.read_text(encoding="utf-8-sig")
+    lines = text.splitlines()
+
+    if not lines or lines[0].strip() != "---":
+        raise SystemExit(f"Agent file is missing frontmatter: {source_path}")
+
+    closing_index = next(
+        (index for index, line in enumerate(lines[1:], start=1) if line.strip() == "---"),
+        None,
+    )
+    if closing_index is None:
+        raise SystemExit(f"Agent file frontmatter is not closed: {source_path}")
+
+    metadata: dict[str, str] = {}
+    for line in lines[1:closing_index]:
+        key, separator, value = line.partition(":")
+        if not separator:
+            continue
+        metadata[key.strip()] = value.strip().strip("\"'")
+
+    body = "\n".join(lines[closing_index + 1 :]).lstrip("\n")
+    return metadata, body
+
+
+def toml_string(value: str) -> str:
+    return json.dumps(value)
+
+
+def toml_multiline_literal(value: str) -> str:
+    if "'''" in value:
+        return toml_string(value)
+    return "'''\n" + value.rstrip() + "\n'''"
+
+
+def codex_agent_content(source_path: Path) -> str:
+    metadata, body = parse_agent_source(source_path)
+    name = metadata.get("name")
+    description = metadata.get("description")
+
+    if not name:
+        raise SystemExit(f"Agent file frontmatter is missing name: {source_path}")
+    if not description:
+        raise SystemExit(f"Agent file frontmatter is missing description: {source_path}")
+    if not body:
+        raise SystemExit(f"Agent file is missing instructions: {source_path}")
+
+    return "\n".join(
+        [
+            f"name = {toml_string(name)}",
+            f"description = {toml_string(description)}",
+            f"developer_instructions = {toml_multiline_literal(body)}",
+            "",
+        ]
+    )
+
+
+def install_tool_agents(target_repo: Path, shared_repo_root: Path) -> dict[str, list[Path]]:
+    source_dir = shared_repo_root / SHARED_AGENTS_DIRNAME
+    installed_paths = {
+        "Claude Code": [],
+        "Codex": [],
+    }
+
+    if not source_dir.exists():
+        return installed_paths
+
+    claude_target_dir = target_repo / CLAUDE_AGENTS_DIR
+    codex_target_dir = target_repo / CODEX_AGENTS_DIR
+
+    if source_dir.resolve() != claude_target_dir.resolve():
+        for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
+            relative_path = source_path.relative_to(source_dir)
+            target_path = claude_target_dir / relative_path
+            if target_path.exists():
+                continue
+
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source_path, target_path)
+            installed_paths["Claude Code"].append(target_path)
+
+    if source_dir.resolve() != codex_target_dir.resolve():
+        for source_path in sorted(path for path in source_dir.rglob("*.md") if path.is_file()):
+            relative_path = source_path.relative_to(source_dir).with_suffix(".toml")
+            target_path = codex_target_dir / relative_path
+            if target_path.exists():
+                continue
+
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            target_path.write_text(codex_agent_content(source_path), encoding="utf-8")
+            installed_paths["Codex"].append(target_path)
+
+    return installed_paths
 
 
 def load_package_json(package_json_path: Path) -> dict:
@@ -515,6 +612,7 @@ def main() -> int:
     agent_context_dir.mkdir(parents=True, exist_ok=True)
     copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
     copied_agent_paths = copy_shared_agents_baseline(target_repo, REPO_ROOT)
+    installed_tool_agent_paths = install_tool_agents(target_repo, REPO_ROOT)
     copied_playwright_paths = copy_playwright_baseline(target_repo, REPO_ROOT)
     playwright_cli_install = install_playwright_cli(target_repo)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
@@ -551,6 +649,12 @@ def main() -> int:
     if copied_agent_paths:
         print("Copied shared agent files:")
         for agent_path in copied_agent_paths:
+            print(f"- {agent_path}")
+    for tool_name, agent_paths in installed_tool_agent_paths.items():
+        if not agent_paths:
+            continue
+        print(f"Installed {tool_name} agent files:")
+        for agent_path in agent_paths:
             print(f"- {agent_path}")
     if copied_playwright_paths:
         print("Copied Playwright CLI baseline files:")
