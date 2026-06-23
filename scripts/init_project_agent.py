@@ -53,6 +53,10 @@ UPSTREAM_SKILL_GROUPS = [
         "skills": ["find-skills"],
     },
     {
+        "source": "https://github.com/vercel-labs/agent-browser",
+        "skills": ["agent-browser"],
+    },
+    {
         "source": "https://github.com/mattpocock/skills",
         "skills": [
             "improve-codebase-architecture",
@@ -72,6 +76,7 @@ UPSTREAM_SKILL_GROUPS = [
             "create-architectural-decision-record",
             "create-readme",
             "create-specification",
+            "refactor",
             "sql-code-review",
             "sql-optimization",
             "update-specification",
