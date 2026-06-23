@@ -59,6 +59,7 @@ UPSTREAM_SKILL_GROUPS = [
     {
         "source": "https://github.com/mattpocock/skills",
         "skills": [
+            "handoff",
             "improve-codebase-architecture",
         ],
     },

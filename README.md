@@ -89,6 +89,7 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | --- | --- | --- |
 | `find-skills` | `vercel-labs/skills` | Search the skills ecosystem and install useful skills. |
 | `agent-browser` | `vercel-labs/agent-browser` | Use persistent browser automation across agent commands. |
+| `handoff` | `mattpocock/skills` | Create concise handoff documents for continuing work across sessions or agents. |
 | `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
 | `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
@@ -105,7 +106,7 @@ The equivalent manual commands are:
 ```bash
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
 npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser --agent codex claude-code --copy -y
-npx skills add https://github.com/mattpocock/skills --skill improve-codebase-architecture --agent codex claude-code --copy -y
+npx skills add https://github.com/mattpocock/skills --skill handoff improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
 npx skills add https://github.com/github/awesome-copilot --skill create-architectural-decision-record create-readme create-specification refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
