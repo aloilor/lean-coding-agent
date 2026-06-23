@@ -168,10 +168,13 @@ Add a team invitation flow so workspace admins can invite new members by email. 
 
 ## When Planning Refactors
 
+Use `$refactor`, `$engineering-standards`, and `$testing-standards` when writing a refactor brief. If SQL, migrations, stored procedures, database access, query performance, indexing, pagination, batching, execution plans, or database load are in scope, also use `$sql-code-review` and `$sql-optimization` as relevant.
+
 1. Identify the behavior that must remain unchanged.
 2. Locate tests or add characterization checks before proposing risky movement.
 3. Separate mechanical moves from behavior changes.
 4. Plan gradual migration requirements for shared modules, public APIs, database schema, or cross-cutting conventions.
+5. Name the specific skills the implementer and reviewer must use for the refactor.
 
 ## Red Flags to Check
 

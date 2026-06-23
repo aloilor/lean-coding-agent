@@ -57,6 +57,15 @@ Use `$testing-standards` when adding, updating, selecting, naming, or reviewing 
 - Choose the smallest test level that proves the behavior.
 - Avoid flaky tests, wall-clock sleeps, shared mutable state, and implementation-detail assertions.
 
+### Refactors
+
+Use `$refactor` when changing internal structure without intended behavior changes, cleaning up code smells, or improving maintainability.
+
+- Pair `$refactor` with `$engineering-standards` for simple design, naming, responsibility boundaries, and minimal change.
+- Pair `$refactor` with `$testing-standards` to choose baseline and post-refactor verification that proves externally observable behavior stayed the same.
+- If the refactor touches SQL, migrations, stored procedures, permissions, ORM queries, persistence, or database access patterns, also use `$sql-code-review`.
+- If the refactor can affect query performance, indexing, execution plans, pagination, batching, large datasets, database load, or user-facing latency, also use `$sql-optimization`.
+
 ### REST APIs
 
 Use `$rest-api-design` when implementing or changing HTTP APIs, REST endpoints, request/response payloads, validation errors, pagination, auth, versioning, docs, or API contract tests.

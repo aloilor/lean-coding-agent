@@ -97,6 +97,7 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Read project-specific shared context from `agent-context/` when it exists.
 - When available, use the `engineering-standards` skill for reusable coding, design, refactoring, debugging, and review guidance.
 - When available, use the `testing-standards` skill for test strategy, test selection, test naming, Arrange-Act-Assert structure, regression coverage, and testing changes or bug fixes.
+- When available, use the `refactor` skill for behavior-preserving internal restructuring and code-smell driven improvements.
 - When available, use the `rest-api-design` skill for REST API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, documentation, and API contract tests.
 - Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
 - Read `AGENTS.local.md` when it exists; it is local, private, and ignored by git.
@@ -127,17 +128,19 @@ For feature implementation work:
 
 Use this workflow when changing internal structure without intended behavior changes.
 
-1. `planner` writes a refactor brief:
+1. `planner` writes a refactor brief using `refactor`, `engineering-standards`, and `testing-standards`:
    - Current behavior to preserve.
    - Files, modules, or boundaries in scope.
    - Files, modules, or boundaries out of scope.
    - Verification plan, including baseline checks when feasible.
    - Rollback risks or behavior-drift risks.
-2. `implementer` performs only the approved refactor, keeps changes surgical, runs the planned verification, and produces a shared implementation report.
-3. `code-reviewer` reviews the refactor brief plus the implementer report and touched files for behavior drift, scope creep, missed tests, and unnecessary abstraction.
-4. If `code-reviewer` returns `BLOCK`, `implementer` reads the shared review file, fixes only those findings, reruns relevant verification, and returns updated touched files.
-5. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
-6. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
+   - SQL, persistence, query performance, indexing, pagination, batching, execution-plan, or database access risks that require `sql-code-review` or `sql-optimization`.
+2. `implementer` performs only the approved refactor using `refactor`, `engineering-standards`, and `testing-standards`; when SQL or database access is touched, also use `sql-code-review`, and use `sql-optimization` for query performance, indexes, pagination, batching, execution plans, or database load.
+3. `implementer` keeps changes surgical, runs the planned verification, and produces a shared implementation report.
+4. `code-reviewer` reviews the refactor brief plus the implementer report and touched files with `engineering-standards`, `testing-standards`, and `refactor` for behavior drift, scope creep, missed tests, and unnecessary abstraction. Use `sql-code-review` and `sql-optimization` when the touched files include the SQL or database concerns listed above.
+5. If `code-reviewer` returns `BLOCK`, `implementer` reads the shared review file, fixes only those findings, reruns relevant verification, and returns updated touched files.
+6. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
+7. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 
 A refactor is successful only if externally observable behavior is unchanged, unless the user explicitly approves a behavior change.
 
