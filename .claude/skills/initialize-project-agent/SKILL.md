@@ -1,6 +1,6 @@
 ---
 name: initialize-project-agent
-description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private override files, `agent-context`, shared `.agents/lessons`, shared subagents for Claude Code and Codex, and copied installable skills from this repo's `skills/` folder into the target repo's `.agents/skills` and `.claude/skills`.
+description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private files, `agent-context`, shared `.agents/lessons`, shared subagents for Claude Code and Codex, and copied installable skills from this repo's `skills/` folder into the target repo's `.agents/skills` and `.claude/skills`.
 ---
 
 # Initialize Project Agent
@@ -14,9 +14,9 @@ Use the shared bootstrap script instead of recreating the setup manually.
 3. Verify the target repo now contains:
    - `AGENTS.md` copied exactly from this repo's `AGENTS.md`
    - `CLAUDE.md` copied exactly from this repo's `CLAUDE.md`
-   - `AGENTS.override.md` for local-private agent overrides
-   - `CLAUDE.override.md` for local-private Claude overrides
-   - `.gitignore` entries for both override files
+   - `AGENTS.local.md` for local-private agent notes
+   - `CLAUDE.local.md` for local-private Claude notes
+   - `.gitignore` entries for both local files
    - `agent-context/`
    - baseline project-context starter files copied from this repo's `agent-context/`
    - `agent-context/README.md` as a shared project-specific context starter
@@ -36,7 +36,7 @@ Use the shared bootstrap script instead of recreating the setup manually.
 - Do not place this skill in `skills/`, because `skills/` is the source copied into initialized project repos.
 - The bootstrap script is idempotent for the managed pieces:
   - It recopies the shared `AGENTS.md` and `CLAUDE.md` baseline files.
-  - It creates override files only when they do not already exist.
+  - It creates local files only when they do not already exist.
   - It copies missing baseline project-context starter files from this repo's `agent-context/`.
   - It creates `agent-context/README.md` only when it does not already exist.
   - It creates `.agents/lessons/LESSONS.md` only when it does not already exist.

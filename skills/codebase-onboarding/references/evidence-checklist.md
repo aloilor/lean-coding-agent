@@ -4,7 +4,7 @@ Use this checklist to gather facts before writing `agent-context/` docs. Read on
 
 ## Repo Orientation
 
-- `AGENTS.md`, `CLAUDE.md`, override files when present.
+- `AGENTS.md`, `CLAUDE.md`, local files when present.
 - `README.md`, `docs/`, `agent-context/`, `CONTRIBUTING.md`, `CHANGELOG.md`.
 - Top-level structure from `rg --files` and directory listing.
 - `.gitignore` for generated or local-only paths.

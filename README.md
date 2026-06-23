@@ -14,18 +14,18 @@ Reusable coding, design, refactoring, debugging, and review guidance lives in th
 - testing expectations
 - project-specific workflows
 
-Each project can also keep private local overrides in:
+Each project can also keep private local notes in:
 
-- `AGENTS.override.md`
-- `CLAUDE.override.md`
+- `AGENTS.local.md`
+- `CLAUDE.local.md`
 
-Those override files are ignored by git and are meant for local-only notes.
+Those local files are ignored by git and are meant for local-only notes.
 
 In other words:
 
 - this repo defines the default baseline
 - each project documents shared project-specific context in `agent-context/`
-- each machine can keep private overrides in the override files
+- each machine can keep private notes in the local files
 
 This setup keeps the global guidance consistent while still allowing every project to document what makes it unique.
 
@@ -41,8 +41,8 @@ The script will:
 
 - copy this repo's `AGENTS.md` into the target repo
 - copy this repo's `CLAUDE.md` into the target repo
-- create `AGENTS.override.md` and `CLAUDE.override.md` when they do not already exist
-- add the override files to the target repo's `.gitignore`
+- create `AGENTS.local.md` and `CLAUDE.local.md` when they do not already exist
+- add the local files to the target repo's `.gitignore`
 - copy missing shared subagent files from this repo's `agents/`
 - install missing Claude Code subagent files into `.claude/agents/`
 - install missing Codex custom agent files into `.codex/agents/`

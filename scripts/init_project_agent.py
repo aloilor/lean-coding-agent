@@ -35,7 +35,7 @@ LESSONS_INDEX_NAME = "LESSONS.md"
 LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
-OVERRIDE_FILENAMES = ["AGENTS.override.md", "CLAUDE.override.md"]
+LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
 PLAYWRIGHT_IGNORE_LINES = [
     ".playwright-cli/",
     ".playwright/output/",
@@ -92,7 +92,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Initialize a project repo with this shared agent baseline, creates "
-            "private override files, agent-context, shared lessons, and installs this repo's "
+            "private local files, agent-context, shared lessons, and installs this repo's "
             "shared skills into the target repo's .agents/skills and .claude/skills "
             "directories."
         )
@@ -133,12 +133,12 @@ def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]
     return copied_paths
 
 
-def override_file_content(filename: str) -> str:
+def local_file_content(filename: str) -> str:
     return "\n".join(
         [
             f"# {filename}",
             "",
-            "Local private overrides for this project.",
+            "Local private notes for this project.",
             "",
             "This file is ignored by git and is safe for machine-specific notes.",
             "",
@@ -146,23 +146,23 @@ def override_file_content(filename: str) -> str:
     )
 
 
-def ensure_override_files(target_repo: Path) -> list[Path]:
-    override_paths: list[Path] = []
+def ensure_local_files(target_repo: Path) -> list[Path]:
+    local_paths: list[Path] = []
 
-    for filename in OVERRIDE_FILENAMES:
-        override_path = target_repo / filename
-        if not override_path.exists():
-            override_path.write_text(override_file_content(filename), encoding="utf-8")
-        override_paths.append(override_path)
+    for filename in LOCAL_FILENAMES:
+        local_path = target_repo / filename
+        if not local_path.exists():
+            local_path.write_text(local_file_content(filename), encoding="utf-8")
+        local_paths.append(local_path)
 
-    return override_paths
+    return local_paths
 
 
-def ensure_override_gitignore(target_repo: Path) -> Path:
+def ensure_local_gitignore(target_repo: Path) -> Path:
     gitignore_path = target_repo / ".gitignore"
     existing = gitignore_path.read_text(encoding="utf-8") if gitignore_path.exists() else ""
     existing_lines = set(existing.splitlines())
-    managed_lines = [*OVERRIDE_FILENAMES, *SHARED_AGENT_IGNORE_LINES, *PLAYWRIGHT_IGNORE_LINES]
+    managed_lines = [*LOCAL_FILENAMES, *SHARED_AGENT_IGNORE_LINES, *PLAYWRIGHT_IGNORE_LINES]
     missing_lines = [line for line in managed_lines if line not in existing_lines]
 
     if missing_lines:
@@ -430,7 +430,7 @@ def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
                 "- testing expectations",
                 "- project-specific workflows",
                 "",
-                "Keep private or machine-specific notes in the root override files instead.",
+                "Keep private or machine-specific notes in the root local files instead.",
                 "",
             ]
         )
@@ -627,8 +627,8 @@ def main() -> int:
     )
 
     baseline_paths = copy_baseline_files(target_repo, REPO_ROOT)
-    override_paths = ensure_override_files(target_repo)
-    gitignore_path = ensure_override_gitignore(target_repo)
+    local_paths = ensure_local_files(target_repo)
+    gitignore_path = ensure_local_gitignore(target_repo)
     installs = discover_shared_skills(SHARED_SKILLS_ROOT)
     skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_paths)
     upstream_skills_install = install_upstream_skills(target_repo)
@@ -638,9 +638,9 @@ def main() -> int:
     print("Copied baseline files:")
     for baseline_path in baseline_paths:
         print(f"- {baseline_path}")
-    print("Ensured private override files:")
-    for override_path in override_paths:
-        print(f"- {override_path}")
+    print("Ensured private local files:")
+    for local_path in local_paths:
+        print(f"- {local_path}")
     print(f"Ensured project context file: {agent_context_readme_path}")
     if copied_context_paths:
         print("Copied baseline project context files:")

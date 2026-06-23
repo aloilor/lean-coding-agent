@@ -3,7 +3,7 @@
 .agents/code-reviews/
 .agents/implementation-reports/
 .claude/settings.local.json
-AGENTS.override.md
-CLAUDE.override.md
+AGENTS.local.md
+CLAUDE.local.md
 __pycache__/
 *.py[cod]

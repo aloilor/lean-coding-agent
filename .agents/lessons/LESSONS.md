@@ -22,3 +22,4 @@
 - [Honor Referenced Skill Structure](honor-referenced-skill-structure.md) - When a user points to a source skill, mirror its workflow and examples before applying requested local adaptations.
 - [Preserve Upstream Subagent Shape When Customizing](preserve-upstream-subagent-shape-when-customizing.md) - When asked for the exact same upstream subagent with adaptations, preserve its structure and change only what the adaptation requires.
 - [Keep Agent-Specific Procedure Out Of Global Baseline](keep-agent-specific-procedure-out-of-global-baseline.md) - Keep detailed subagent procedure in the subagent prompt, not duplicated in `AGENTS.md`.
+- [Use Local Agent Files Not Override](use-local-agent-files-not-override.md) - Use `AGENTS.local.md` and `CLAUDE.local.md` for private per-project notes instead of `*.override.md` naming.
