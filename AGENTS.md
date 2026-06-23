@@ -104,7 +104,23 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
 - At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
 
-## Feature Requirements And Specification Workflow
+## Workflows
+
+Use this section to choose the right workflow from the user's latest request. When multiple rows match, use the most specific workflow that covers the requested outcome, and keep the scope limited to what the user asked for.
+
+### Workflow Selection Rules
+
+| User input pattern | Apply this workflow | Rule |
+| --- | --- | --- |
+| User asks to define, draft, clarify, or update requirements, acceptance criteria, contracts, or a feature specification before implementation. | Feature Requirements And Specification Workflow | Use this when the deliverable is requirements or a specification, not production code. |
+| User asks to build, add, implement, or change product behavior for a feature. | Feature Development Loop | Use this when code changes are expected and the requested behavior is externally observable. |
+| User asks to refactor, restructure, clean up, extract, rename, or simplify code while preserving behavior. | Refactor Workflow | Use this only when the intended outcome is internal structure change with no behavior change. If behavior changes are requested too, treat it as feature work. |
+| User asks to fix findings from `code-reviewer`, continue after review feedback, or loop until approval. | Review Fix Loop | Use this after planner, implementer, and code-reviewer have already been used for the same implementation or refactor task. |
+| User asks for a code review, review, audit, or risk assessment without asking for edits. | Review stance | Lead with findings and file/line references. Do not enter the Review Fix Loop unless the user asks to fix the findings. |
+| User reports a bug, failing test, CI failure, runtime error, or regression. | Autonomous Bug Fixing | Reproduce or inspect the failure, fix the root cause, and verify. Use Feature Development Loop only when the fix expands into feature-level behavior or contract work. |
+| User asks a direct question, requests a small documentation edit, or asks for a narrow mechanical change. | Normal task execution | Do the smallest useful thing. Do not force planner, implementer, or code-reviewer workflows unless the change grows into one of the rows above. |
+
+### Feature Requirements And Specification Workflow
 
 Use this workflow when drafting requirements and specifications for a new feature. This is a requirements and contracts workflow, not a deep technical design or OOP class design workflow.
 
@@ -113,7 +129,7 @@ Use this workflow when drafting requirements and specifications for a new featur
 
 Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 
-## Feature Development Loop
+### Feature Development Loop
 
 For feature implementation work:
 
@@ -124,7 +140,7 @@ For feature implementation work:
 5. Repeat the review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the documented blocker conditions.
 6. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 
-## Refactor Workflow
+### Refactor Workflow
 
 Use this workflow when changing internal structure without intended behavior changes.
 
@@ -144,7 +160,7 @@ Use this workflow when changing internal structure without intended behavior cha
 
 A refactor is successful only if externally observable behavior is unchanged, unless the user explicitly approves a behavior change.
 
-## Review Fix Loop
+### Review Fix Loop
 
 For implementation work that uses `planner`, `implementer`, and `code-reviewer`:
 
