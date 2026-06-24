@@ -74,6 +74,14 @@ After the specification is stable enough for implementation, create a durable im
 - Name supporting refactors only when they directly reduce risk, remove duplication introduced by the change, or prevent brittle implementation.
 - Keep the plan at engineering-task granularity; do not invent internal classes, interfaces, or architectural details unless the specification, existing architecture, or an ADR requires them.
 
+### 5. User Approval Gate
+
+Before any implementation starts, show the user the planning summary, specification path, implementation plan path, open questions, assumptions, and meaningful tradeoffs.
+
+- Do not invoke `$implementer`, hand off to an implementation agent, or imply implementation can begin until the user explicitly approves the plan and specification.
+- If the user requests changes to the plan or specification, update the relevant artifacts and show the revised version for approval again.
+- Treat approval as required even when the plan feels obvious, unless the user explicitly bypasses planning approval for that task.
+
 ## Planning Output Format
 
 ```markdown
@@ -103,6 +111,7 @@ After the specification is stable enough for implementation, create a durable im
 - Specification: [path or "required next"]
 - Implementation plan: [.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md or "required next"]
 - ADRs: [path, "not needed", or "recommended"]
+- Approval required before implementation: yes
 
 ## Testing Strategy
 
@@ -146,6 +155,7 @@ After the specification is stable enough for implementation, create a durable im
 7. Make implementation plans standards-aware and durable: save the plan as a handoff artifact, route API work through REST API standards, and route database work through SQL review or optimization standards as applicable.
 8. Keep product intent and contracts clear: specifications define who, why, and what must be true.
 9. Document durable decisions: use ADRs only when the trade-off deserves future context.
+10. Require user approval before implementation: show the plan and specification, then wait for explicit approval before handing off to `$implementer`.
 
 ## Worked Example: Adding Team Invitations
 
@@ -176,6 +186,7 @@ Add a team invitation flow so workspace admins can invite new members by email. 
 - Specification: `spec/spec-process-team-invitations.md`
 - Implementation plan: `.agents/implementation-plans/implementation-plan_20260620_team_invitations.md`
 - ADRs: not needed
+- Approval required before implementation: yes
 
 ## Testing Strategy
 
