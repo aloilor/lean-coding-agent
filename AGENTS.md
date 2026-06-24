@@ -168,7 +168,7 @@ Use this section to choose the right workflow from the user's latest request. Wh
 
 Use this workflow when drafting requirements and specifications for a new feature. This is a requirements and contracts workflow, not a deep technical design or OOP class design workflow.
 
-1. `planner`: Create the requirements and specification, including behavior, inputs, outputs, data formats, validation rules, APIs, persistence rules, and test criteria.
+1. `planner`: Create the requirements, specification, and standards-aware implementation plan artifact.
 
 Only add deep implementation details, OOP classes, internal interfaces, or module designs when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 
@@ -176,9 +176,9 @@ Only add deep implementation details, OOP classes, internal interfaces, or modul
 
 For feature implementation work:
 
-1. `planner` creates the specification.
-2. `implementer` reads the specification, writes code, runs verification, loops internally until the selected tests/checks pass, and produces a shared implementation report.
-3. `code-reviewer` reviews the planner specification plus the implementer report and touched files.
+1. `planner` creates the specification and standards-aware implementation plan artifact.
+2. `implementer` reads the specification and implementation plan artifact, writes code, runs verification, loops internally until the selected tests/checks pass, and produces a shared implementation report.
+3. `code-reviewer` reviews the planner specification, implementation plan artifact, implementer report, and touched files.
 4. If `code-reviewer` returns `BLOCK`, give the review report back to `implementer`. `implementer` fixes only the reported findings, keeps the original specification unchanged, reruns the relevant verification, and updates the implementation report with the new touched files and test results.
 5. Send the updated implementation report and touched files back to `code-reviewer`. Repeat this review-fix loop until `code-reviewer` returns `APPROVE`, or stop on the blocker conditions below.
 6. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.

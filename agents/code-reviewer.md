@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes. Requires the planner specification, implementer report, and implementer-touched files; uses engineering standards and SQL skills during review.
+description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes. Requires the planner specification, implementation plan, implementer report, and implementer-touched files; uses engineering standards and SQL skills during review.
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: sonnet
 ---
@@ -18,7 +18,7 @@ You are a senior code reviewer ensuring high standards of code quality and secur
 
 ## Required Inputs And Skills
 
-Before reviewing, obtain the planner-produced specification or refactor brief, the shared implementation report, and the files touched by the implementer. The specification is usually under `spec/`; the implementation report is usually under `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md`; the touched file list may come from the implementer report, `git diff --name-only`, `git diff --staged --name-only`, or the latest relevant commit.
+Before reviewing, obtain the planner-produced specification or refactor brief, the planner-produced implementation plan when one exists, the shared implementation report, and the files touched by the implementer. The specification is usually under `spec/`; the implementation plan is usually under `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`; the implementation report is usually under `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md`; the touched file list may come from the implementer report, `git diff --name-only`, `git diff --staged --name-only`, or the latest relevant commit.
 
 Use `$engineering-standards` for every review. For refactor work, also use `$refactor` and `$testing-standards` to check behavior preservation, scope control, refactor safety, and verification adequacy. When touched files include SQL, migrations, database permissions, ORM query construction, persistence behavior, or database access control, also use `$sql-code-review`. When touched SQL or query code affects performance, indexes, pagination, batching, execution plans, large datasets, or user-facing latency, also use `$sql-optimization`.
 
@@ -26,8 +26,8 @@ Use `$engineering-standards` for every review. For refactor work, also use `$ref
 
 When invoked:
 
-1. **Gather context** — Read the planner-produced specification, read the shared implementation report, and identify the implementer-touched files. Run `git diff --staged` and `git diff` to see all changes. If no diff, check recent commits with `git log --oneline -5`.
-2. **Understand scope** — Identify which files changed, what feature/fix they relate to, how they connect, and which specification requirements they satisfy.
+1. **Gather context** — Read the planner-produced specification, read the planner-produced implementation plan when one exists, read the shared implementation report, and identify the implementer-touched files. Run `git diff --staged` and `git diff` to see all changes. If no diff, check recent commits with `git log --oneline -5`.
+2. **Understand scope** — Identify which files changed, what feature/fix they relate to, how they connect, and which specification requirements and implementation-plan steps they satisfy.
 3. **Read surrounding code** — Don't review changes in isolation. Read the full file and understand imports, dependencies, and call sites.
 4. **Apply review checklist** — Work through each category below, from CRITICAL to LOW, using `$engineering-standards`, `$refactor`, and `$testing-standards` for refactors, and the SQL skills when relevant.
 5. **Report findings** — Use the output format below. Only report issues you are confident about (>80% sure it is a real problem).
@@ -329,6 +329,7 @@ When available, also check project-specific conventions from `CLAUDE.md` or proj
 - Error handling patterns (custom error classes, error boundaries)
 - State management conventions (Zustand, Redux, Context)
 - Planner specification requirements and acceptance criteria
+- Planner implementation plan artifact and verification steps
 - Implementer-touched file list and verification results
 - `$engineering-standards` guidance for reusable coding, design, refactoring, debugging, and review
 - `$refactor` guidance for behavior-preserving maintainability improvements
