@@ -43,6 +43,7 @@ The script will:
 - copy this repo's `CLAUDE.md` into the target repo
 - create `AGENTS.local.md` and `CLAUDE.local.md` when they do not already exist
 - add the local files to the target repo's `.gitignore`
+- add project-local task note folders to the target repo's `.gitignore`
 - copy missing shared subagent files from this repo's `agents/`
 - install missing Claude Code subagent files into `.claude/agents/`
 - install missing Codex custom agent files into `.codex/agents/`
@@ -51,6 +52,7 @@ The script will:
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
 - add `.agents/code-reviews/` and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
+- add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
 - copy missing Playwright CLI baseline files from `.playwright/`

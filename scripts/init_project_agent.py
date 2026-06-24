@@ -41,6 +41,11 @@ PLAYWRIGHT_IGNORE_LINES = [
     ".playwright/output/",
     ".playwright/*.local.json",
 ]
+TASK_IGNORE_LINES = [
+    ".agents/tasks/",
+    ".codex/tasks/",
+    ".claude/tasks/",
+]
 SHARED_AGENT_IGNORE_LINES = [
     ".agents/code-reviews/",
     ".agents/implementation-reports/",
@@ -166,7 +171,12 @@ def ensure_local_gitignore(target_repo: Path) -> Path:
     gitignore_path = target_repo / ".gitignore"
     existing = gitignore_path.read_text(encoding="utf-8") if gitignore_path.exists() else ""
     existing_lines = set(existing.splitlines())
-    managed_lines = [*LOCAL_FILENAMES, *SHARED_AGENT_IGNORE_LINES, *PLAYWRIGHT_IGNORE_LINES]
+    managed_lines = [
+        *LOCAL_FILENAMES,
+        *TASK_IGNORE_LINES,
+        *SHARED_AGENT_IGNORE_LINES,
+        *PLAYWRIGHT_IGNORE_LINES,
+    ]
     missing_lines = [line for line in managed_lines if line not in existing_lines]
 
     if missing_lines:
