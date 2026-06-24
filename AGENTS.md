@@ -7,6 +7,7 @@
 - Scoped Impact: Keep changes tied to the request, but allow supporting refactors when they make the solution cleaner or safer.
 - Better Approach Warning: If a clearly better path exists, explain it before implementing.
 - Use Settled Practice: Prefer proven patterns, standards, libraries, and published methods when they fit the task.
+- Explicit Omissions: End every task by saying what meaningful work was not done.
 
 ## 1. Think Before Coding
 
@@ -65,7 +66,7 @@ Ask yourself: "Would a senior engineer call this both understandable today and d
 
 When editing existing code:
 - Don't make unrelated improvements, comment edits, formatting churn, or drive-by cleanups.
-- Do make small related refactors when they directly support the requested change, reduce duplication introduced by the change, or prevent awkward/fragile code.
+- Do make related refactors when they directly support the requested change, reduce duplication introduced by the change, or prevent awkward/fragile code.
 - Explain why each supporting refactor is in scope.
 - Follow style guidance from the `engineering-standards` skill when available. If nearby code conflicts with that guidance, prefer the skill unless an explicit project rule says otherwise.
 - If you notice unrelated dead code, mention it - don't delete it.
@@ -94,21 +95,33 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 7. Demand Elegance (Balanced)
+## 7. Did Not Do Closeout
+
+**End every task by stating what you did not do.**
+
+In the final response, include a brief "Did Not Do" note that mentions any meaningful:
+- Edge cases left uncovered.
+- Tests, checks, or broader verification not run.
+- Cleanup, docs, migrations, compatibility work, or follow-up work left out of scope.
+- Assumptions that still matter after the change.
+
+Do not pad this section with irrelevant non-work. If there are no meaningful omissions, say: "No meaningful omissions."
+
+## 8. Demand Elegance (Balanced)
 
 - For non-trivial changes: pause and ask, "Is there a more elegant way?"
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution."
 - Skip this for simple, obvious fixes - don't over-engineer
 - Challenge your own work before presenting it
 
-## 8. Autonomous Bug Fixing
+## 9. Autonomous Bug Fixing
 
 - When given a bug report: just fix it. Don’t ask for hand-holding
 - Point at logs, errors, failing tests — then resolve them
 - Zero context switching is required from the user
 - Go fix failing CI tests without being told how
 
-## 9. Self-Improvement Loop
+## 10. Self-Improvement Loop
 
 - Keep shared agent lessons in `.agents/lessons/`
 - After any correction from the user, add one new lesson file in `.agents/lessons/`
