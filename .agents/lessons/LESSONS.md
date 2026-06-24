@@ -24,3 +24,4 @@
 - [Keep Agent-Specific Procedure Out Of Global Baseline](keep-agent-specific-procedure-out-of-global-baseline.md) - Keep detailed subagent procedure in the subagent prompt, not duplicated in `AGENTS.md`.
 - [Use Local Agent Files Not Override](use-local-agent-files-not-override.md) - Use `AGENTS.local.md` and `CLAUDE.local.md` for private per-project notes instead of `*.override.md` naming.
 - [Prefer Engineering Standards Over Local Style](prefer-engineering-standards-over-local-style.md) - Follow the `engineering-standards` skill for style guidance instead of preserving inconsistent nearby code style.
+- [Do Not Run Startup Skill Update Automatically](do-not-run-startup-skill-update.md) - Do not run the project skill update command just because `skills-lock.json` exists; run it only when asked or when skill syncing is required.

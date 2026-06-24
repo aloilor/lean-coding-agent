@@ -147,7 +147,7 @@ Do not pad this section with irrelevant non-work. If there are no meaningful omi
 - Review `.agents/lessons/LESSONS.md` and any relevant linked lesson files when they exist.
 - Read `AGENTS.local.md` or `CLAUDE.local.md` when it exists; it is local, private, and ignored by git.
 - Keep project-specific shared rules in `agent-context/`, not by editing the copied baseline.
-- At the start of every session, when `skills-lock.json` exists, automatically run the project skill update command from the repo root: use `npx.cmd skills update --project --yes` on Windows and `npx skills update --project --yes` elsewhere. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
+- Do not run the project skill update command automatically at the start of every session. Run `npx.cmd skills update --project --yes` on Windows or `npx skills update --project --yes` elsewhere only when the user asks for a skill update or the current task directly requires syncing project skills. After it runs, check `git status --short`; report any changed skill files or update failures before continuing.
 
 ## Workflows
 
