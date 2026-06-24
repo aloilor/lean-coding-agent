@@ -2,9 +2,11 @@
 
 ## Core Principles
 
-- Simplicity First: Make every change as simple as possible. Impact minimal code.
+- Simplest Responsible Solution: Prefer the least complex approach that solves the request without creating an obvious future trap.
 - No Laziness: Find root causes. No temporary fixes. Senior developer standards.
-- Minimal Impact: Changes should only touch what's necessary. Avoid introducing bugs.
+- Scoped Impact: Keep changes tied to the request, but allow supporting refactors when they make the solution cleaner or safer.
+- Better Approach Warning: If a clearly better path exists, explain it before implementing.
+- Use Settled Practice: Prefer proven patterns, standards, libraries, and published methods when they fit the task.
 
 ## 1. Think Before Coding
 
@@ -16,35 +18,65 @@ Before implementing:
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
-## 2. Simplicity First
+## 2. Better Approach Warning
 
-**Minimum code that solves the problem. Nothing speculative.**
+**If you see a clearly better approach, say so before implementing.**
 
+Explain the tradeoff in 2-4 bullets:
+- What the requested approach optimizes for.
+- What the better approach improves.
+- What the better approach costs or makes harder.
+- Whether the requested approach is still reasonable.
+
+If the current request is still reasonable, proceed. Stop and ask only when the better approach avoids serious risk, wasted work, or a likely architectural dead end.
+
+## 3. Use Settled Practice
+
+**Do not reinvent settled solutions without a reason.**
+
+When the task resembles established industry practice, a standard pattern, a proven library, or published research:
+- Name the established approach.
+- Explain why it fits this project and task.
+- Prefer the established approach unless project constraints make it unsuitable.
+- Avoid cargo-culting: do not cite a company, paper, or framework unless the context actually matches.
+
+## 4. Simplest Responsible Solution
+
+**Choose the least complex approach that solves the problem without creating an obvious future trap.**
+
+Before writing code, state:
+- The approach you are taking.
+- Why it is the simplest responsible option.
+- What this approach makes harder later.
+- Which heavier alternative you rejected and why.
+
+Then keep the implementation disciplined:
 - No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
+- No abstractions unless they remove real duplication, clarify a real boundary, or prevent the requested change from becoming brittle.
+- No "flexibility" or "configurability" that is not needed for the current requirement or an obvious near-term extension point.
 - No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
+- If a short patch solves today but blocks the likely next change, say so before choosing it.
 
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+Ask yourself: "Would a senior engineer call this both understandable today and defensible tomorrow?" If not, simplify or choose the cleaner small design.
 
-## 3. Surgical Changes
+## 5. Scoped Changes
 
-**Touch only what you must. Clean up only your own mess.**
+**Touch only what is connected to the request, and make the connected code coherent.**
 
 When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
+- Don't make unrelated improvements, comment edits, formatting churn, or drive-by cleanups.
+- Do make small related refactors when they directly support the requested change, reduce duplication introduced by the change, or prevent awkward/fragile code.
+- Explain why each supporting refactor is in scope.
+- Follow style guidance from the `engineering-standards` skill when available. If nearby code conflicts with that guidance, prefer the skill unless an explicit project rule says otherwise.
 - If you notice unrelated dead code, mention it - don't delete it.
 
 When your changes create orphans:
 - Remove imports/variables/functions that YOUR changes made unused.
 - Don't remove pre-existing dead code unless asked.
 
-The test: Every changed line should trace directly to the user's request.
+The test: Every changed line should trace either to the user's request or to a named supporting refactor that makes the requested change cleaner, safer, or easier to maintain.
 
-## 4. Goal-Driven Execution
+## 6. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -62,21 +94,21 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
-## 5. Demand Elegance (Balanced)
+## 7. Demand Elegance (Balanced)
 
 - For non-trivial changes: pause and ask, "Is there a more elegant way?"
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution."
 - Skip this for simple, obvious fixes - don't over-engineer
 - Challenge your own work before presenting it
 
-## 6. Autonomous Bug Fixing
+## 8. Autonomous Bug Fixing
 
 - When given a bug report: just fix it. Don’t ask for hand-holding
 - Point at logs, errors, failing tests — then resolve them
 - Zero context switching is required from the user
 - Go fix failing CI tests without being told how
 
-## 7. Self-Improvement Loop
+## 9. Self-Improvement Loop
 
 - Keep shared agent lessons in `.agents/lessons/`
 - After any correction from the user, add one new lesson file in `.agents/lessons/`
