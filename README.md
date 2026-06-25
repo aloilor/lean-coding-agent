@@ -51,7 +51,7 @@ The script will:
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
-- add `.agents/code-reviews/` and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
+- add `.agents/code-reviews/`, `.agents/refactor-briefs/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
 - add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`

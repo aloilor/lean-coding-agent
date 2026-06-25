@@ -2,6 +2,7 @@
 .codex/tasks/
 .claude/tasks/
 .agents/code-reviews/
+.agents/refactor-briefs/
 .agents/implementation-reports/
 .claude/settings.local.json
 AGENTS.local.md

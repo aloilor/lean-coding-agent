@@ -48,6 +48,7 @@ TASK_IGNORE_LINES = [
 ]
 SHARED_AGENT_IGNORE_LINES = [
     ".agents/code-reviews/",
+    ".agents/refactor-briefs/",
     ".agents/implementation-reports/",
 ]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
