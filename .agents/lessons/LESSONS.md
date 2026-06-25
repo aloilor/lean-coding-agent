@@ -27,3 +27,4 @@
 - [Do Not Run Startup Skill Update Automatically](do-not-run-startup-skill-update.md) - Do not run the project skill update command just because `skills-lock.json` exists; run it only when asked or when skill syncing is required.
 - [Require Planner Approval Before Implementation](require-planner-approval-before-implementation.md) - Show planner specs, plans, assumptions, and tradeoffs to the user, then wait for explicit approval before implementation starts.
 - [Update Bootstrap Managed Ignore Rules](update-bootstrap-managed-ignore-rules.md) - When ignore rules must apply to initialized repos, update the bootstrap-managed list instead of only editing this repo's root `.gitignore`.
+- [Require Refactor Brief Artifacts](require-refactor-brief-artifacts.md) - Planned refactors need a distinct workflow with a saved behavior-preservation brief and matching implementation plan before implementation begins.
