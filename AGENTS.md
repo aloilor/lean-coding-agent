@@ -120,6 +120,8 @@ Do not pad this section with irrelevant non-work. If there are no meaningful omi
 - Point at logs, errors, failing tests — then resolve them
 - Zero context switching is required from the user
 - Go fix failing CI tests without being told how
+- For non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs, run `bug-diagnostician` before `implementer`. The diagnostician writes `.agents/bug-diagnoses/bug-diagnosis_YYYYMMDD_short_description.md` and drafts `docs/incidents/incident_YYYYMMDD_short_description.md`. Show both to the user and wait for explicit approval before implementation starts.
+- For every bug fix, create a concise incident report. The diagnostician owns the first draft when diagnosis runs; the implementer owns the final incident report after the fix and verification. Include symptom, impact, root cause, fix, verification, and follow-ups.
 
 ## 10. Self-Improvement Loop
 
@@ -161,7 +163,7 @@ Use this section to choose the right workflow from the user's latest request. Wh
 | User asks to build, add, implement, or change product behavior for a feature. | Feature Development Workflow | Use this when code changes are expected and the requested behavior is externally observable. |
 | User asks to refactor, restructure, clean up, extract, rename, or simplify code while preserving behavior. | Refactor Workflow | Use this only when the intended outcome is internal structure change with no behavior change. If behavior changes are requested too, treat it as feature work. |
 | User asks for a code review, review, audit, or risk assessment without asking for edits. | Review Workflow | Use this when the deliverable is review findings, not code changes. |
-| User reports a bug, failing test, CI failure, runtime error, or regression. | Autonomous Bug Fixing | Reproduce or inspect the failure, fix the root cause, and verify. Use Feature Development Workflow only when the fix expands into feature-level behavior or contract work. |
+| User reports a bug, failing test, CI failure, runtime error, or regression. | Autonomous Bug Fixing | For non-trivial bugs, use `bug-diagnostician` first to create a diagnosis report and incident draft, show them to the user, and wait for explicit approval before `implementer` fixes the root cause and finalizes the incident report. For obvious bugs, fix directly and still create the incident report. Use Feature Development Workflow only when the fix expands into feature-level behavior or contract work. |
 | User asks a direct question, requests a small documentation edit, or asks for a narrow mechanical change. | Normal task execution | Do the smallest useful thing. Do not force planner, implementer, or code-reviewer workflows unless the change grows into one of the rows above. |
 
 ### Feature Requirements And Specification Workflow
@@ -191,6 +193,18 @@ Stop and surface a blocker when:
 - The fix requires changing the specification or expanding scope.
 - Verification fails for a reason that is not understood.
 - Fixing would require weakening tests or hiding a failure.
+
+### Autonomous Bug Fixing Workflow
+
+Use this workflow when the user reports a bug, failing test, CI failure, runtime error, or regression.
+
+1. For non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs, `bug-diagnostician` investigates first and writes `.agents/bug-diagnoses/bug-diagnosis_YYYYMMDD_short_description.md`.
+2. `bug-diagnostician` also creates a draft incident report at `docs/incidents/incident_YYYYMMDD_short_description.md` with symptom, impact, draft root cause, and candidate follow-ups.
+3. Show the diagnosis report, proposed fix direction, verification plan, and incident draft to the user. Wait for explicit approval before implementation starts.
+4. `implementer` reads the approved diagnosis report and incident draft, fixes the root cause, runs verification, creates or updates the implementation report, and finalizes the incident report with confirmed root cause, fix, verification, and follow-ups.
+5. `code-reviewer` reviews the code change, implementation report, diagnosis report when one exists, and final incident report for consistency with the evidence and verification.
+
+For obvious one-line bugs, the main agent may skip `bug-diagnostician`, but the implementer or main agent still creates the final incident report.
 
 ### Refactor Workflow
 

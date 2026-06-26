@@ -32,6 +32,8 @@ Prefer to start from one or more of these artifacts:
 - A specification under `spec/` with requirements, contracts, validation rules, and test criteria.
 - A refactor brief under `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md` with behavior to preserve, scope boundaries, verification, and behavior-drift risks.
 - An implementation plan under `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md` with ordered steps, applicable standards, target files/modules, and verification checks.
+- A bug diagnosis report under `.agents/bug-diagnoses/bug-diagnosis_YYYYMMDD_short_description.md` and incident draft under `docs/incidents/incident_YYYYMMDD_short_description.md` for non-trivial bug fixes.
+- Explicit user approval of the diagnosis and proposed fix direction when a bug diagnosis report exists.
 - A user-approved issue, ticket, or written request for small unambiguous work.
 
 If the specification or refactor brief is missing but the task is small and unambiguous, implement directly after stating assumptions and verification criteria.
@@ -41,6 +43,8 @@ If the specification is missing for complex feature work, API contracts, persist
 If the refactor brief is missing for planned refactor work, stop and route back to `$planner` before coding unless the user explicitly bypassed the refactor planning gate for this task.
 
 If the implementation plan artifact is missing for complex feature work, planned refactors, API contracts, persistence changes, or architecture-sensitive behavior, stop and route back to `$planner` before coding.
+
+If a bug diagnosis report exists but explicit user approval of the diagnosis and proposed fix direction is missing, stop and route back for approval before coding.
 
 ## Skill Routing
 
@@ -141,6 +145,7 @@ When you stop, report the failing test, the actual error, what you tried, and yo
 
 - Review the diff for unrelated changes, over-engineering, missing tests, and accidental formatting churn.
 - Confirm requirements and acceptance criteria are satisfied.
+- For bug fixes, finalize the incident report after verification. Confirm the root cause, describe the fix, record verification, and capture follow-ups. If no diagnosis agent ran, create the incident report yourself under `docs/incidents/incident_YYYYMMDD_short_description.md`.
 - Create or update the shared implementation report before handing work to `code-reviewer`.
 - Document any residual risks, manual checks, skipped tests, or follow-up work.
 
@@ -154,9 +159,11 @@ The report must include:
 
 - Source specification path or refactor brief path and request context.
 - Source implementation plan path when one exists.
+- Source bug diagnosis path and incident report path for bug fixes.
 - Summary of implemented behavior.
 - Touched files and why each changed.
 - Verification commands/checks and results.
+- Final incident report status for bug fixes.
 - Review fix history, including linked `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` files when applicable.
 - Residual risks, skipped tests, or manual checks.
 
@@ -188,6 +195,8 @@ Path: `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md`
 - Specification: [path or "not applicable"]
 - Refactor brief: [path or "not applicable"]
 - Implementation plan: [path or "not applicable"]
+- Bug diagnosis: [path or "not applicable"]
+- Incident report: [path or "not applicable"]
 - Request: [issue, ticket, or direct request]
 
 ## Summary
@@ -208,6 +217,11 @@ Path: `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md`
 
 - [command/check]: passed
 - [command/check]: failed or not run, with reason
+
+## Incident Report
+
+- [finalized path, or "not applicable"]
+- [confirmed root cause and fix summary for bug fixes]
 
 ## Review Fixes
 

@@ -50,8 +50,9 @@ The script will:
 - create `agent-context/` in the target repo
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
+- create `docs/incidents/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
-- add `.agents/code-reviews/`, `.agents/refactor-briefs/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
+- add `.agents/code-reviews/`, `.agents/refactor-briefs/`, `.agents/bug-diagnoses/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
 - add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
@@ -141,6 +142,10 @@ npx skills add https://github.com/github/awesome-copilot --skill create-architec
 Shared subagent source files live in [agents](agents). The bootstrap copies missing files from this folder into each target repo's `agents/` directory without overwriting project-local versions. It also installs missing Claude Code subagents under `.claude/agents/*.md` and missing Codex custom agents under `.codex/agents/*.toml`.
 
 The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
+
+The bug diagnosis subagent in [agents/bug-diagnostician.md](agents/bug-diagnostician.md) investigates non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs before implementation. It saves the first handoff report under `.agents/bug-diagnoses/bug-diagnosis_YYYYMMDD_short_description.md` and drafts the durable incident report under `docs/incidents/incident_YYYYMMDD_short_description.md`. The diagnosis, proposed fix direction, verification plan, and incident draft must be shown to the user for approval before implementation starts.
+
+Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 
 The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved specifications, refactor briefs, and implementation plans, then routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, `refactor` for behavior-preserving structure changes, and `rest-api-design` for API changes. It creates or updates `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md` as the shared handoff artifact. When `code-reviewer` returns findings, the implementer fixes only those findings, reruns verification, updates the implementation report, and hands the updated touched file list back for another review pass.
 

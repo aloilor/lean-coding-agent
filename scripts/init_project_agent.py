@@ -25,6 +25,9 @@ LEGACY_MANIFEST_NAMES = [
 LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
+DOCS_DIRNAME = "docs"
+INCIDENTS_DIRNAME = "incidents"
+INCIDENTS_README_NAME = "README.md"
 PLAYWRIGHT_DIRNAME = ".playwright"
 SHARED_AGENTS_DIRNAME = "agents"
 CLAUDE_AGENTS_DIR = Path(".claude") / "agents"
@@ -49,6 +52,7 @@ TASK_IGNORE_LINES = [
 SHARED_AGENT_IGNORE_LINES = [
     ".agents/code-reviews/",
     ".agents/refactor-briefs/",
+    ".agents/bug-diagnoses/",
     ".agents/implementation-reports/",
 ]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
@@ -486,6 +490,27 @@ def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
     return readme_path
 
 
+def ensure_incidents_readme(target_repo: Path) -> Path:
+    incidents_dir = target_repo / DOCS_DIRNAME / INCIDENTS_DIRNAME
+    incidents_dir.mkdir(parents=True, exist_ok=True)
+
+    readme_path = incidents_dir / INCIDENTS_README_NAME
+    if not readme_path.exists():
+        content = "\n".join(
+            [
+                "# Incident Reports",
+                "",
+                "Store durable bug incident reports in this folder.",
+                "",
+                "Use `incident_YYYYMMDD_short_description.md` for report filenames. Each report should include symptom, impact, root cause, fix, verification, and follow-ups.",
+                "",
+            ]
+        )
+        readme_path.write_text(content, encoding="utf-8")
+
+    return readme_path
+
+
 def copy_agent_context_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
     source_dir = shared_repo_root / AGENT_CONTEXT_DIRNAME
     target_dir = target_repo / AGENT_CONTEXT_DIRNAME
@@ -664,6 +689,7 @@ def main() -> int:
     playwright_cli_install = install_playwright_cli(target_repo)
     agent_browser_install = install_agent_browser(target_repo)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
+    incidents_readme_path = ensure_incidents_readme(target_repo)
     lessons_index_path = ensure_lessons_index(target_repo)
     manifest_path = agent_context_dir / MANIFEST_NAME
     legacy_manifest_paths = [
@@ -710,6 +736,7 @@ def main() -> int:
             print(f"- {playwright_path}")
     print(f"Playwright CLI dependency: {playwright_cli_install}")
     print(f"Agent Browser dependency: {agent_browser_install}")
+    print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
