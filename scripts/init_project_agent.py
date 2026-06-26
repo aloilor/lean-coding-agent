@@ -53,6 +53,7 @@ SHARED_AGENT_IGNORE_LINES = [
     ".agents/code-reviews/",
     ".agents/refactor-briefs/",
     ".agents/bug-diagnoses/",
+    ".agents/implementation-plans/",
     ".agents/implementation-reports/",
 ]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"

@@ -52,7 +52,7 @@ The script will:
 - create `agent-context/README.md` when it does not already exist
 - create `docs/incidents/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
-- add `.agents/code-reviews/`, `.agents/refactor-briefs/`, `.agents/bug-diagnoses/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
+- add `.agents/code-reviews/`, `.agents/refactor-briefs/`, `.agents/bug-diagnoses/`, `.agents/implementation-plans/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
 - add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
