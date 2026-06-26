@@ -1,6 +1,6 @@
 ---
 name: codebase-onboarding
-description: Analyze an unfamiliar codebase and generate structured agent-context documentation with architecture map, key entry points, conventions, workflows, testing guidance, and domain language. Use when joining a new project, filling agent-context/, or asking to understand, onboard to, or walk through a repo.
+description: Analyze an unfamiliar codebase and generate structured agent-context documentation with architecture map, key entry points, conventions, workflows, testing guidance, skill usage index, and domain language. Use when joining a new project, filling agent-context/, or asking to understand, onboard to, or walk through a repo.
 ---
 
 # Codebase Onboarding
@@ -29,6 +29,7 @@ Read the matching reference before creating or updating each file:
 - `references/architecture.md` for `agent-context/architecture.md`.
 - `references/workflows.md` for `agent-context/workflows.md`.
 - `references/testing.md` for `agent-context/testing.md`.
+- `references/skills.md` for `agent-context/skills.md`.
 - `references/api.md` for optional `agent-context/api.md`.
 - `references/data.md` for optional `agent-context/data.md`.
 - `references/operations.md` for optional `agent-context/operations.md`.
@@ -63,6 +64,10 @@ Gather raw signals about the project without reading every file. Run these check
 6. Test structure detection
    -> tests/, test/, __tests__/, *_test.go, *.spec.ts, *.test.js,
       pytest.ini, jest.config.*, vitest.config.*
+
+7. Project skill inventory
+   -> .agents/skills/*/SKILL.md, .claude/skills/*/SKILL.md,
+      .codex/skills/*/SKILL.md, skills/*/SKILL.md
 ```
 
 Also inspect existing `agent-context/` docs before writing. Preserve useful content and update it in place.
@@ -123,6 +128,13 @@ Identify patterns the codebase already follows:
 - PR workflow: squash, merge, rebase.
 - If the repo has no commits yet or only a shallow history, skip this section and note "Git history unavailable or too shallow to detect conventions".
 
+**Skill Usage Guidance**
+- Inventory project-local skills and shared skill sources.
+- Deduplicate mirrored copies of the same skill by name.
+- Capture each skill's trigger guidance from its frontmatter `description` and any concise "when to use" instructions.
+- Note related project workflows from `AGENTS.md`, `CLAUDE.md`, or equivalent repo guidance when they determine which skill to use.
+- If no project-local skills exist, still create `agent-context/skills.md` and state that no project-local skills were found.
+
 ### Phase 4: Generate Agent Context Artifacts
 
 Create or update structured docs inside `agent-context/`. Use the per-file references above for the exact structure.
@@ -135,6 +147,7 @@ Create or update structured docs inside `agent-context/`. Use the per-file refer
 | Tech stack, architecture pattern, entry points, data flow | `agent-context/architecture.md` |
 | Common tasks, build/run commands, git and review conventions | `agent-context/workflows.md` |
 | Test stack, test locations, naming, verification commands | `agent-context/testing.md` |
+| Project-local skills and when agents should use them | `agent-context/skills.md` |
 | API style, endpoints, contracts | `agent-context/api.md` when evidence exists |
 | Databases, schemas, migrations, seed data | `agent-context/data.md` when evidence exists |
 | Deployment, runtime config, jobs, monitoring | `agent-context/operations.md` when evidence exists |
@@ -185,6 +198,11 @@ The resulting docs should collectively cover the same information as the onboard
 - **Database migrations**: `npx prisma migrate dev`
 - **Build for production**: `npm run build`
 
+## Skills Index
+| Skill | Use when | Source |
+| --- | --- | --- |
+| `git-conventional-commit` | Creating or proposing Conventional Commit messages | `.agents/skills/git-conventional-commit/SKILL.md` |
+
 ## Where to Look
 | I want to... | Look at... |
 | --- | --- |
@@ -218,12 +236,12 @@ Do not print a standalone onboarding guide unless the user explicitly asks for o
 ### Example 1: First time in a new repo
 **User**: "Onboard me to this codebase"
 **Action**: Run full 4-phase workflow, then create or update the standard `agent-context/` docs.
-**Output**: `agent-context/README.md`, `domain.md`, `folder-structure.md`, `architecture.md`, `workflows.md`, and `testing.md`, plus optional docs when evidence exists.
+**Output**: `agent-context/README.md`, `domain.md`, `folder-structure.md`, `architecture.md`, `workflows.md`, `testing.md`, and `skills.md`, plus optional docs when evidence exists.
 
 ### Example 2: Fill agent-context for an existing project
 **User**: "Fill agent-context for this project"
 **Action**: Run Phases 1-3, read existing `agent-context/` docs, then update each file using its matching reference.
-**Output**: Updated `agent-context/` docs with detected conventions and open questions.
+**Output**: Updated `agent-context/` docs with detected conventions, skill usage guidance, and open questions.
 
 ### Example 3: Refresh project conventions
 **User**: "Update the project context with current conventions"
