@@ -126,9 +126,9 @@ Do not pad this section with irrelevant non-work. If there are no meaningful omi
 ## 10. Self-Improvement Loop
 
 - Keep shared agent lessons in `.agents/lessons/`
-- After any correction from the user, add one new lesson file in `.agents/lessons/`
-- Handle lesson capture autonomously when the correction reveals a generalizable agent behavior rule
-- If the correction is ambiguous, task-specific, or preference-like, ask before writing a lesson
+- After any correction from the user, ask whether they want a new lesson before creating or updating lesson files.
+- Create a lesson only after the user explicitly approves adding it.
+- Do not handle lesson capture autonomously, even when the correction reveals a generalizable agent behavior rule.
 - Do not add lessons for one-off task details that will not prevent a repeatable mistake
 - Never keep a single `lessons.md`; create one short, descriptive file per lesson, such as `.agents/lessons/avoid-broad-git-add.md`
 - Keep a `LESSONS.md` index in `.agents/lessons/` that lists every lesson file with a short title and one-line summary
@@ -237,9 +237,9 @@ Use this workflow when the user asks for a code review, audit, or risk assessmen
 
 ## Task Management
 
-- Store task notes in the current tool's project-local tasks folder: use `.codex/tasks/` when working in Codex, and `.claude/tasks/` when working in Claude Code
-- Files inside `.codex/tasks/` or `.claude/tasks/` are local working notes and should never be committed
-- Plan First: Write the plan in a task-specific file in the current project's tasks folder, for example `.codex/tasks/todo_20260520_update_login_validation.md` or `.claude/tasks/todo_20260520_update_login_validation.md`
+- Store task notes in `.agents/tasks/`
+- Files inside `.agents/tasks/` are local working notes and should never be committed
+- Plan First: Write the plan in a task-specific file in `.agents/tasks/`, for example `.agents/tasks/todo_20260520_update_login_validation.md`
 - Create one task file per task: name it `todo_YYYYMMDD_synthetic_task_description.md`, using the run date and a short lowercase description of the task or feature with words separated by underscores
 - Each task entry must include `planned on: YYYY-MM-DD` and `ran on: YYYY-MM-DD`
 - Verify Plan: Check in before starting implementation
