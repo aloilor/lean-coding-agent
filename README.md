@@ -57,6 +57,7 @@ The script will:
 - install or refresh upstream skills with `npx skills add`
 - copy missing Playwright CLI baseline files from `.playwright/`
 - install `@playwright/cli` as a dev dependency
+- install `agent-browser` as a dev dependency and run `agent-browser install`
 - add Playwright CLI generated-artifact paths to the target repo's `.gitignore`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 - write `skills-lock.json` for upstream skill installs
@@ -82,6 +83,23 @@ npx playwright-cli open http://localhost:3000 --headed
 ```
 
 The CLI automatically loads `.playwright/cli.config.json` when present. Generated snapshots and output are ignored by the bootstrap-managed `.gitignore` entries.
+
+## Agent Browser Baseline
+
+The bootstrap installs Agent Browser as a dev dependency using the package manager implied by `packageManager` or the existing lockfile. It then runs the package manager's local executable command for:
+
+```bash
+agent-browser install
+```
+
+The equivalent manual npm commands are:
+
+```bash
+npm install --save-dev agent-browser@latest
+npx agent-browser install
+```
+
+The bootstrap also installs the upstream `agent-browser` skill so agents know how to use the local browser automation tool.
 
 ## Upstream Skills
 

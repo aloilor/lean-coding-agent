@@ -52,6 +52,8 @@ SHARED_AGENT_IGNORE_LINES = [
     ".agents/implementation-reports/",
 ]
 PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
+AGENT_BROWSER_PACKAGE = "agent-browser@latest"
+AGENT_BROWSER_COMMAND = "agent-browser"
 UPSTREAM_SKILL_AGENTS = ["codex", "claude-code"]
 UPSTREAM_SKILL_GROUPS = [
     {
@@ -90,11 +92,17 @@ UPSTREAM_SKILL_GROUPS = [
         ],
     },
 ]
-PACKAGE_MANAGER_COMMANDS = {
-    "npm": ["npm", "install", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
-    "pnpm": ["pnpm", "add", "--save-dev", PLAYWRIGHT_CLI_PACKAGE],
-    "yarn": ["yarn", "add", "--dev", PLAYWRIGHT_CLI_PACKAGE],
-    "bun": ["bun", "add", "--dev", PLAYWRIGHT_CLI_PACKAGE],
+DEV_DEPENDENCY_INSTALL_COMMANDS = {
+    "npm": ["npm", "install", "--save-dev"],
+    "pnpm": ["pnpm", "add", "--save-dev"],
+    "yarn": ["yarn", "add", "--dev"],
+    "bun": ["bun", "add", "--dev"],
+}
+AGENT_BROWSER_BROWSER_INSTALL_COMMANDS = {
+    "npm": ["npm", "exec", "--", AGENT_BROWSER_COMMAND, "install"],
+    "pnpm": ["pnpm", "exec", AGENT_BROWSER_COMMAND, "install"],
+    "yarn": ["yarn", "run", AGENT_BROWSER_COMMAND, "install"],
+    "bun": ["bun", "run", AGENT_BROWSER_COMMAND, "install"],
 }
 
 
@@ -347,7 +355,7 @@ def detect_package_manager(target_repo: Path, package_json: dict) -> str:
     package_manager = package_json.get("packageManager")
     if isinstance(package_manager, str):
         manager_name = package_manager.split("@", 1)[0]
-        if manager_name in PACKAGE_MANAGER_COMMANDS:
+        if manager_name in DEV_DEPENDENCY_INSTALL_COMMANDS:
             return manager_name
 
     lockfile_managers = [
@@ -369,25 +377,49 @@ def executable_name(command_name: str) -> str:
     return f"{command_name}.cmd" if os.name == "nt" else command_name
 
 
-def install_playwright_cli(target_repo: Path) -> str:
+def install_dev_dependency(target_repo: Path, package_name: str) -> str:
     package_json_path = target_repo / "package.json"
     package_json = load_package_json(package_json_path) if package_json_path.exists() else {}
     manager_name = detect_package_manager(target_repo, package_json)
-    command = PACKAGE_MANAGER_COMMANDS[manager_name].copy()
+    command = [*DEV_DEPENDENCY_INSTALL_COMMANDS[manager_name], package_name]
     command[0] = executable_name(command[0])
 
     try:
         subprocess.run(command, cwd=target_repo, check=True)
     except FileNotFoundError as exc:
         raise SystemExit(
-            f"Could not install {PLAYWRIGHT_CLI_PACKAGE}: {manager_name} is not available on PATH."
+            f"Could not install {package_name}: {manager_name} is not available on PATH."
         ) from exc
     except subprocess.CalledProcessError as exc:
         raise SystemExit(
-            f"Could not install {PLAYWRIGHT_CLI_PACKAGE} with {manager_name} in {target_repo}."
+            f"Could not install {package_name} with {manager_name} in {target_repo}."
         ) from exc
 
+    return manager_name
+
+
+def install_playwright_cli(target_repo: Path) -> str:
+    manager_name = install_dev_dependency(target_repo, PLAYWRIGHT_CLI_PACKAGE)
     return f"installed with {manager_name}"
+
+
+def install_agent_browser(target_repo: Path) -> str:
+    manager_name = install_dev_dependency(target_repo, AGENT_BROWSER_PACKAGE)
+    command = AGENT_BROWSER_BROWSER_INSTALL_COMMANDS[manager_name].copy()
+    command[0] = executable_name(command[0])
+
+    try:
+        subprocess.run(command, cwd=target_repo, check=True)
+    except FileNotFoundError as exc:
+        raise SystemExit(
+            f"Could not run {AGENT_BROWSER_COMMAND} install: {manager_name} is not available on PATH."
+        ) from exc
+    except subprocess.CalledProcessError as exc:
+        raise SystemExit(
+            f"Could not run {AGENT_BROWSER_COMMAND} install with {manager_name} in {target_repo}."
+        ) from exc
+
+    return f"package installed and browser installed with {manager_name}"
 
 
 def upstream_skills_install_command(source: str, skill_names: list[str]) -> list[str]:
@@ -630,6 +662,7 @@ def main() -> int:
     installed_tool_agent_paths = install_tool_agents(target_repo, REPO_ROOT)
     copied_playwright_paths = copy_playwright_baseline(target_repo, REPO_ROOT)
     playwright_cli_install = install_playwright_cli(target_repo)
+    agent_browser_install = install_agent_browser(target_repo)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     lessons_index_path = ensure_lessons_index(target_repo)
     manifest_path = agent_context_dir / MANIFEST_NAME
@@ -676,6 +709,7 @@ def main() -> int:
         for playwright_path in copied_playwright_paths:
             print(f"- {playwright_path}")
     print(f"Playwright CLI dependency: {playwright_cli_install}")
+    print(f"Agent Browser dependency: {agent_browser_install}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
