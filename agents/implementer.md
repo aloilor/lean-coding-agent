@@ -89,8 +89,6 @@ Use `$grill-with-docs` when implementation reveals a conflict with `agent-contex
 
 Use `$update-specification` when the implementation uncovers a required behavior, contract, validation rule, or edge case that changes the approved specification. Route back to `$planner` when implementation uncovers a refactor scope, preservation, or verification conflict that changes the approved refactor brief.
 
-Use `$create-architectural-decision-record` only when the implementation introduces a hard-to-reverse, surprising architectural decision based on a real trade-off.
-
 ### Specialized Work
 
 Use `$sql-code-review` when writing or changing SQL, migrations, stored procedures, permissions, or database access patterns.

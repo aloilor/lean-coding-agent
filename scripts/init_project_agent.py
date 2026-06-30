@@ -52,7 +52,6 @@ TASK_IGNORE_LINES = [
 SHARED_AGENT_IGNORE_LINES = [
     ".agents/code-reviews/",
     ".agents/refactor-briefs/",
-    ".agents/bug-diagnoses/",
     ".agents/implementation-plans/",
     ".agents/implementation-reports/",
 ]
@@ -87,7 +86,6 @@ UPSTREAM_SKILL_GROUPS = [
     {
         "source": "https://github.com/github/awesome-copilot",
         "skills": [
-            "create-architectural-decision-record",
             "create-readme",
             "create-specification",
             "refactor",

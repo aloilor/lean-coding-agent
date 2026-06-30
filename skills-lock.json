@@ -1,12 +1,6 @@
 {
   "version": 1,
   "skills": {
-    "create-architectural-decision-record": {
-      "source": "github/awesome-copilot",
-      "sourceType": "github",
-      "skillPath": "skills/create-architectural-decision-record/SKILL.md",
-      "computedHash": "5c99e32293271aef0270c279c2af8b62301e29257bf85f2ebf7e810c740b4404"
-    },
     "create-readme": {
       "source": "github/awesome-copilot",
       "sourceType": "github",

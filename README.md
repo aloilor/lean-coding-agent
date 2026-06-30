@@ -114,7 +114,6 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
 | `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
-| `create-architectural-decision-record` | `github/awesome-copilot` | Create ADRs for durable architectural decision history. |
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
 | `create-specification` | `github/awesome-copilot` | Create durable AI-ready specifications before implementation. |
 | `refactor` | `github/awesome-copilot` | Refactor code safely without changing behavior. |
@@ -130,7 +129,7 @@ npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browse
 npx skills add https://github.com/mattpocock/skills --skill handoff improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
-npx skills add https://github.com/github/awesome-copilot --skill create-architectural-decision-record create-readme create-specification refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
 ```
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
