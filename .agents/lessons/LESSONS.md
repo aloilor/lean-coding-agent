@@ -28,6 +28,6 @@
 - [Require Planner Approval Before Implementation](require-planner-approval-before-implementation.md) - Show planner specs, plans, assumptions, and tradeoffs to the user, then wait for explicit approval before implementation starts.
 - [Update Bootstrap Managed Ignore Rules](update-bootstrap-managed-ignore-rules.md) - When ignore rules must apply to initialized repos, update the bootstrap-managed list instead of only editing this repo's root `.gitignore`.
 - [Require Refactor Brief Artifacts](require-refactor-brief-artifacts.md) - Planned refactors need a distinct workflow with a saved behavior-preservation brief and matching implementation plan before implementation begins.
-- [Create Incident Reports For Bug Fixes](create-incident-reports-for-bug-fixes.md) - For every bug fix, create a concise incident report in `docs/incidents/`; diagnosis owns the first draft and implementation owns finalization.
-- [Require Bug Diagnosis Approval Before Implementation](require-bug-diagnosis-approval-before-implementation.md) - After a bug diagnosis report exists, wait for explicit approval before implementation starts.
+- [Create Incident Reports For Bug Fixes](create-incident-reports-for-bug-fixes.md) - For every bug fix, create a concise incident report in `docs/incidents/`; diagnosis owns the first draft and code-reviewer finalizes it.
+- [Require Bug Diagnosis Approval Before Implementation](require-bug-diagnosis-approval-before-implementation.md) - After a draft incident report exists, wait for explicit approval before implementation starts.
 - [Keep Durable Incident Reports In Docs](keep-durable-incident-reports-in-docs.md) - Store incident reports in committed documentation, not local agent handoff folders.
