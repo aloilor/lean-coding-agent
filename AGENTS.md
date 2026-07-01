@@ -91,7 +91,7 @@ End every task with a brief "Did Not Do" note covering any meaningful: edge case
 
 ## Autonomous Bug Fixing
 
-When given a bug report: just fix it. Point at logs, errors, or failing tests, then resolve them with zero context switching required from the user — including fixing failing CI without being told how. For non-trivial bugs the procedure (diagnosis, approval gate, incident report) lives in the **Autonomous Bug Fixing Workflow** below; every bug fix still ends with an incident report.
+When given a bug report: just fix it. Point at logs, errors, or failing tests, then resolve them with zero context switching required from the user — including fixing failing CI without being told how. For non-trivial bugs the procedure (diagnosis, approval gate, incident report) lives in the `workflow-bug-fixing` skill; Medium-tier and larger bug fixes end with an incident report, while genuinely trivial one-line (Small-tier) fixes skip it.
 
 ## Self-Improvement Loop
 
@@ -114,7 +114,7 @@ When given a bug report: just fix it. Point at logs, errors, or failing tests, t
 
 ## Workflows
 
-Choose the workflow that matches the user's latest request. When multiple match, use the most specific one that covers the requested outcome, and keep scope limited to what the user asked for.
+Each workflow lives in its own `workflow-*` skill. The main agent routes the user's latest request to a workflow via the **Workflow Selection Rules** below, invokes that skill with the Skill tool, and orchestrates its steps. The shared rules in this section — subagent spawning, standard artifacts, tiering, and stop conditions — apply to every workflow and stay here rather than in any single skill.
 
 ### Always Spawn The Named Subagents
 
@@ -159,62 +159,16 @@ When you stop, report the failing check, the actual error, what you tried, and y
 
 ### Workflow Selection Rules
 
-| User input pattern | Apply this workflow | Rule |
+Match the request to a row, then **invoke that workflow's skill** with the Skill tool and orchestrate it from the main agent. Each workflow's steps live in its skill; the shared rules above apply to all of them. When multiple rows match, use the most specific one that covers the requested outcome, and keep scope limited to what the user asked for.
+
+| User input pattern | Invoke this skill | Rule |
 | --- | --- | --- |
-| Define, draft, clarify, or update requirements, acceptance criteria, contracts, or a feature specification before implementation. | Feature Requirements And Specification Workflow | Use when the deliverable is requirements or a specification, not production code. |
-| Build, add, implement, or change product behavior for a feature. | Feature Development Workflow | Use when code changes are expected and the requested behavior is externally observable. |
-| Refactor, restructure, clean up, extract, rename, or simplify code while preserving behavior. | Refactor Workflow | Use only when the outcome is internal structure change with no behavior change. If behavior changes too, treat it as feature work. |
-| Code review, review, audit, or risk assessment without asking for edits. | Review Workflow | Use when the deliverable is review findings, not code changes. |
-| Bug, failing test, CI failure, runtime error, or regression. | Autonomous Bug Fixing Workflow | For non-trivial bugs, diagnose first and gate on approval. For obvious bugs, fix directly. Still create the incident report. |
-| Direct question, small documentation edit, or narrow mechanical change. | Normal task execution (Small tier) | Do the smallest useful thing. Don't force planner/implementer/reviewer unless the change grows into a row above. |
-
-### Feature Requirements And Specification Workflow
-
-Use when drafting requirements and specifications for a new feature. This is a requirements and contracts workflow, not a deep technical design or OOP class-design workflow.
-
-1. `planner` creates the specification, implementation plan, and any standards-aware notes.
-
-Add deep implementation details, OOP classes, internal interfaces, or module designs only when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
-
-### Feature Development Workflow
-
-1. `planner` creates the specification and implementation plan.
-2. `implementer` reads them and implements test-first — driving each behavior through the `tdd` skill's red-green-refactor loop, with `testing-standards` for test shape and `engineering-standards` in the refactor step — then runs broader verification, loops internally until the selected tests/checks pass, and produces the implementation report with its TDD evidence.
-3. `code-reviewer` reviews the specification, implementation plan, implementer report, and touched files — including test-first evidence and SOLID, DRY, YAGNI, KISS, and code-smell design checks — then returns `APPROVE`, `WARNING`, or `BLOCK`.
-4. On `BLOCK`, return the review to `implementer`, who fixes only the reported findings, keeps the specification unchanged, reruns the relevant verification, and updates the report. Repeat the review-fix loop until `APPROVE` or a Shared Stop Condition triggers.
-5. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
-
-Treat `WARNING` as a judgment call: fix it when tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap; otherwise report it as residual risk.
-
-### Autonomous Bug Fixing Workflow
-
-Use when the user reports a bug, failing test, CI failure, runtime error, or regression.
-
-1. For non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs, `bug-diagnostician` investigates first and writes a draft incident report whose **Investigation** section carries the evidence, root-cause hypothesis, fix direction, and verification plan.
-2. Show the draft incident report (investigation, proposed fix direction, verification plan) to the user. Wait for explicit approval before implementation starts.
-3. `implementer` reads the approved draft, fixes the root cause, runs verification, and records the confirmed root cause, fix, verification, and follow-ups in its implementation report. It does not edit the incident report.
-4. `code-reviewer` reviews the change and implementation report, then on `APPROVE` finalizes the incident report — transcribing confirmed root cause, fix, and verification from the implementation report and diff, trimming the Investigation section to a short summary, and updating follow-ups.
-
-For obvious one-line bugs, the main agent may skip `bug-diagnostician`. The incident report is still required: `code-reviewer` creates it during review, or the main agent creates it when a Small-tier fix ships without review. Use the Feature Development Workflow only when the fix expands into feature-level behavior or contract work.
-
-### Refactor Workflow
-
-Use when changing internal structure without intended behavior changes.
-
-1. `planner` writes a refactor brief (current behavior to preserve; in-scope and out-of-scope boundaries; baseline and post-refactor verification; behavior-drift and rollback risks; any SQL/persistence risks needing `sql-code-review` or `sql-optimization`) plus a matching implementation plan, and shows both for approval before implementation.
-2. `implementer` performs only the approved refactor using `refactor`, `engineering-standards`, and `testing-standards` (plus the SQL skills when database access is touched), keeps changes surgical, runs the planned verification, and produces the implementation report.
-3. `code-reviewer` reviews the brief, plan, report, and touched files for behavior drift, scope creep, missed tests, and unnecessary abstraction. On `BLOCK`, loop with `implementer` until `APPROVE` or a Shared Stop Condition triggers.
-4. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
-
-A refactor is successful only if externally observable behavior is unchanged, unless the user explicitly approves a behavior change.
-
-### Review Workflow
-
-Use when the user asks for a code review, audit, or risk assessment without asking for edits.
-
-1. `code-reviewer` reviews the requested scope.
-2. Report findings first, ordered by severity, with file/line references when available.
-3. Do not make edits, run `implementer`, or enter a fix loop unless the user explicitly asks to fix the findings.
+| Define, draft, clarify, or update requirements, acceptance criteria, contracts, or a feature specification before implementation. | `workflow-feature-specification` | Use when the deliverable is requirements or a specification, not production code. |
+| Build, add, implement, or change product behavior for a feature. | `workflow-feature-development` | Use when code changes are expected and the requested behavior is externally observable. |
+| Refactor, restructure, clean up, extract, rename, or simplify code while preserving behavior. | `workflow-refactor` | Use only when the outcome is internal structure change with no behavior change. If behavior changes too, treat it as feature work. |
+| Code review, review, audit, or risk assessment without asking for edits. | `workflow-review` | Use when the deliverable is review findings, not code changes. |
+| Bug, failing test, CI failure, runtime error, or regression. | `workflow-bug-fixing` | For non-trivial bugs, diagnose first and gate on approval. For obvious bugs, fix directly. Incident report for Medium-tier and larger fixes; genuinely trivial one-liners skip it. |
+| Direct question, small documentation edit, or narrow mechanical change. | Normal task execution (Small tier) | Do the smallest useful thing. Don't force workflows unless the change grows into a row above. |
 
 ## Task Management
 

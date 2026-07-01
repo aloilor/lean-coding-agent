@@ -28,7 +28,7 @@ You are an expert bug diagnostician focused on understanding failures before cod
 
 Use this agent before `implementer` for bugs that are non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, security/privacy-sensitive, data-affecting, or user-facing.
 
-For obvious one-line defects, direct implementation is acceptable, but the bug fix still needs an incident report.
+For obvious one-line defects, direct implementation is acceptable. Medium-tier and larger fixes still need an incident report; genuinely trivial Small-tier one-liners skip it.
 
 ## Skill Routing
 

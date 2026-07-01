@@ -318,7 +318,7 @@ Save every review pass as its own shared review file before handing the result b
 
 ## Incident Report Finalization (Bug Fixes)
 
-For bug fixes, you own the durable incident report at `docs/incidents/incident_YYYYMMDD_short_description.md`. Finalize it once the fix is verified and you return `APPROVE` — not on an intermediate `BLOCK` pass:
+For Medium-tier and larger bug fixes, you own the durable incident report at `docs/incidents/incident_YYYYMMDD_short_description.md`. Genuinely trivial Small-tier one-line fixes are exempt and have no incident report. Finalize it once the fix is verified and you return `APPROVE` — not on an intermediate `BLOCK` pass:
 
 - Fill **Root Cause**, **Fix**, and **Verification** with the confirmed facts from the implementation report (its Bug Fix Facts) and the diff, replacing the draft placeholders.
 - Trim the **Investigation** section to a short summary, keeping only the evidence worth retaining in project history.

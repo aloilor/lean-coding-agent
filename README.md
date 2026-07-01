@@ -102,7 +102,7 @@ flowchart TD
 
 ### Bug Workflow
 
-For an obvious one-line bug the diagnostician step is skipped, but the incident report is still created — by the reviewer during review, or by the main agent when a small fix ships without review.
+For an obvious bug the diagnostician step is skipped. Medium-tier and larger fixes still get an incident report — finalized by the reviewer during review — but genuinely trivial one-line (Small-tier) fixes skip the incident report.
 
 ```mermaid
 flowchart TD
