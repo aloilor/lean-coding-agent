@@ -116,6 +116,7 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
 | `create-specification` | `github/awesome-copilot` | Create durable AI-ready specifications before implementation. |
+| `prd` | `github/awesome-copilot` | Generate Product Requirements Documents from business vision and feature requirements. |
 | `refactor` | `github/awesome-copilot` | Refactor code safely without changing behavior. |
 | `sql-code-review` | `github/awesome-copilot` | Review SQL for correctness, security, maintainability, and performance. |
 | `sql-optimization` | `github/awesome-copilot` | Optimize SQL queries, indexes, and execution patterns. |
@@ -129,7 +130,7 @@ npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browse
 npx skills add https://github.com/mattpocock/skills --skill handoff improve-codebase-architecture --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
-npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification prd refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
 ```
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.

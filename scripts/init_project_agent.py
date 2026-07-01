@@ -88,6 +88,7 @@ UPSTREAM_SKILL_GROUPS = [
         "skills": [
             "create-readme",
             "create-specification",
+            "prd",
             "refactor",
             "sql-code-review",
             "sql-optimization",
