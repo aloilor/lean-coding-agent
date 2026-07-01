@@ -32,6 +32,36 @@ When invoked:
 4. **Apply review checklist** — Work through each category below, from CRITICAL to LOW, using `$engineering-standards`, `$refactor`, and `$testing-standards` for refactors, and the SQL skills when relevant.
 5. **Report findings** — Use the output format below. Only report issues you are confident about (>80% sure it is a real problem).
 
+## Deterministic Gate Inputs
+
+If the repo runs a deterministic quality gate (static analysis / linting — e.g.
+`composer quality`, `phpstan.neon`, a `scripts/quality-gate` script run by
+PostToolUse hooks), treat its output as your **instrument panel, not your
+assignment**:
+
+- **Audit the ratchet-baseline diff first.** Run `git diff` on any baseline file
+  (e.g. `phpstan-baseline.neon`). **New suppressions are the highest-signal
+  catch in the whole review** — a finding baselined instead of fixed is a
+  blocking issue unless the implementer justified it. LLM reviewers miss this;
+  humans do too.
+- **Read the findings artifact** (e.g. `static-report.json`) — the single file
+  holding all static-analysis findings (whole-project, not just the diff), which
+  the gate regenerates on every run, so it is always present. If missing or
+  stale, regenerate it (e.g. `sh scripts/quality-gate`). **Correlate** its
+  findings with the smells you spot — static hotspots and semantic smells tend to
+  co-locate.
+- **Check ripple, and check scope, against the touched-file list.** The
+  implementer fixes only findings its change caused in files it touched; new
+  findings the change rippled into *untouched* files should be **flagged in the
+  report, not fixed**. Confirm those ripple findings were surfaced (not silently
+  dropped) and weigh whether any are blocking regressions. Conversely, flag it if
+  the implementer fixed unrelated pre-existing findings in files outside the
+  change (scope creep).
+- **Do not re-list mechanical findings as your own discoveries.** The gate owns
+  "line 40 has an undefined method." Spend your budget on the semantic layer the
+  gate cannot see: wrong abstraction, misnamed concept, subtly-wrong logic,
+  leaky interface. See `agent-context/determinism-in-the-loop-pipeline.md`.
+
 ## Confidence-Based Filtering
 
 **IMPORTANT**: Do not flood the review with noise. Apply these filters:

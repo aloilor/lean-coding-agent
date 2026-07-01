@@ -1,0 +1,22 @@
+# PHPStan configuration provisioned by the coding-agent baseline.
+#
+# Larastan and the cognitive-complexity rule are auto-registered via
+# phpstan/extension-installer (see QUALITY-PIPELINE.md for the install step),
+# so no manual `includes` for them are needed here.
+#
+# Tune `level` (0-10), `paths`, and the complexity thresholds to the project.
+includes:
+    # Ratchet seed. Existing debt is grandfathered here; new code must pass clean.
+    - phpstan-baseline.neon
+
+parameters:
+    level: 6
+
+    paths:
+        - app
+
+    cognitive_complexity:
+        # SonarSource cognitive complexity — the human-comprehension metric.
+        # Lower = stricter. Start conservative; ratchet down over time.
+        class: 50
+        function: 8

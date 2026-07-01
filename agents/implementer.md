@@ -133,6 +133,7 @@ Record the RED evidence — the actual failing assertion message — for each be
 - Run the narrowest meaningful tests first, then broaden verification for shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 - Run the full relevant suite before handoff so the red-green-refactor steps did not regress sibling behavior.
 - If a test cannot be run, state why and provide the best available substitute check.
+- **Run the deterministic quality gate** if the repo provides one (e.g. a `scripts/quality-gate` script, PostToolUse hooks, `composer quality`, `npm run lint`, static-analysis configs like `phpstan.neon`). The gate collects all static-analysis findings — analyzed across the whole project, not just your edits — into a single artifact (e.g. `static-report.json`). **Scope your fixes to findings your change caused in the files you touched.** For that set, do not hand mechanical slop to the reviewer. New findings your change ripples into *untouched* files (e.g. a caller you did not open) — do **not** fix them; **flag them** in the implementation report for the reviewer to weigh, and leave them in the artifact. Pre-existing findings unrelated to your change are not yours to fix; the ratchet baseline grandfathers them. If you deliberately grandfather a finding into the baseline (e.g. `phpstan-baseline.neon`) instead of fixing it, that is a rare, justified exception you must call out in the report. The reviewer reads the artifact and audits the baseline diff. See the repo's pipeline doc (`agent-context/determinism-in-the-loop-pipeline.md`) and any `QUALITY-PIPELINE.md`.
 
 **Loop until done.** When a test fails or an acceptance criterion is unmet, fix the code (use `$engineering-standards` to keep the fix clean and minimal, `$testing-standards` for the test) and re-run. Repeat until **every** selected test passes and **each** acceptance criterion is demonstrably satisfied. Close the loop by fixing the code, never by weakening, skipping, or deleting a test. Do not report success while any required test is failing or skipped to dodge a failure, or while any acceptance criterion is unverified — if you cannot close the loop, stop and surface the blocker.
 
@@ -167,6 +168,7 @@ The report must include:
 - Touched files and why each changed.
 - Test-first (TDD) evidence: the RED failing-assertion message, GREEN, and refactor notes per behavior, or a named non-behavioral exemption.
 - Verification commands/checks and results.
+- Deterministic quality-gate result (which gate ran, pass/fail), any new ratchet-baseline suppressions with justification, and any ripple findings in untouched files you flagged but did not fix (file, finding, why left) — or "no gate in this repo".
 - Confirmed bug-fix facts (root cause, fix, verification, follow-ups) for `code-reviewer` to transcribe into the incident report, plus the draft incident report path.
 - Review fix history, including linked `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` files when applicable.
 - Residual risks, skipped tests, or manual checks.

@@ -111,6 +111,12 @@ AGENT_BROWSER_BROWSER_INSTALL_COMMANDS = {
     "yarn": ["yarn", "run", AGENT_BROWSER_COMMAND, "install"],
     "bun": ["bun", "run", AGENT_BROWSER_COMMAND, "install"],
 }
+LARAVEL_TEMPLATE_SUBPATH = Path("templates") / "php-laravel"
+QUALITY_GATE_SCRIPT_SUBPATH = Path("scripts") / "quality-gate"
+LARAVEL_QUALITY_REQUIRE_COMMAND = (
+    "composer require --dev larastan/larastan:^3.0 "
+    "tomasvotruba/cognitive-complexity phpstan/extension-installer laravel/pint"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -256,6 +262,57 @@ def copy_playwright_baseline(target_repo: Path, shared_repo_root: Path) -> list[
         copied_paths.append(target_path)
 
     return copied_paths
+
+
+def detect_php_laravel(target_repo: Path) -> bool:
+    if (target_repo / "artisan").exists():
+        return True
+
+    composer_json_path = target_repo / "composer.json"
+    if not composer_json_path.exists():
+        return False
+
+    try:
+        composer_json = json.loads(composer_json_path.read_text(encoding="utf-8-sig"))
+    except json.JSONDecodeError:
+        return False
+
+    require = composer_json.get("require", {})
+    return isinstance(require, dict) and "laravel/framework" in require
+
+
+def make_executable(path: Path) -> None:
+    current_mode = path.stat().st_mode
+    path.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+
+
+def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) -> dict | None:
+    if not detect_php_laravel(target_repo):
+        return None
+
+    source_dir = shared_repo_root / LARAVEL_TEMPLATE_SUBPATH
+    if not source_dir.exists():
+        return None
+
+    copied_paths: list[Path] = []
+    for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
+        relative_path = source_path.relative_to(source_dir)
+        target_path = target_repo / relative_path
+        if target_path.exists():
+            continue
+
+        target_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, target_path)
+        copied_paths.append(target_path)
+
+    gate_script = target_repo / QUALITY_GATE_SCRIPT_SUBPATH
+    if gate_script.is_file():
+        make_executable(gate_script)
+
+    return {
+        "copied_paths": copied_paths,
+        "require_command": LARAVEL_QUALITY_REQUIRE_COMMAND,
+    }
 
 
 def copy_shared_agents_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
@@ -835,6 +892,7 @@ def main() -> int:
     copied_playwright_paths = copy_playwright_baseline(target_repo, REPO_ROOT)
     playwright_cli_install = install_playwright_cli(target_repo)
     agent_browser_install = install_agent_browser(target_repo)
+    laravel_quality_gate = provision_laravel_quality_gate(target_repo, REPO_ROOT)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     incidents_readme_path = ensure_incidents_readme(target_repo)
     lessons_index_path = ensure_lessons_index(target_repo)
@@ -885,6 +943,15 @@ def main() -> int:
             print(f"- {playwright_path}")
     print(f"Playwright CLI dependency: {playwright_cli_install}")
     print(f"Agent Browser dependency: {agent_browser_install}")
+    if laravel_quality_gate is not None:
+        print("PHP/Laravel quality gate provisioned:")
+        if laravel_quality_gate["copied_paths"]:
+            for gate_path in laravel_quality_gate["copied_paths"]:
+                print(f"- {gate_path}")
+        else:
+            print("- templates already present")
+        print(f"- finish setup (install tools): {laravel_quality_gate['require_command']}")
+        print("- then add composer scripts per QUALITY-PIPELINE.md")
     print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")

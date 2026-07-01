@@ -1,0 +1,43 @@
+#!/usr/bin/env sh
+# Deterministic quality gate — the agent-side enforcement for this repo.
+# Invoked by the PostToolUse hooks in:
+#   - .claude/settings.json   (Claude Code)
+#   - .codex/hooks.json       (Codex)
+#
+# Both hooks fire after an Edit/Write, so the edit already happened: exit 2
+# surfaces the findings to the model as feedback (it does not undo the change).
+#
+# This repo is AGENT-ONLY by choice — there is no git pre-commit gate, so nothing
+# hard-blocks a commit and humans/other tools are not covered. A hard,
+# human-covering commit or CI gate can be added later (see QUALITY-PIPELINE.md).
+#
+# ALL static-analysis findings are written to ONE artifact, static-report.json,
+# on every run — always fresh, so the reviewer never depends on someone producing
+# it. Formatting (Pint) is a console-only step: it is fixes, not analysis findings.
+#
+# Exit 0 = clean OR not-yet-provisioned (never wedge a half-set-up repo).
+# Exit 2 = findings.
+ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$ROOT" || exit 0
+
+if ! command -v composer >/dev/null 2>&1; then
+    echo "[quality-gate] composer not on PATH; skipping." >&2
+    exit 0
+fi
+
+if ! composer run-script --list 2>/dev/null | grep -q "quality:report"; then
+    echo "[quality-gate] 'composer quality:report' not defined yet; skipping (see QUALITY-PIPELINE.md)." >&2
+    exit 0
+fi
+
+status=0
+composer quality:style || status=2      # formatting check (console only, not persisted)
+composer quality:report || status=2     # writes ALL static-analysis findings to static-report.json
+
+if [ "$status" -eq 0 ]; then
+    exit 0
+fi
+
+echo "[quality-gate] Static-analysis findings written to static-report.json — read it." >&2
+echo "[quality-gate] Fix them, or justify a baseline entry, before proceeding (formatting issues, if any, are in the console above)." >&2
+exit "$status"

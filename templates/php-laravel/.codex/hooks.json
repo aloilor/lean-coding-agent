@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|apply_patch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$(git rev-parse --show-toplevel)/scripts/quality-gate\"",
+            "statusMessage": "Running quality gate"
+          }
+        ]
+      }
+    ]
+  }
+}
