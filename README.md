@@ -47,49 +47,82 @@ flowchart LR
     F --> A
 ```
 
-### Feature Or Refactor Workflow
+### Feature Development Workflow
+
+The implementer drives each behavior with the `tdd` red-green-refactor loop one slice at a time and records the red failing-assertion evidence in the implementation report. The reviewer checks that evidence alongside SOLID, DRY, YAGNI, KISS, security, and stack-specific findings before approving.
 
 ```mermaid
 flowchart TD
-    A[Request] --> B[Planner]
-    B --> C{Work type}
-    C -->|Feature or behavior change| D[grill-with-docs]
-    D --> E[create-specification]
-    C -->|Behavior-preserving refactor| F[Refactor brief]
-    E --> G[Implementation plan]
-    F --> G
-    G --> H[User approval]
-    H --> I[Implementer]
-    I --> J[Write or update failing test]
-    J --> K[Implement smallest fix]
-    K --> L[Run focused verification]
-    L --> M{Passing and complete?}
-    M -->|No| J
-    M -->|Yes| N[Implementation report]
-    N --> O[Code reviewer]
-    O --> P{Review result}
-    P -->|APPROVE| Q[Done]
-    P -->|WARNING or BLOCK| I
+    A[Feature request] --> B[Planner]
+    B --> C[grill-with-docs, then create-specification]
+    C --> D[Implementation plan]
+    D --> E[User approval]
+    E --> F[Implementer]
+    F --> G[RED: write one failing behavior test]
+    G --> H[GREEN: simplest code that passes]
+    H --> I[REFACTOR: apply engineering-standards]
+    I --> J[Run focused verification]
+    J --> K{More behaviors to cover?}
+    K -->|Yes, next slice| G
+    K -->|No| L[Implementation report with TDD evidence]
+    L --> M[Code reviewer]
+    M --> N{Review result}
+    N -->|APPROVE| O[Done]
+    N -->|BLOCK| F
+    N -->|WARNING| P{Tied to spec, bug, security, or test gap?}
+    P -->|Yes| F
+    P -->|No| O
+```
+
+### Refactor Workflow
+
+A refactor writes no new failing test: it preserves behavior against the existing suite, so its report records a behavior-preserving exemption instead of red-green-refactor evidence.
+
+```mermaid
+flowchart TD
+    A[Refactor request] --> B[Planner]
+    B --> C[Refactor brief: behavior to preserve, scope, verification]
+    C --> D[Implementation plan]
+    D --> E[User approval]
+    E --> F[Implementer]
+    F --> G[Confirm baseline tests green]
+    G --> H[Apply one behavior-preserving change]
+    H --> I[Run tests]
+    I --> J{Behavior unchanged and refactor complete?}
+    J -->|No| H
+    J -->|Yes| K[Implementation report]
+    K --> L[Code reviewer]
+    L --> M{Review result}
+    M -->|APPROVE| N[Done]
+    M -->|BLOCK| F
+    M -->|WARNING| O{Tied to brief, behavior drift, or test gap?}
+    O -->|Yes| F
+    O -->|No| N
 ```
 
 ### Bug Workflow
 
+For an obvious one-line bug the diagnostician step is skipped, but the incident report is still created — by the reviewer during review, or by the main agent when a small fix ships without review.
+
 ```mermaid
 flowchart TD
     A[Bug report] --> B[Bug diagnostician]
-    B --> C[Draft incident report]
+    B --> C[Draft incident report: investigation, fix direction, verification]
     C --> D[User approval]
     D --> E[Implementer]
-    E --> F[Reproduce bug or write regression test]
-    F --> G[Implement smallest fix]
+    E --> F[RED: failing test reproduces the bug]
+    F --> G[GREEN: fix the root cause]
     G --> H[Run focused verification]
     H --> I{Bug fixed and no regression?}
-    I -->|No| F
-    I -->|Yes| J[Update implementation report]
+    I -->|No| G
+    I -->|Yes| J[Implementation report with confirmed root cause]
     J --> K[Code reviewer]
     K --> L{Review result}
-    L -->|WARNING or BLOCK| E
     L -->|APPROVE| M[Finalize incident report]
+    L -->|BLOCK| E
+    L -->|WARNING| N{Tied to the fix, security, or a test gap?}
+    N -->|Yes| E
+    N -->|No| M
 ```
 
 Workflow artifacts are intentionally split by durability:
@@ -233,9 +266,9 @@ The bug diagnosis subagent in [agents/bug-diagnostician.md](agents/bug-diagnosti
 
 Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 
-The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved specifications, refactor briefs, and implementation plans, then routes into skills as needed, including `engineering-standards` for code work, `testing-standards` for tests, `refactor` for behavior-preserving structure changes, and `rest-api-design` for API changes. It creates or updates `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md` as the shared handoff artifact. When `code-reviewer` returns findings, the implementer fixes only those findings, reruns verification, updates the implementation report, and hands the updated touched file list back for another review pass.
+The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved specifications, refactor briefs, and implementation plans, driving behavioral changes with the `tdd` red-green-refactor loop and routing into skills as needed, including `engineering-standards` for code work, `testing-standards` for test shape and repo conventions, `refactor` for behavior-preserving structure changes, and `rest-api-design` for API changes. It creates or updates `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md` as the shared handoff artifact, including the red-green-refactor evidence the reviewer checks. When `code-reviewer` returns findings, the implementer fixes only those findings, reruns verification, updates the implementation report, and hands the updated touched file list back for another review pass.
 
-The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification or refactor brief and shared implementation report, applies `engineering-standards`, `testing-standards`, and `refactor` for refactor work, and routes database changes through `sql-code-review` and `sql-optimization` when relevant. It does not edit the code under review, returns `APPROVE`, `WARNING`, or `BLOCK` for the shared review-fix loop, and saves every review pass as `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report. For bug fixes it also finalizes the durable incident report under `docs/incidents/` from the implementer's confirmed facts on the `APPROVE` pass.
+The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification or refactor brief and shared implementation report, applies `engineering-standards`, `testing-standards`, and `refactor` for refactor work, checks the report's test-first evidence and flags SOLID, DRY, YAGNI, KISS, and code-smell violations alongside security and stack-specific risks, and routes database changes through `sql-code-review` and `sql-optimization` when relevant. It does not edit the code under review, returns `APPROVE`, `WARNING`, or `BLOCK` for the shared review-fix loop, and saves every review pass as `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report. For bug fixes it also finalizes the durable incident report under `docs/incidents/` from the implementer's confirmed facts on the `APPROVE` pass.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
