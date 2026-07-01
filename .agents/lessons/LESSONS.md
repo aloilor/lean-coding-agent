@@ -1,33 +1,12 @@
 # Lessons
 
 - [Write All Project Output In English](write-all-project-output-in-english.md) - Write all project output, including stored content and assistant responses, in English unless the project rule is explicitly changed.
-- [Keep Practical Examples In Guides](keep-practical-examples-in-guides.md) - Keep short concrete examples in reusable guides when they make the rules easier to apply correctly.
 - [Make README Indexes Clickable](make-readme-indexes-clickable.md) - When a README serves as an index, link the referenced files so the document is directly navigable.
-- [Prefer Plainer Explanations In Guides](prefer-plainer-explanations-in-guides.md) - Prefer the simplest wording that still preserves the concept when writing reusable guides.
-- [Preserve Named Source Guidance When Adapting](preserve-named-source-guidance-when-adapting.md) - When adapting a guide, compare source and target headings so named rules are not accidentally compressed away.
-- [Place Content In The Active Target Context](place-content-in-active-target-context.md) - When a thread is focused on a destination tree, add new content there instead of a related source/reference tree.
-- [Place Domain Context Guides At Agent Context Root](place-domain-context-guides-at-agent-context-root.md) - Put broad API, architecture, and project-context guides under `agent-context/`, not `agent-context/coding-style/`.
-- [Honor Exact Copy Requests](honor-exact-copy-requests.md) - When asked to copy a file exactly, preserve its content verbatim instead of adapting or improving it.
-- [Use Copied Guide Folder Format For Coding Style](use-copied-guide-folder-format-for-coding-style.md) - New `agent-context/coding-style/` additions should use the compact copied-guide folder format unless explicitly told otherwise.
-- [Keep Lessons General And Reusable](keep-lessons-general-and-reusable.md) - Save lessons only when they capture a broader rule that can be reused across different tasks, not a one-off omission.
-- [Add New Lessons To Shared Agent Lessons](add-new-lessons-to-shared-agents-lessons.md) - Whenever this repo gets a new lesson, add one file and index entry in `.agents/lessons/`.
-- [Fix Skill Behavior In The Skill, Not In Lessons](fix-skill-behavior-in-the-skill-not-in-lessons.md) - When a skill behaves wrongly or ambiguously, fix the skill itself instead of adding lessons as a workaround.
-- [Mirror Project Operating Files Across Supported Tools](mirror-project-operating-files-across-supported-tools.md) - When this repo supports multiple agent tools, keep shared agent memory and repo-local tool files aligned with the supported layout.
 - [Sync Updated Shared Skills To Local And Sibling Repos](sync-updated-shared-skills-to-local-and-sibling-repos.md) - Whenever a skill in `skills/` is updated, sync that skill into every maintained matching `.agents/skills/<skill>` and `.claude/skills/<skill>` copy in this repo and sibling repos under `../`.
 - [Honor Bootstrap Installation Scope](honor-bootstrap-installation-scope.md) - When asked to install tooling in initialized projects, make the bootstrap create the required project files instead of only documenting manual commands.
 - [Autonomously Capture Generalizable Corrections](autonomously-capture-generalizable-corrections.md) - After a user correction, add a lesson yourself when the correction reveals a reusable agent behavior rule.
-- [Store Codex Skills In Agents](store-codex-skills-in-agents.md) - Keep Codex skills in `.agents/skills` and do not mirror them into `.codex/skills`.
 - [Preserve Upstream Skill Shape When Customizing](preserve-upstream-skill-shape-when-customizing.md) - When asked to adapt an upstream skill, preserve its behavior and change only the requested local references or paths.
-- [Split Skill References By Output File](split-skill-references-by-output-file.md) - When a skill generates multiple named output files, keep one reference per output file for cleaner loading and maintenance.
-- [Honor Referenced Skill Structure](honor-referenced-skill-structure.md) - When a user points to a source skill, mirror its workflow and examples before applying requested local adaptations.
 - [Preserve Upstream Subagent Shape When Customizing](preserve-upstream-subagent-shape-when-customizing.md) - When asked for the exact same upstream subagent with adaptations, preserve its structure and change only what the adaptation requires.
-- [Keep Agent-Specific Procedure Out Of Global Baseline](keep-agent-specific-procedure-out-of-global-baseline.md) - Keep detailed subagent procedure in the subagent prompt, not duplicated in `AGENTS.md`.
-- [Use Local Agent Files Not Override](use-local-agent-files-not-override.md) - Use `AGENTS.local.md` and `CLAUDE.local.md` for private per-project notes instead of `*.override.md` naming.
 - [Prefer Engineering Standards Over Local Style](prefer-engineering-standards-over-local-style.md) - Follow the `engineering-standards` skill for style guidance instead of preserving inconsistent nearby code style.
-- [Do Not Run Startup Skill Update Automatically](do-not-run-startup-skill-update.md) - Do not run the project skill update command just because `skills-lock.json` exists; run it only when asked or when skill syncing is required.
-- [Require Planner Approval Before Implementation](require-planner-approval-before-implementation.md) - Show planner specs, plans, assumptions, and tradeoffs to the user, then wait for explicit approval before implementation starts.
 - [Update Bootstrap Managed Ignore Rules](update-bootstrap-managed-ignore-rules.md) - When ignore rules must apply to initialized repos, update the bootstrap-managed list instead of only editing this repo's root `.gitignore`.
-- [Require Refactor Brief Artifacts](require-refactor-brief-artifacts.md) - Planned refactors need a distinct workflow with a saved behavior-preservation brief and matching implementation plan before implementation begins.
-- [Create Incident Reports For Bug Fixes](create-incident-reports-for-bug-fixes.md) - For every bug fix, create a concise incident report in `docs/incidents/`; diagnosis owns the first draft and code-reviewer finalizes it.
-- [Require Bug Diagnosis Approval Before Implementation](require-bug-diagnosis-approval-before-implementation.md) - After a draft incident report exists, wait for explicit approval before implementation starts.
-- [Keep Durable Incident Reports In Docs](keep-durable-incident-reports-in-docs.md) - Store incident reports in committed documentation, not local agent handoff folders.
+- [Verify Tool Capability Claims Before Designing Around Them](verify-tool-capability-claims-before-designing.md) - Confirm "tool X can't do Y" against current docs before building a design on it; agent tooling changes faster than the knowledge cutoff.
