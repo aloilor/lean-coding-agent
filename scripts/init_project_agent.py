@@ -142,6 +142,31 @@ def ensure_shared_skills_root(shared_skills_root: Path) -> None:
         raise SystemExit(f"Shared skills path is not a directory: {shared_skills_root}")
 
 
+def baseline_guard_block(filename: str) -> str:
+    local_filename = filename.replace(".md", ".local.md")
+    return "\n".join(
+        [
+            "",
+            "---",
+            "",
+            "## Do Not Edit This Baseline File",
+            "",
+            f"**Under no circumstances edit `{filename}` or the other baseline file in "
+            "this project.** These files are the shared agents baseline, copied in from "
+            "the upstream agents repo, and any edits here are overwritten on the next "
+            "sync.",
+            "",
+            f"- For project-specific rules that should be shared and committed, use "
+            "`agent-context/`.",
+            f"- For local, private, machine-specific notes, use `{local_filename}` "
+            "(git-ignored).",
+            "",
+            "Change the baseline itself only in the upstream agents repo, not here.",
+            "",
+        ]
+    )
+
+
 def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]:
     copied_paths: list[Path] = []
 
@@ -152,6 +177,12 @@ def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]
 
         target_path = target_repo / filename
         shutil.copy2(source_path, target_path)
+
+        baseline_text = source_path.read_text(encoding="utf-8")
+        prefix = "" if baseline_text.endswith("\n") else "\n"
+        with target_path.open("a", encoding="utf-8") as target_file:
+            target_file.write(prefix + baseline_guard_block(filename))
+
         copied_paths.append(target_path)
 
     return copied_paths
