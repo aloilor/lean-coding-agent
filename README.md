@@ -1,4 +1,4 @@
-# dev-agent-baseline
+# coding-agent-baseline
 
 This repository is the shared base I want to reuse across all of my projects.
 
