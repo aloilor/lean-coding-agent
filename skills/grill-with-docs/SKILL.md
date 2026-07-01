@@ -27,20 +27,20 @@ Most repos have a single context:
 `-- src/
 ```
 
-If an `agent-context/context-map.md` exists, the repo has multiple contexts. The map points to where each one lives:
+If an `agent-context/context-map.md` exists, the repo has multiple contexts. Each context lives in its own subfolder under `agent-context/`, and the map points to where each one is:
 
 ```text
 /
 |-- agent-context/
 |   |-- context-map.md
-|   `-- adr/                          <- system-wide decisions
-|-- src/
+|   |-- adr/                          <- system-wide decisions
 |   |-- ordering/
 |   |   |-- domain.md
-|   |   `-- docs/adr/                 <- context-specific decisions
+|   |   `-- adr/                      <- context-specific decisions
 |   `-- billing/
 |       |-- domain.md
-|       `-- docs/adr/
+|       `-- adr/
+`-- src/
 ```
 
 Create files lazily - only when you have something to write. If no `agent-context/domain.md` exists, create one when the first term is resolved. If no `agent-context/adr/` exists, create it when the first ADR is needed.

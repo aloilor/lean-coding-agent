@@ -33,16 +33,16 @@ _Avoid_: Client, buyer, account
 
 **Single context (most repos):** One `agent-context/domain.md`.
 
-**Multiple contexts:** An `agent-context/context-map.md` lists the contexts, where they live, and how they relate to each other:
+**Multiple contexts:** Each context lives in its own subfolder under `agent-context/` (e.g. `agent-context/ordering/domain.md`). An `agent-context/context-map.md` lists the contexts, where they live, and how they relate to each other:
 
 ```md
 # Context Map
 
 ## Contexts
 
-- [Ordering](../src/ordering/domain.md) - receives and tracks customer orders
-- [Billing](../src/billing/domain.md) - generates invoices and processes payments
-- [Fulfillment](../src/fulfillment/domain.md) - manages warehouse picking and shipping
+- [Ordering](ordering/domain.md) - receives and tracks customer orders
+- [Billing](billing/domain.md) - generates invoices and processes payments
+- [Fulfillment](fulfillment/domain.md) - manages warehouse picking and shipping
 
 ## Relationships
 

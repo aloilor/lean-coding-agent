@@ -1,8 +1,10 @@
 # ADR Format
 
-ADRs live in `agent-context/adr/` and use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
+ADRs use sequential numbering: `0001-slug.md`, `0002-slug.md`, etc.
 
-Create the `agent-context/adr/` directory lazily - only when the first ADR is needed.
+In a single-context repo they live in `agent-context/adr/`. In a multi-context repo, system-wide decisions live in `agent-context/adr/` while context-specific decisions live under that context's subfolder, e.g. `agent-context/ordering/adr/`.
+
+Create the relevant `adr/` directory lazily - only when the first ADR is needed.
 
 ## Template
 
@@ -24,7 +26,7 @@ Only include these when they add genuine value. Most ADRs won't need them.
 
 ## Numbering
 
-Scan `agent-context/adr/` for the highest existing number and increment by one.
+Scan the relevant `adr/` directory (the context's own, or `agent-context/adr/` for system-wide decisions) for the highest existing number and increment by one.
 
 ## When to offer an ADR
 
