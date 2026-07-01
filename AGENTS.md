@@ -108,7 +108,7 @@ When given a bug report: just fix it. Point at logs, errors, or failing tests, t
 - Read project-specific shared context from `agent-context/` when it exists.
 - Read `AGENTS.local.md` or `CLAUDE.local.md` when it exists; it is local, private, and ignored by git.
 - Review `.agents/lessons/LESSONS.md` and relevant linked lesson files when they exist.
-- Before running a skill, check `.agents/skill-overrides/INDEX.md` when it exists. If the skill is listed, read `.agents/skill-overrides/<skill-name>.md` and apply it; those shared overrides take precedence over the skill's default behavior. Keep the index in sync when adding an override.
+- Before running a skill, check `.agents/skill-overrides/INDEX.md` when it exists. If the skill is listed, read the matching `<skill-name>.md` override and apply it; those shared overrides take precedence over the skill's default behavior. Keep the source index in sync when adding an override.
 - Use these skills when their area applies: `engineering-standards` (coding, design, refactoring, debugging, review), `testing-standards` (test strategy, selection, naming, AAA structure, regression coverage), `refactor` (behavior-preserving restructuring), `rest-api-design` (API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, docs, contract tests).
 - Do not run the project skill update command automatically at session start. Run `npx.cmd skills update --project --yes` (Windows) or `npx skills update --project --yes` (elsewhere) only when the user asks for a skill update or the task requires syncing project skills. After it runs, check `git status --short` and report any changed skill files or failures before continuing.
 

@@ -75,6 +75,7 @@ UPSTREAM_SKILL_GROUPS = [
         "skills": [
             "handoff",
             "improve-codebase-architecture",
+            "tdd",
         ],
     },
     {
@@ -621,6 +622,88 @@ def ensure_skill_overrides_index(target_repo: Path) -> Path:
     return index_path
 
 
+def index_entry_for_skill(index_text: str, skill_name: str) -> str | None:
+    prefix = f"- [{skill_name}]("
+    for line in index_text.splitlines():
+        if line.startswith(prefix):
+            return line
+    return None
+
+
+def upsert_baseline_override_index_entries(
+    target_index_path: Path,
+    source_index_path: Path,
+    override_names: list[str],
+) -> None:
+    if not source_index_path.exists():
+        target_index_path.parent.mkdir(parents=True, exist_ok=True)
+        if not target_index_path.exists():
+            target_index_path.write_text("# Skill Overrides\n\n", encoding="utf-8")
+        return
+
+    source_text = source_index_path.read_text(encoding="utf-8")
+    if not target_index_path.exists():
+        target_index_path.write_text(source_text, encoding="utf-8")
+        return
+
+    target_text = target_index_path.read_text(encoding="utf-8")
+    target_lines = [
+        line for line in target_text.splitlines() if line.strip() != "- _No skill overrides yet._"
+    ]
+    target_text = "\n".join(target_lines).rstrip() + "\n"
+
+    missing_entries: list[str] = []
+    for override_name in override_names:
+        if index_entry_for_skill(target_text, override_name):
+            continue
+        source_entry = index_entry_for_skill(source_text, override_name)
+        if source_entry:
+            missing_entries.append(source_entry)
+
+    if not missing_entries:
+        target_index_path.write_text(target_text, encoding="utf-8")
+        return
+
+    if "## Baseline Overrides" not in target_text:
+        target_text = target_text.rstrip() + "\n\n## Baseline Overrides\n\n"
+    elif not target_text.endswith("\n"):
+        target_text += "\n"
+
+    target_text += "\n".join(missing_entries) + "\n"
+    target_index_path.write_text(target_text, encoding="utf-8")
+
+
+def sync_baseline_skill_overrides(target_repo: Path, shared_repo_root: Path) -> list[Path]:
+    source_dir = shared_repo_root / "skills" / SKILL_OVERRIDES_DIRNAME
+    target_dir = target_repo / AGENTS_DIRNAME / SKILL_OVERRIDES_DIRNAME
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    if not source_dir.exists():
+        return [ensure_skill_overrides_index(target_repo)]
+
+    copied_paths: list[Path] = []
+    source_override_paths = sorted(
+        path
+        for path in source_dir.glob("*.md")
+        if path.name != SKILL_OVERRIDES_INDEX_NAME
+    )
+    override_names = [path.stem for path in source_override_paths]
+
+    for source_path in source_override_paths:
+        target_path = target_dir / source_path.name
+        shutil.copy2(source_path, target_path)
+        copied_paths.append(target_path)
+
+    target_index_path = target_dir / SKILL_OVERRIDES_INDEX_NAME
+    upsert_baseline_override_index_entries(
+        target_index_path,
+        source_dir / SKILL_OVERRIDES_INDEX_NAME,
+        override_names,
+    )
+    copied_paths.append(target_index_path)
+    return copied_paths
+
+
 def load_manifest(manifest_path: Path) -> dict:
     if not manifest_path.exists():
         return {"skills": []}
@@ -755,7 +838,8 @@ def main() -> int:
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     incidents_readme_path = ensure_incidents_readme(target_repo)
     lessons_index_path = ensure_lessons_index(target_repo)
-    skill_overrides_index_path = ensure_skill_overrides_index(target_repo)
+    skill_override_paths = sync_baseline_skill_overrides(target_repo, REPO_ROOT)
+    skill_overrides_index_path = target_repo / AGENTS_DIRNAME / SKILL_OVERRIDES_DIRNAME / SKILL_OVERRIDES_INDEX_NAME
     manifest_path = agent_context_dir / MANIFEST_NAME
     legacy_manifest_paths = [
         agent_context_dir / legacy_name for legacy_name in LEGACY_MANIFEST_NAMES
@@ -805,6 +889,10 @@ def main() -> int:
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
     print(f"Ensured skill overrides index: {skill_overrides_index_path}")
+    if skill_override_paths:
+        print("Installed baseline skill override files:")
+        for skill_override_path in skill_override_paths:
+            print(f"- {skill_override_path}")
     print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} shared skills into:")
     for skills_root in skills_roots:

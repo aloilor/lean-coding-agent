@@ -1,4 +1,0 @@
-interface:
-  display_name: "Codebase Onboarding"
-  short_description: "Fill agent-context docs and skills index from repo evidence"
-  default_prompt: "Use $codebase-onboarding to analyze this repo and fill agent-context with structured, evidence-backed project docs, including a skills index."

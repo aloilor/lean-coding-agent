@@ -25,21 +25,92 @@ In other words:
 
 - this repo defines the default baseline
 - each project documents shared project-specific context in `agent-context/`
-- each project can override installed-skill behavior in `.agents/skill-overrides/`
+- this repo stores baseline skill overrides in `skills/skill-overrides/`
+- each project receives installed-skill overrides in `.agents/skill-overrides/`
 - each machine can keep private notes in the local files
 
 This setup keeps the global guidance consistent while still allowing every project to document what makes it unique.
 
+## Workflows
+
+The baseline is organized around a few repeatable workflows that keep context, planning, implementation, and review connected across agents and tools. The same flow works whether the work happens in Codex, Claude Code, or a mix of both, because the durable handoff artifacts live in the project repo.
+
+### Project Setup Cycle
+
+```mermaid
+flowchart LR
+    A[Update shared baseline] --> B[Run bootstrap script]
+    B --> C[Install agents, skills, and browser tooling]
+    C --> D[Fill agent-context with project facts]
+    D --> E[Use skills and subagents during work]
+    E --> F[Capture lessons, specs, reviews, and incidents]
+    F --> A
+```
+
+### Feature Or Refactor Workflow
+
+```mermaid
+flowchart TD
+    A[Request] --> B[Planner]
+    B --> C{Work type}
+    C -->|Feature or behavior change| D[grill-with-docs]
+    D --> E[create-specification]
+    C -->|Behavior-preserving refactor| F[Refactor brief]
+    E --> G[Implementation plan]
+    F --> G
+    G --> H[User approval]
+    H --> I[Implementer]
+    I --> J[Write or update failing test]
+    J --> K[Implement smallest fix]
+    K --> L[Run focused verification]
+    L --> M{Passing and complete?}
+    M -->|No| J
+    M -->|Yes| N[Implementation report]
+    N --> O[Code reviewer]
+    O --> P{Review result}
+    P -->|APPROVE| Q[Done]
+    P -->|WARNING or BLOCK| I
+```
+
+### Bug Workflow
+
+```mermaid
+flowchart TD
+    A[Bug report] --> B[Bug diagnostician]
+    B --> C[Draft incident report]
+    C --> D[User approval]
+    D --> E[Implementer]
+    E --> F[Reproduce bug or write regression test]
+    F --> G[Implement smallest fix]
+    G --> H[Run focused verification]
+    H --> I{Bug fixed and no regression?}
+    I -->|No| F
+    I -->|Yes| J[Update implementation report]
+    J --> K[Code reviewer]
+    K --> L{Review result}
+    L -->|WARNING or BLOCK| E
+    L -->|APPROVE| M[Finalize incident report]
+```
+
+Workflow artifacts are intentionally split by durability:
+
+- `agent-context/` keeps shared project facts that should shape future work
+- `docs/spec/` keeps approved feature specifications
+- `docs/incidents/` keeps durable bug investigations and final incident reports
+- `.agents/implementation-plans/`, `.agents/implementation-reports/`, and `.agents/code-reviews/` keep local coordination notes and review passes
+- `.agents/lessons/LESSONS.md` keeps reusable lessons learned from previous work
+
 ## Skill Overrides
 
-Installed skills (including marketplace skills) are overwritten when they update, so editing a skill directly to change its behavior for one project does not survive. Instead, each project keeps shared, committed overrides in `.agents/skill-overrides/`:
+Installed skills (including marketplace skills) are overwritten when they update, so editing a skill directly to change its behavior for one project does not survive. This baseline keeps shared override sources in [skills/skill-overrides](skills/skill-overrides), and the bootstrap copies them into each target repo's `.agents/skill-overrides/` directory:
 
 - one file per overridden skill, named `<skill-name>.md` to match the skill's name
-- `.agents/skill-overrides/INDEX.md` lists each overridden skill with a one-line summary
+- `skills/skill-overrides/INDEX.md` lists each baseline override with a one-line summary
+- target repos consume those overrides from `.agents/skill-overrides/INDEX.md`
 
-The baseline rule in `AGENTS.md` tells agents to check `INDEX.md` before running a skill and, when the skill is listed, to read and apply `.agents/skill-overrides/<skill-name>.md` as taking precedence over the skill's default behavior. This works for both Claude Code and Codex because both read `AGENTS.md`.
+The baseline rule in `AGENTS.md` tells agents to check `INDEX.md` before running a skill and, when the skill is listed, to read and apply the matching `<skill-name>.md` override as taking precedence over the skill's default behavior. This works for both Claude Code and Codex because both read `AGENTS.md`.
 
-Overrides are for adjusting guidance the agent should follow (for example, where a skill saves its output). They are shared with the team, unlike the private `AGENTS.local.md` / `CLAUDE.local.md` files.
+Overrides are for adjusting guidance the agent should follow (for example, where a skill saves its output or how strictly a workflow should run). They are shared with the team, unlike the private `AGENTS.local.md` / `CLAUDE.local.md` files.
 
 ## Initialize A New Project
 
@@ -64,7 +135,7 @@ The script will:
 - create `agent-context/README.md` when it does not already exist
 - create `docs/incidents/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
-- create `.agents/skill-overrides/INDEX.md` when it does not already exist
+- copy baseline skill overrides from `skills/skill-overrides/` into `.agents/skill-overrides/`
 - add `.agents/code-reviews/`, `.agents/refactor-briefs/`, `.agents/implementation-plans/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
 - add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
@@ -125,6 +196,7 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `agent-browser` | `vercel-labs/agent-browser` | Use persistent browser automation across agent commands. |
 | `handoff` | `mattpocock/skills` | Create concise handoff documents for continuing work across sessions or agents. |
 | `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
+| `tdd` | `mattpocock/skills` | Guide behavior-focused test-driven development with red-green-refactor cycles. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
 | `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
@@ -140,7 +212,7 @@ The equivalent manual commands are:
 ```bash
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
 npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser --agent codex claude-code --copy -y
-npx skills add https://github.com/mattpocock/skills --skill handoff improve-codebase-architecture --agent codex claude-code --copy -y
+npx skills add https://github.com/mattpocock/skills --skill handoff improve-codebase-architecture tdd --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
 npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
 npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification prd refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
@@ -170,13 +242,13 @@ Rerun the bootstrap to refresh upstream skills in a project.
 
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
-Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
+Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Keep this local set intentionally small: `git-conventional-commit` and `initialize-project-agent`. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
 
 Why both skill folders:
 
 - Codex looks for repo-local skills under `.agents/skills/`
 - Claude Code looks for repo-local skills under `.claude/skills/`
-- the shared `SKILL.md` format works for both, so this repo installs the same shared skills into each tool's expected location
+- the shared `SKILL.md` format works for both, so this repo keeps the same repo-only skills in each tool's expected location
 
 ## Sync Updated Shared Skills
 
@@ -189,7 +261,7 @@ python scripts/sync_skills.py
 To sync only one shared skill:
 
 ```bash
-python scripts/sync_skills.py initialize-project-agent
+python scripts/sync_skills.py git-conventional-commit
 ```
 
 The sync script only updates matching `.agents/skills/<skill>/` and `.claude/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.

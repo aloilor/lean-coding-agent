@@ -1,4 +1,0 @@
-interface:
-  display_name: "Adapt Best Practices"
-  short_description: "Adapt best-practice guides by stack"
-  default_prompt: "Use $adapt-best-practices to convert a general best-practices folder into language- and framework-specific guidance with researched applicability and concrete examples."
