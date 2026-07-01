@@ -39,9 +39,9 @@ The baseline is organized around a few repeatable workflows that keep context, p
 
 ```mermaid
 flowchart LR
-    A[Update shared baseline] --> B[Run bootstrap script]
-    B --> C[Install agents, skills, and browser tooling]
-    C --> D[Fill agent-context with project facts]
+    A[Update shared baseline] --> B[Run initialize-project-agent skill]
+    B --> C[Bootstrap agents, skills, and browser tooling]
+    C --> D[Run codebase-onboarding for project facts]
     D --> E[Use skills and subagents during work]
     E --> F[Capture lessons, specs, reviews, and incidents]
     F --> A
@@ -114,13 +114,13 @@ Overrides are for adjusting guidance the agent should follow (for example, where
 
 ## Initialize A New Project
 
-Run the bootstrap script from this repo and point it at the target project repo:
+Ask an agent in this repo to run `$initialize-project-agent` with the target project repo path. Do not run the bootstrap script directly for normal project setup; the skill wraps that script and then runs `$codebase-onboarding` in the target repo.
 
-```bash
-python scripts/init_project_agent.py ../your-project-repo
+```text
+Use $initialize-project-agent to initialize ../your-project-repo
 ```
 
-The script will:
+The skill will:
 
 - copy this repo's `AGENTS.md` into the target repo
 - copy this repo's `CLAUDE.md` into the target repo
@@ -146,6 +146,7 @@ The script will:
 - add Playwright CLI generated-artifact paths to the target repo's `.gitignore`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 - write `skills-lock.json` for upstream skill installs
+- run `$codebase-onboarding` in the target repo so `agent-context/` contains structured, evidence-backed project documentation, including `agent-context/skills.md`
 
 ## Playwright CLI Baseline
 
@@ -238,7 +239,7 @@ The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) r
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 
-Rerun the bootstrap to refresh upstream skills in a project.
+Rerun `$initialize-project-agent` with the project path to refresh the baseline and upstream skills in a project.
 
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 

@@ -1,22 +1,23 @@
 ---
 name: initialize-project-agent
-description: Initialize a new project repo so it uses this shared agents baseline. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private files, `agent-context`, shared `.agents/lessons`, shared subagents for Claude Code and Codex, and copied installable skills from this repo's `skills/` folder into the target repo's `.agents/skills` and `.claude/skills`.
+description: Initialize a new project repo so it uses this shared agents baseline and has populated project context. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private files, `agent-context`, shared `.agents/lessons`, shared subagents for Claude Code and Codex, copied installable skills from this repo's `skills/` folder into the target repo's `.agents/skills` and `.claude/skills`, and a follow-up `codebase-onboarding` pass.
 ---
 
 # Initialize Project Agent
 
-Use the shared bootstrap script instead of recreating the setup manually.
+Use this skill as the setup entry point for new projects. Do not ask the user to run the bootstrap script directly; run it as this skill's internal bootstrap step, then run `codebase-onboarding` in the target repo.
 
 ## Workflow
 
 1. Identify the target project repo path.
 2. Run `python scripts/init_project_agent.py <target-repo>` from this repo root.
-3. Verify the target repo now contains:
+3. Switch context to the target repo and use `$codebase-onboarding` to analyze the project and create or update structured `agent-context/` docs. If the newly installed skill is not auto-discovered in the current thread yet, read `<target-repo>/.agents/skills/codebase-onboarding/SKILL.md` and follow it directly.
+4. Verify the target repo now contains:
    - `AGENTS.md` copied exactly from this repo's `AGENTS.md`
    - `CLAUDE.md` copied exactly from this repo's `CLAUDE.md`
    - `AGENTS.local.md` for local-private agent notes
    - `CLAUDE.local.md` for local-private Claude notes
-   - `.gitignore` entries for both local files
+   - `.gitignore` entries for local files, local task folders, shared local handoff reports, and Playwright CLI generated artifacts
    - `agent-context/`
    - baseline project-context starter files copied from this repo's `agent-context/`
    - `agent-context/README.md` as a shared project-specific context starter
@@ -29,13 +30,15 @@ Use the shared bootstrap script instead of recreating the setup manually.
    - `.codex/agents/` with Codex custom agent files
    - `agent-context/skills-installed.json`
    - `.agents/skills/` and `.claude/skills/` with the copied skill folders from this repo's `skills/`
-4. Tell the user which skills were installed.
+   - `agent-context/` docs created or refreshed by `codebase-onboarding`, including `agent-context/skills.md`
+5. Tell the user which skills were installed and which `agent-context/` docs were created or updated by `codebase-onboarding`.
 
 ## Notes
 
 - Keep the folder name `agent-context` exactly as requested by this repo's convention.
 - Keep this skill in this repo's `.agents/skills/` folder because it is only for maintaining this shared repo itself.
 - Do not place this skill in `skills/`, because `skills/` is the source copied into initialized project repos.
+- Run `codebase-onboarding` only after the bootstrap script finishes so the generated `agent-context/skills.md` can include the installed project-local skills.
 - The bootstrap script is idempotent for the managed pieces:
   - It recopies the shared `AGENTS.md` and `CLAUDE.md` baseline files.
   - It creates local files only when they do not already exist.
