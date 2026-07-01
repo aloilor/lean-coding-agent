@@ -22,6 +22,8 @@ Use the shared bootstrap script instead of recreating the setup manually.
    - `agent-context/README.md` as a shared project-specific context starter
    - `.agents/lessons/`
    - `.agents/lessons/LESSONS.md` as a shared agent lessons index
+   - `.agents/skill-overrides/`
+   - `.agents/skill-overrides/INDEX.md` as a shared skill-overrides index
    - `agents/` with shared subagent source files
    - `.claude/agents/` with Claude Code subagent files
    - `.codex/agents/` with Codex custom agent files
@@ -40,6 +42,7 @@ Use the shared bootstrap script instead of recreating the setup manually.
   - It copies missing baseline project-context starter files from this repo's `agent-context/`.
   - It creates `agent-context/README.md` only when it does not already exist.
   - It creates `.agents/lessons/LESSONS.md` only when it does not already exist.
+  - It creates `.agents/skill-overrides/INDEX.md` only when it does not already exist.
   - It copies shared subagent files only when the target file does not already exist.
   - It creates Codex custom agent TOML files from the shared subagent Markdown only when the target file does not already exist.
   - It recopies the current repo-local shared skills into the target repo.

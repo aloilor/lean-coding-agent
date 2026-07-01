@@ -25,9 +25,21 @@ In other words:
 
 - this repo defines the default baseline
 - each project documents shared project-specific context in `agent-context/`
+- each project can override installed-skill behavior in `.agents/skill-overrides/`
 - each machine can keep private notes in the local files
 
 This setup keeps the global guidance consistent while still allowing every project to document what makes it unique.
+
+## Skill Overrides
+
+Installed skills (including marketplace skills) are overwritten when they update, so editing a skill directly to change its behavior for one project does not survive. Instead, each project keeps shared, committed overrides in `.agents/skill-overrides/`:
+
+- one file per overridden skill, named `<skill-name>.md` to match the skill's name
+- `.agents/skill-overrides/INDEX.md` lists each overridden skill with a one-line summary
+
+The baseline rule in `AGENTS.md` tells agents to check `INDEX.md` before running a skill and, when the skill is listed, to read and apply `.agents/skill-overrides/<skill-name>.md` as taking precedence over the skill's default behavior. This works for both Claude Code and Codex because both read `AGENTS.md`.
+
+Overrides are for adjusting guidance the agent should follow (for example, where a skill saves its output). They are shared with the team, unlike the private `AGENTS.local.md` / `CLAUDE.local.md` files.
 
 ## Initialize A New Project
 
@@ -52,6 +64,7 @@ The script will:
 - create `agent-context/README.md` when it does not already exist
 - create `docs/incidents/README.md` when it does not already exist
 - create `.agents/lessons/LESSONS.md` when it does not already exist
+- create `.agents/skill-overrides/INDEX.md` when it does not already exist
 - add `.agents/code-reviews/`, `.agents/refactor-briefs/`, `.agents/implementation-plans/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
 - add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
@@ -141,7 +154,7 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 Shared subagent source files live in [agents](agents). The bootstrap copies missing files from this folder into each target repo's `agents/` directory without overwriting project-local versions. It also installs missing Claude Code subagents under `.claude/agents/*.md` and missing Codex custom agents under `.codex/agents/*.toml`.
 
-The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
+The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `docs/spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
 
 The bug diagnosis subagent in [agents/bug-diagnostician.md](agents/bug-diagnostician.md) investigates non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs before implementation. It drafts the durable incident report under `docs/incidents/incident_YYYYMMDD_short_description.md`, capturing the evidence, root-cause hypothesis, fix direction, and verification plan in an Investigation section that `code-reviewer` trims to a summary when it finalizes the report after the fix. The draft incident report — investigation, proposed fix direction, and verification plan — must be shown to the user for approval before implementation starts.
 

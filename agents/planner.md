@@ -55,7 +55,7 @@ Use this workflow when implementation is expected to create or change externally
    - Offer ADRs only for decisions that are hard to reverse, surprising without context, and based on a real trade-off.
 3. Create the feature specification:
    - Use `$create-specification` once the core product intent is clear enough to become an implementation contract.
-   - Save new specifications under `spec/` using the `spec-[a-z0-9-]+.md` naming convention.
+   - Save new specifications under `docs/spec/` using the `spec-[a-z0-9-]+.md` naming convention.
    - When using `$create-specification`, use every resolved answer, refined term, scenario outcome, constraint, non-goal, trade-off, and decision from `$grill-with-docs` as source material for the saved specification. Condense that material into definitions, requirements, constraints, acceptance criteria, test criteria, rationale, or explicit `TBD`s. Do not leave implementation-relevant refinements only in chat, `agent-context/domain.md`, ADRs, or the planning summary.
    - Specify the problem statement, users, non-goals, behavior, inputs, outputs, validation rules, persistence rules, API contracts, integration points, edge cases, acceptance criteria, measurable success criteria, and test criteria.
    - Keep unknown constraints marked as `TBD` instead of inventing them.
@@ -276,7 +276,7 @@ Add a team invitation flow so workspace admins can invite new members by email. 
 
 ## Requirements Artifacts
 
-- Specification: `spec/spec-process-team-invitations.md`
+- Specification: `docs/spec/spec-process-team-invitations.md`
 - Refactor brief: not applicable
 - Implementation plan: `.agents/implementation-plans/implementation-plan_20260620_team_invitations.md`
 - ADRs: not needed

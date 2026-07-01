@@ -35,6 +35,8 @@ CODEX_AGENTS_DIR = Path(".codex") / "agents"
 AGENTS_DIRNAME = ".agents"
 LESSONS_DIRNAME = "lessons"
 LESSONS_INDEX_NAME = "LESSONS.md"
+SKILL_OVERRIDES_DIRNAME = "skill-overrides"
+SKILL_OVERRIDES_INDEX_NAME = "INDEX.md"
 LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
@@ -557,6 +559,37 @@ def ensure_lessons_index(target_repo: Path) -> Path:
     return index_path
 
 
+def ensure_skill_overrides_index(target_repo: Path) -> Path:
+    overrides_dir = target_repo / AGENTS_DIRNAME / SKILL_OVERRIDES_DIRNAME
+    overrides_dir.mkdir(parents=True, exist_ok=True)
+
+    index_path = overrides_dir / SKILL_OVERRIDES_INDEX_NAME
+    if not index_path.exists():
+        content = "\n".join(
+            [
+                "# Skill Overrides",
+                "",
+                "Project-specific overrides that adjust the default behavior of installed "
+                "skills without editing the skills themselves. Installed and marketplace "
+                "skills are overwritten when they update, so overrides live here instead. "
+                "These files are shared (committed), unlike the private `*.local.md` files.",
+                "",
+                "Before running a skill, check this index. If the skill is listed below, read "
+                "`.agents/skill-overrides/<skill-name>.md` and apply it — those overrides take "
+                "precedence over that skill's default behavior.",
+                "",
+                "One file per overridden skill, named `<skill-name>.md` to match the skill's "
+                "name. Add a matching clickable entry here whenever you add an override.",
+                "",
+                "- _No skill overrides yet._",
+                "",
+            ]
+        )
+        index_path.write_text(content, encoding="utf-8")
+
+    return index_path
+
+
 def load_manifest(manifest_path: Path) -> dict:
     if not manifest_path.exists():
         return {"skills": []}
@@ -691,6 +724,7 @@ def main() -> int:
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     incidents_readme_path = ensure_incidents_readme(target_repo)
     lessons_index_path = ensure_lessons_index(target_repo)
+    skill_overrides_index_path = ensure_skill_overrides_index(target_repo)
     manifest_path = agent_context_dir / MANIFEST_NAME
     legacy_manifest_paths = [
         agent_context_dir / legacy_name for legacy_name in LEGACY_MANIFEST_NAMES
@@ -739,6 +773,7 @@ def main() -> int:
     print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")
+    print(f"Ensured skill overrides index: {skill_overrides_index_path}")
     print(f"Updated ignore rules: {gitignore_path}")
     print(f"Installed {len(installs)} shared skills into:")
     for skills_root in skills_roots:

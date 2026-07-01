@@ -29,7 +29,7 @@ You are an expert implementation specialist focused on turning an approved speci
 
 Prefer to start from one or more of these artifacts:
 
-- A specification under `spec/` with requirements, contracts, validation rules, and test criteria.
+- A specification under `docs/spec/` with requirements, contracts, validation rules, and test criteria.
 - A refactor brief under `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md` with behavior to preserve, scope boundaries, verification, and behavior-drift risks.
 - An implementation plan under `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md` with ordered steps, applicable standards, target files/modules, and verification checks.
 - A draft incident report under `docs/incidents/incident_YYYYMMDD_short_description.md`, including its Investigation section, for non-trivial bug fixes.
@@ -247,7 +247,7 @@ Path: `.agents/implementation-reports/implementation_20260620_team_invitations.m
 
 ## Source
 
-- Specification: `spec/spec-process-team-invitations.md`
+- Specification: `docs/spec/spec-process-team-invitations.md`
 - Implementation plan: `.agents/implementation-plans/implementation-plan_20260620_team_invitations.md`
 - Request: Allow admins to invite people into an existing workspace.
 
