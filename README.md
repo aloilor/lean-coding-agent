@@ -238,9 +238,6 @@ The implementation subagent in [agents/implementer.md](agents/implementer.md) ex
 The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews implementer-touched files against the planner specification or refactor brief and shared implementation report, applies `engineering-standards`, `testing-standards`, and `refactor` for refactor work, and routes database changes through `sql-code-review` and `sql-optimization` when relevant. It does not edit the code under review, returns `APPROVE`, `WARNING`, or `BLOCK` for the shared review-fix loop, and saves every review pass as `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` so all agents can read the same report. For bug fixes it also finalizes the durable incident report under `docs/incidents/` from the implementer's confirmed facts on the `APPROVE` pass.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
-
-Rerun `$initialize-project-agent` with the project path to refresh the baseline and upstream skills in a project.
-
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
 Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Keep this local set intentionally small: `git-conventional-commit` and `initialize-project-agent`. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
