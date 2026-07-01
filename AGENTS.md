@@ -109,7 +109,7 @@ When given a bug report: just fix it. Point at logs, errors, or failing tests, t
 - Read `AGENTS.local.md` or `CLAUDE.local.md` when it exists; it is local, private, and ignored by git.
 - Review `.agents/lessons/LESSONS.md` and relevant linked lesson files when they exist.
 - Before running a skill, check `.agents/skill-overrides/INDEX.md` when it exists. If the skill is listed, read the matching `<skill-name>.md` override and apply it; those shared overrides take precedence over the skill's default behavior. Keep the source index in sync when adding an override.
-- Use these skills when their area applies: `engineering-standards` (coding, design, refactoring, debugging, review), `testing-standards` (test strategy, selection, naming, AAA structure, regression coverage), `refactor` (behavior-preserving restructuring), `rest-api-design` (API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, docs, contract tests).
+- Use these skills when their area applies: `engineering-standards` (coding, design, refactoring, debugging, review), `tdd` (red-green-refactor loop for behavioral implementation), `testing-standards` (test strategy, selection, naming, AAA structure, regression coverage), `refactor` (behavior-preserving restructuring), `rest-api-design` (API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, docs, contract tests).
 - Do not run the project skill update command automatically at session start. Run `npx.cmd skills update --project --yes` (Windows) or `npx skills update --project --yes` (elsewhere) only when the user asks for a skill update or the task requires syncing project skills. After it runs, check `git status --short` and report any changed skill files or failures before continuing.
 
 ## Workflows
@@ -179,8 +179,8 @@ Add deep implementation details, OOP classes, internal interfaces, or module des
 ### Feature Development Workflow
 
 1. `planner` creates the specification and implementation plan.
-2. `implementer` reads them, writes code, runs verification, loops internally until the selected tests/checks pass, and produces the implementation report.
-3. `code-reviewer` reviews the specification, implementation plan, implementer report, and touched files, then returns `APPROVE`, `WARNING`, or `BLOCK`.
+2. `implementer` reads them and implements test-first — driving each behavior through the `tdd` skill's red-green-refactor loop, with `testing-standards` for test shape and `engineering-standards` in the refactor step — then runs broader verification, loops internally until the selected tests/checks pass, and produces the implementation report with its TDD evidence.
+3. `code-reviewer` reviews the specification, implementation plan, implementer report, and touched files — including test-first evidence and SOLID, DRY, YAGNI, KISS, and code-smell design checks — then returns `APPROVE`, `WARNING`, or `BLOCK`.
 4. On `BLOCK`, return the review to `implementer`, who fixes only the reported findings, keeps the specification unchanged, reruns the relevant verification, and updates the report. Repeat the review-fix loop until `APPROVE` or a Shared Stop Condition triggers.
 5. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 

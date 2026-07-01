@@ -26,7 +26,7 @@ Use `$engineering-standards` for every review. For refactor work, also use `$ref
 
 When invoked:
 
-1. **Gather context** — Read the planner-produced specification or refactor brief, read the planner-produced implementation plan when one exists, read the shared implementation report, and identify the implementer-touched files. For bug fixes, read the draft incident report, including its Investigation section, which you finalize on the `APPROVE` pass. Run `git diff --staged` and `git diff` to see all changes. If no diff, check recent commits with `git log --oneline -5`.
+1. **Gather context** — Read the planner-produced specification or refactor brief, read the planner-produced implementation plan when one exists, read the shared implementation report including its TDD Evidence section, and identify the implementer-touched files. For bug fixes, read the draft incident report, including its Investigation section, which you finalize on the `APPROVE` pass. Run `git diff --staged` and `git diff` to see all changes. If no diff, check recent commits with `git log --oneline -5`.
 2. **Understand scope** — Identify which files changed, what feature/fix/refactor they relate to, how they connect, and which specification requirements or refactor-brief sections and implementation-plan steps they satisfy.
 3. **Read surrounding code** — Don't review changes in isolation. Read the full file and understand imports, dependencies, and call sites.
 4. **Apply review checklist** — Work through each category below, from CRITICAL to LOW, using `$engineering-standards`, `$refactor`, and `$testing-standards` for refactors, and the SQL skills when relevant.
@@ -184,12 +184,34 @@ function processUsers(users) {
 }
 ```
 
+### Test-First Discipline (HIGH)
+
+The implementer must drive behavioral changes with TDD. Using the implementation report's TDD Evidence section and the diff, check:
+
+- **Missing RED evidence** — a behavioral change with no recorded failing-assertion message, or a claimed non-behavioral exemption that actually contains behavioral logic.
+- **Tests assert implementation details** instead of observable behavior, so they would pass even if the behavior were wrong.
+- **Tests that cannot fail** — tautological or absent assertions, or coverage that never exercises the new branch.
+- **Green-by-weakening** — a previously failing test loosened, skipped (`.skip`/`xit`/pending), or deleted to reach green instead of fixing the code. Treat this as blocking: it hides a real gap.
+
+Do not flag missing tests on genuinely non-behavioral, explicitly-exempted work (config, docs, generated code).
+
+### Design Principles & Smells (HIGH)
+
+Apply `$engineering-standards` and report clear violations, not stylistic preference. Stay behind the >80% confidence gate and the "would a senior engineer on this team actually change this?" test, and consolidate related instances into one finding.
+
+- **SOLID** — a class or module with more than one reason to change (SRP); behavior that cannot extend without risky edits (OCP); a subtype that breaks its supertype's contract (LSP); an interface forcing callers to depend on members they do not use (ISP); high-level policy depending on a concrete low-level detail (DIP).
+- **DRY** — the *same stable concept or business rule* duplicated across sites, not incidental line similarity. Do not flag until the shared concept is real and stable.
+- **YAGNI** — speculative generality: abstractions, options, hooks, or config added for a hypothetical future with no current caller.
+- **KISS** — accidental complexity a simpler construct would remove: needless indirection, over-broad flexibility, deep nesting hiding the main path.
+- **Named smells** — feature envy, primitive obsession, data clumps, long parameter list, divergent change, shotgun surgery, middle man. Treat as inspection signals; report only when they cause a concrete maintenance or correctness risk.
+
 ### Stack-Specific Checks (HIGH — apply only when the stack matches)
 
 Raise these only when the project actually uses the stack. Match the project's existing language and framework; never suggest a stack change. For stacks not listed (Python, Go, Rust, etc.), apply the equivalent framework-level checks and lean on `$engineering-standards` and the SQL skills.
 
 - **React / Next.js** — incomplete `useEffect`/`useMemo`/`useCallback` dependency arrays; setState during render; array index as key for reorderable lists; prop drilling through 3+ levels; missing memoization for expensive work; `useState`/`useEffect` in Server Components; data fetching without loading/error states; stale closures in handlers.
 - **Node.js / backend** — request input used without schema validation; public endpoints without rate limiting; unbounded queries (`SELECT *` or no `LIMIT`) on user-facing paths; N+1 queries instead of a join/batch; external calls without timeouts; internal error details leaked to clients; missing or overly broad CORS.
+- **Laravel / PHP** — mass assignment from `$request->all()` into `create`/`update`/`fill` without a `FormRequest` or `$fillable`/`$guarded` guard; state-changing routes missing authorization (`Policy`/`Gate`/`authorize()` or middleware), and route-model binding without ownership scoping (IDOR); raw SQL (`DB::raw`, `whereRaw`, `selectRaw`) built with interpolated input instead of bindings; unescaped Blade `{!! !!}` rendering user data (XSS); N+1 from lazy-loaded relations without `with()` eager loading, and unbounded `->get()`/`all()` where `->paginate()` is needed; `env()` called outside `config/` (returns null once `config:cache` runs); query-builder `update`/`delete` bypassing model events and observers when they carry logic; multi-write operations without `DB::transaction()`.
 
 ### Performance (MEDIUM)
 

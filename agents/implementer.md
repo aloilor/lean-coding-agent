@@ -58,14 +58,16 @@ Use `$engineering-standards` before writing, refactoring, debugging, or reviewin
 - Apply simple design, clear naming, single responsibility, and minimal change.
 - Avoid speculative abstractions, unrelated cleanup, and broad rewrites.
 
-### Tests And Verification
+### Tests And Verification (Test-Driven)
 
-Use `$testing-standards` when adding, updating, selecting, naming, or reviewing tests.
+Drive every behavioral or logic change with the `$tdd` skill's red-green-refactor loop: write the failing test first, then the simplest code that passes, then refactor. Do not write production logic ahead of a failing test. Use `$testing-standards` for test shape — level selection, naming, Arrange-Act-Assert structure, and reliability.
 
 - Prefer behavior-focused tests that map to acceptance criteria.
 - Add regression tests for bugs and risky behavior changes.
 - Choose the smallest test level that proves the behavior.
 - Avoid flaky tests, wall-clock sleeps, shared mutable state, and implementation-detail assertions.
+
+**TDD is mandatory for behavioral and logic changes.** Non-behavioral work — pure configuration, documentation, generated code, or a throwaway spike — is exempt, but you must name the exemption explicitly in the implementation report's TDD Evidence section. If you are unsure whether a change is behavioral, treat it as behavioral and write the test first.
 
 ### Refactors
 
@@ -114,19 +116,22 @@ Use `$git-conventional-commit` only when the user asks to stage, commit, or prop
 - Check git status and preserve unrelated user changes.
 - Prefer existing abstractions and local conventions over new ones.
 
-### 3. Implement In Small Steps
+### 3. Implement Test-First (RED → GREEN → REFACTOR)
 
-- Follow the implementation plan order and specification or refactor brief requirements unless repo evidence shows a safer order.
-- Change only files required by the specification or refactor brief, or required by verification.
-- Keep each edit tied to a requirement, acceptance criterion, bug reproduction, or test.
-- Remove unused imports, dead branches, or generated code created by your own changes.
-- If a requirement becomes invalid, pause, explain the mismatch, and update the specification before continuing.
+Work one acceptance criterion or behavior at a time, following the implementation plan order unless repo evidence shows a safer order. For each one, run the `$tdd` red-green-refactor loop (use `$testing-standards` for test level, naming, and structure):
 
-### 4. Test And Verify
+- **RED** — Write one small failing test that names the behavior in domain terms. Run it and confirm it fails on the *assertion* (the behavior is missing), not on a compile or import error. A test you never watched fail proves nothing.
+- **GREEN** — Write the simplest production code that makes that test pass. Reach green by changing production code, never by weakening, skipping, or deleting the test.
+- **REFACTOR** — With the test green, apply `$engineering-standards`: remove meaningful duplication, clarify names, split mixed responsibilities, and cut accidental complexity. Keep behavior unchanged and re-run the test.
 
-- Run the narrowest meaningful tests first.
-- Broaden verification for shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
-- For bugs, prove the failing behavior before or alongside the fix when practical.
+Then repeat for the next behavior. Keep each edit tied to a requirement, acceptance criterion, bug reproduction, or test; change only files the specification or refactor brief or verification requires; and remove imports, branches, or generated code your own changes made unused. If a requirement becomes invalid, pause, explain the mismatch, and update the specification before continuing.
+
+Record the RED evidence — the actual failing assertion message — for each behavior as you go; the implementation report's TDD Evidence section depends on it. For non-behavioral work exempt from TDD, note the exemption instead.
+
+### 4. Verify And Broaden
+
+- Run the narrowest meaningful tests first, then broaden verification for shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
+- Run the full relevant suite before handoff so the red-green-refactor steps did not regress sibling behavior.
 - If a test cannot be run, state why and provide the best available substitute check.
 
 **Loop until done.** When a test fails or an acceptance criterion is unmet, fix the code (use `$engineering-standards` to keep the fix clean and minimal, `$testing-standards` for the test) and re-run. Repeat until **every** selected test passes and **each** acceptance criterion is demonstrably satisfied. Close the loop by fixing the code, never by weakening, skipping, or deleting a test. Do not report success while any required test is failing or skipped to dodge a failure, or while any acceptance criterion is unverified — if you cannot close the loop, stop and surface the blocker.
@@ -160,6 +165,7 @@ The report must include:
 - Source incident report path for bug fixes.
 - Summary of implemented behavior.
 - Touched files and why each changed.
+- Test-first (TDD) evidence: the RED failing-assertion message, GREEN, and refactor notes per behavior, or a named non-behavioral exemption.
 - Verification commands/checks and results.
 - Confirmed bug-fix facts (root cause, fix, verification, follow-ups) for `code-reviewer` to transcribe into the incident report, plus the draft incident report path.
 - Review fix history, including linked `.agents/code-reviews/review_YYYYMMDD_feature_name_pass_N.md` files when applicable.
@@ -209,6 +215,12 @@ Path: `.agents/implementation-reports/implementation_YYYYMMDD_feature_name.md`
 
 - `path/to/file.ext`: [what changed and why]
 - `path/to/test.ext`: [test coverage added or updated]
+
+## TDD Evidence
+
+For each behavioral change, record the red-green-refactor proof. For work exempt from TDD, state `not applicable — non-behavioral (<reason>)`.
+
+- [behavior]: RED — `<actual failing assertion message>`; GREEN — passing; REFACTOR — [what changed, or "none"]
 
 ## Verification
 
@@ -267,6 +279,12 @@ Path: `.agents/implementation-reports/implementation_20260620_team_invitations.m
 - `src/workspaces/invitations/create.ts`: validates admin access, normalizes email, stores token hash, and sends the invite.
 - `src/workspaces/invitations/accept.ts`: accepts valid pending invitations and prevents reuse.
 - `src/workspaces/invitations/invitations.test.ts`: covers permission denial, duplicate pending invites, expired tokens, and acceptance.
+
+## TDD Evidence
+
+- Non-admin cannot invite: RED — `expected 403, received 200`; GREEN — passing; REFACTOR — extracted `assertAdmin` guard.
+- Duplicate pending invite rejected: RED — `expected InvitationExistsError, received undefined`; GREEN — passing; REFACTOR — none.
+- Expired token cannot be accepted: RED — `expected TokenExpiredError, received accepted`; GREEN — passing; REFACTOR — none.
 
 ## Verification
 
