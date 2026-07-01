@@ -1,26 +1,34 @@
 # Duplication And Refactoring
 
-## Overview
+Duplication and smells are prompts to inspect design, not permission for broad rewrites. Refactor only when the change is in scope, behavior-preserving, and verifiable.
 
-Duplication and code smells are signals to inspect design. Refactor only when the change makes behavior clearer, safer, or easier to modify.
+## Duplication Judgment
 
-## Treat Duplication As A Design Smell
+| Signal | Usually Extract | Usually Tolerate |
+| --- | --- | --- |
+| Business rule | The same policy, invariant, permission, calculation, or validation appears in multiple places. | Rules look similar but are owned by different domains or change for different reasons. |
+| Syntax | The same code shape hides the same concept and has a clear name. | The code only looks alike and an abstraction would need a vague name. |
+| Bug risk | A future fix would need to be made in several places. | Copies are local, obvious, and cheaper to read than an indirection. |
+| Callers | Callers want one named operation. | Callers would need flags or options to recover different meanings. |
 
-### Problem It Solves
+## Safer Refactoring Steps
 
-Repeated business rules drift when one copy changes and another does not.
+Prefer small mechanical moves:
 
-### How to Apply
+- Rename for intent.
+- Extract a named function around one concept.
+- Replace deep nesting with guard clauses when it clarifies the main path.
+- Move behavior toward the data or invariant it protects.
+- Encapsulate direct mutation that can break rules.
+- Run the relevant check after each meaningful step.
 
-Extract shared behavior when the repeated code represents the same concept. Do not abstract two similar lines before a real shared idea exists.
+Avoid mixing refactors with behavior changes unless the behavior change is the requested work and the refactor is needed to make it safe.
+
+## Example
+
+Repeated authorization logic is duplication because it is one policy:
 
 ```typescript
-// BAD: copied in many handlers
-if (user.id !== invoice.ownerId || invoice.status === "paid") {
-  throw new ForbiddenError();
-}
-
-// GOOD: one named policy
 function assertCanEditInvoice(user: User, invoice: Invoice): void {
   if (user.id !== invoice.ownerId || invoice.status === "paid") {
     throw new ForbiddenError();
@@ -28,109 +36,23 @@ function assertCanEditInvoice(user: User, invoice: Invoice): void {
 }
 ```
 
-### Detection Questions
-
-- If this rule changes, how many places must be edited?
-- Is the duplication repeated behavior or only similar syntax?
-- Is there a clear name for the shared concept?
-
----
-
-## Use Code Smells As Signals
-
-### Problem It Solves
-
-Smells like long functions, vague names, flag arguments, and deep nesting often point to hidden design problems.
-
-### How to Apply
-
-Investigate the smell first. Choose the smallest refactor that clarifies the underlying issue.
+A vague helper with flags is a warning sign:
 
 ```typescript
-// Smell: copied conditional policy
-function assertCanDeleteProject(user: User, project: Project): void {
-  if (!project.isOwnedBy(user)) throw new ForbiddenError();
-  if (project.hasActiveBilling) throw new ActiveBillingError();
-}
-```
-
-### Detection Questions
-
-- What is the smell pointing at?
-- Is the issue naming, function size, control flow, duplication, or boundaries?
-- Can one small refactor clarify it?
-
----
-
-## Refactor In Small Safe Steps
-
-### Problem It Solves
-
-Broad rewrites mix behavior changes with structure changes and become hard to review.
-
-### How to Apply
-
-Prefer mechanical, behavior-preserving steps: rename, extract function, replace nesting with guards, encapsulate direct mutation, run tests.
-
-```typescript
-// BEFORE
-if (!request.user || request.user.role !== "admin") {
-  throw new ForbiddenError();
-}
-
-// AFTER
-assertAdminUser(request.user);
-```
-
-### Detection Questions
-
-- Can this be improved with one small refactor?
-- Are tests available for the behavior being preserved?
-- Is this refactor separate from behavior changes?
-
----
-
-## Avoid Premature Abstraction
-
-### Problem It Solves
-
-Bad abstractions create vague helpers, flags, and coupling that can be harder to remove than a little duplication.
-
-### How to Apply
-
-Wait until duplication reveals a shared concept. Name the abstraction after that concept.
-
-```typescript
-// BAD: one function hides separate operations
 await updateInvoice(invoice, { recalculateTax: true, sendEmail: true });
+```
 
-// GOOD: separate intentions
+Prefer separate names when intentions differ:
+
+```typescript
 await recalculateInvoiceTax(invoice);
 await sendInvoiceUpdatedEmail(invoice);
 ```
 
-### Detection Questions
-
-- Is the abstraction named after a real shared concept?
-- Does it need flags to recover meaning?
-- Are callers likely to change in different directions?
-
----
-
-## Practical Checks
+## Checks
 
 - If this rule changes, how many places must be edited?
-- What is the smell pointing at?
-- Can the improvement be made as one small safe refactor?
-- Is the abstraction clearer than the duplication it replaces?
-
----
-
-## Quick Reference
-
-| Rule | Good | Red Flag |
-|------|------|----------|
-| Duplication | Extract shared business rule | Copied policy across handlers |
-| Code Smells | Investigate cause | Automatic rewrite because code is large |
-| Small Refactors | Rename, extract, guard, test | Broad rewrite with behavior changes |
-| Abstraction Timing | Shared concept is clear | Vague helper with flags |
+- Is this repeated knowledge or only similar syntax?
+- Is there a clear domain name for the extraction?
+- Would the abstraction remove risk or just add indirection?
+- Can the refactor be reviewed and verified independently?

@@ -1,44 +1,17 @@
 # Inline Comments
 
-## Overview
+Inline comments should explain context the code cannot express clearly. First improve names and structure; then comment only on intent, constraints, tradeoffs, and surprising local behavior.
 
-Inline comments should explain context the code cannot express clearly. First make the code readable; then comment only on intent, constraints, tradeoffs, and surprising local behavior.
+## Comment Rules
 
-## Prefer Self-Explaining Code First
+| Rule | Use | Red Flag |
+| --- | --- | --- |
+| Prefer self-explaining code first | Rename or extract before adding a comment that explains what code does. | `const d = 5000; // retry delay in milliseconds` |
+| Explain why, not obvious what | Capture constraints, tradeoffs, and surprising behavior. | `i++ // increment i` |
+| Keep comments accurate | Update or delete comments when behavior changes. | Timeout/comment mismatch, stale TODO, or old business rule. |
+| Keep API docs separate | Use inline comments for local context, not public contract documentation. | A local comment tries to document caller-facing behavior. |
 
-### Problem It Solves
-
-Comments often become a patch over unclear names or tangled structure.
-
-### How to Apply
-
-Rename or extract before adding a comment that only explains what the code does.
-
-```typescript
-// BAD
-const d = 5000; // retry delay in milliseconds
-
-// GOOD
-const retryDelayMs = 5000;
-```
-
-### Detection Questions
-
-- Would a better name remove this comment?
-- Would extracting a helper make the intent clear?
-- Is the comment compensating for unclear code?
-
----
-
-## Use Comments For Why, Not For Obvious What
-
-### Problem It Solves
-
-Obvious comments add noise and drift. Missing context makes surprising code look accidental.
-
-### How to Apply
-
-Comment on intent, constraints, and tradeoffs.
+## Useful Comment Example
 
 ```typescript
 async function normalizeVendorStatus(status: string): Promise<OrderStatus> {
@@ -49,50 +22,10 @@ async function normalizeVendorStatus(status: string): Promise<OrderStatus> {
 }
 ```
 
-### Detection Questions
+## Checks
 
-- Does the comment explain why this code exists?
-- Does it capture a constraint, tradeoff, or surprising behavior?
+- Would a better name remove this comment?
+- Does the comment explain a constraint, decision, or surprising behavior?
 - Is it merely repeating the code?
-
----
-
-## Keep Comments Accurate
-
-### Problem It Solves
-
-A wrong comment teaches the wrong mental model.
-
-### How to Apply
-
-Update comments when behavior changes. Delete comments that no longer add context.
-
-```typescript
-// Keep this timeout lower than the gateway timeout so callers receive our error shape.
-const paymentTimeoutMs = 4500;
-```
-
-### Detection Questions
-
 - Did nearby behavior change without updating the comment?
-- Does the comment describe old behavior?
 - Can the comment be deleted because the code now explains itself?
-
----
-
-## Practical Checks
-
-- Does the comment explain something the code cannot say clearly?
-- Would better naming remove the need for the comment?
-- Is every comment still accurate?
-- Is this local implementation context rather than public API documentation?
-
----
-
-## Quick Reference
-
-| Rule | Good | Red Flag |
-|------|------|----------|
-| Self-Explaining First | Clear names | Comment explaining `x` |
-| Why, Not What | Vendor constraint | `i++ // increment i` |
-| Accuracy | Comment matches behavior | Timeout comment says 3s, code says 4.5s |

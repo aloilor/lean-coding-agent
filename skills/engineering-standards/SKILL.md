@@ -1,69 +1,43 @@
 ---
 name: engineering-standards
-description: Use this skill when writing code, implementing features, refactoring, planning architecture, designing systems, reviewing code, debugging, or making design decisions. This skill applies this repo's shared engineering baseline through clean code, code quality, object-oriented design, simple design, and maintainability guidance.
+description: Use this skill when writing code, implementing features, refactoring, planning architecture, designing systems, reviewing code, debugging, or making design decisions. Always apply this repo's shared engineering baseline for clean code, object-oriented design, SOLID, DRY, YAGNI, KISS, naming, documentation, simple design, and maintainability.
 ---
 
 # Engineering Standards
 
-Reusable, cross-project engineering baseline: clean code, object-oriented design, simple design, and maintainability. Keep project-specific facts in `agent-context/`; use this skill for standards that apply everywhere.
+Reusable, cross-project engineering baseline for code that is simple, maintainable, well named, verified, and documented where callers need it. Keep project-specific facts in `agent-context/`.
 
-## When This Skill Applies
+## Always Apply
 
-Use it for any code work: writing features, fixes, utilities, tests, scripts, or tooling; refactoring; planning or designing architecture; reviewing code; debugging; and making design decisions.
+- Prefer the simplest responsible design that satisfies the request.
+- Use names, structure, and tests that make behavior easy to understand and change.
+- Keep functions, modules, classes, APIs, and tests focused on one clear responsibility.
+- Avoid speculative features, extension points, abstractions, and just-in-case error handling.
+- Remove duplication only when it represents the same stable concept or business rule.
+- Document public contracts, constraints, side effects, edge cases, and failure modes; avoid comments that narrate obvious code.
+- When objects are involved, keep responsibilities cohesive, encapsulate state and behavior, protect invariants, and prefer composition over inheritance.
 
-## Core Philosophy
+## Decision Checklist
 
-> Code exists so developers can cost-effectively discover, understand, add, change, remove, test, debug, deploy, and monitor behavior. Optimize for the people who will read and change it next.
+- **Before:** What behavior is changing, and how will I verify it?
+- **During:** Is this still the simplest thing that works without creating an obvious future trap?
+- **After:** Do relevant checks pass, did my change create unused code, and would another developer understand this later?
 
-## Load The Shared Baseline First
+## Optional References
 
-Before code, design, or review work, read these compact rule indexes:
+Read only the references needed for the current task:
 
-- `references/clean-code/RULES.md`
-- `references/object-oriented-design/RULES.md`
+- `references/clean-code/RULES.md` - routing map for naming, functions, comments, documentation, duplication, smells, and complexity.
+- `references/object-oriented-design/RULES.md` - routing map for object responsibilities, SOLID, inheritance, polymorphism, patterns, and domain modeling.
 
-Each index summarizes every rule and links to a detail file. Open a detail file only when the current task needs its examples or depth — do not load the whole `references/` folder by default.
+Open detail files only when their examples or deeper questions are directly useful. Do not load the whole `references/` folder by default.
 
-## Apply The Core Lenses
+## Red Flags
 
-**SOLID** — for each class, module, function, or boundary:
+- The behavior or verification plan is unclear.
+- A new abstraction exists before a stable shared concept exists.
+- A change adds flexibility for a hypothetical future.
+- Code reaches through another object's internals instead of asking for behavior.
+- A cleanup is unrelated to the requested change or lacks verification.
 
-| Principle | Question |
-|-----------|----------|
-| SRP | Does this have one clear reason to change? |
-| OCP | Can behavior extend without risky modification? |
-| LSP | Can substitutes preserve the expected contract? |
-| ISP | Do callers depend only on what they use? |
-| DIP | Do high-level policies avoid depending on low-level details? |
-
-Detail: `references/object-oriented-design/solid-principles.md`.
-
-**Simple design, in priority order:** (1) works correctly, (2) expresses intent through clear names and obvious structure, (3) no meaningful duplication, (4) minimal — the fewest concepts necessary. Detail: `references/clean-code/complexity.md`.
-
-**Complexity** — separate essential (domain) complexity from accidental (solution) complexity, and fight the accidental kind with KISS, YAGNI, and DRY-with-judgment. Watch for change amplification, high cognitive load, and surprising coupling. Detail: `references/clean-code/complexity.md`.
-
-**Code smells** are signals to inspect design, not mandatory rewrites: long method, large class, long parameter list, feature envy, data clumps, primitive obsession, divergent change, shotgun surgery, speculative generality. Detail: `references/clean-code/code-smells.md`.
-
-**Design patterns** should emerge from real design pressure — do not force them. Detail: `references/object-oriented-design/design-patterns.md`.
-
-## Working Checklist
-
-- **Before:** Do I understand the required behavior and how I'll verify it? What is the simplest solution? Am I solving a real problem or a hypothetical one?
-- **While coding:** Is this the simplest thing that works? Does each unit have one clear responsibility? Am I depending on abstractions for a good reason? Can I name this more clearly? Am I leaving incidental duplication alone until the shared concept is clear?
-- **After it works:** Do the relevant checks pass? Any unused code my change created to remove? Are names and comments still accurate? Would another developer understand this in six months?
-
-## Red Flags — Stop And Rethink
-
-- Writing code without understanding the behavior being changed.
-- A method or class size that hides multiple responsibilities.
-- More nesting than the main path needs.
-- Hardcoding values that belong in configuration or domain rules.
-- Creating an abstraction before repeated behavior reveals a stable concept.
-- Adding features, flexibility, or error handling "just in case."
-- Data bags that force callers to own domain behavior.
-
-## Remember
-
-> "A little bit of duplication is far better than the wrong abstraction."
-
-Prefer the simplest responsible design, and let structure earn its place.
+Prefer a little local duplication over the wrong abstraction. Let structure earn its place.

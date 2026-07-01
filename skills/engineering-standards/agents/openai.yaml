@@ -1,4 +1,4 @@
 interface:
   display_name: "Engineering Standards"
-  short_description: "Apply shared coding and design standards"
-  default_prompt: "Use $engineering-standards to implement this change with the shared engineering baseline."
+  short_description: "Always apply clean code and design standards"
+  default_prompt: "Use $engineering-standards to implement this change with clean code, object-oriented design, SOLID, DRY, YAGNI, KISS, clear naming, and appropriate documentation."

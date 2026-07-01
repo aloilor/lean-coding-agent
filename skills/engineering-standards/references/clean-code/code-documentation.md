@@ -1,275 +1,56 @@
 # Code Documentation
 
-## Overview
+Documentation should help the next caller or maintainer use, change, debug, or operate behavior correctly. Prefer clear code first; document what names and types cannot make obvious.
 
-Documentation should help another engineer use code correctly without reading every implementation detail. Keep it close to the code, stable across refactors, and honest about side effects and failure modes.
+## Document Caller Contracts
 
-## Document The Public Contract First
+For public APIs, exported functions, shared modules, scripts, and durable interfaces, document the facts callers rely on:
 
-### Problem It Solves
+- Purpose and expected inputs.
+- Return values or outputs.
+- Constraints, units, ordering, and idempotency.
+- Side effects such as persistence, network calls, retries, emitted events, or file writes.
+- Failure modes, validation errors, partial failures, and recovery expectations.
+- One small honest example when usage is non-obvious.
 
-Public code is easy to misuse when callers cannot see requirements, side effects, or errors.
+Skip contract docs when the name, type, and local scope already answer the caller's next question.
 
-### How to Apply
+## Keep Documentation Close
 
-Document modules, classes, functions, endpoints, and commands that other engineers use directly.
+Put documentation where maintainers will update it with the behavior:
 
-```typescript
-/**
- * Reserves inventory for every shippable item in an order.
- *
- * Throws `OutOfStockError` when at least one item cannot be reserved.
- * Writes reservation records and emits `inventory.reserved`.
- */
-export async function reserveInventory(orderId: string): Promise<Reservation> {
-  // ...
-}
-```
+- Function or method docs for callable contracts.
+- Module docs for shared concepts and constraints.
+- README or `agent-context/` docs for project workflows and architecture.
+- Inline comments only for local non-obvious decisions.
 
-### Detection Questions
+## Prefer Stable Facts
 
-- Does the documentation tell callers how to use the code correctly?
-- Are failure modes and side effects included?
-- Are implementation details excluded unless they affect usage?
+Document behavior, constraints, and tradeoffs. Avoid temporary narration such as "first we loop over the items" when the code already says that.
 
----
+Useful comments explain:
 
-## Keep Documentation Close To The Code
+- Why an unusual choice exists.
+- Which external constraint forced a shape.
+- Which invariant must not be broken.
+- Why a simpler-looking alternative is unsafe.
 
-### Problem It Solves
+## Examples
 
-Distant docs become stale because maintainers forget to update them with code changes.
+Keep examples small, realistic, and copy-safe:
 
-### How to Apply
-
-Use docstrings or JSDoc for local public APIs, READMEs for module setup, and architecture docs for cross-module decisions.
-
-```typescript
-/**
- * Client for the billing provider's invoice endpoints.
- */
-export class BillingInvoiceClient {
-  // ...
-}
-```
-
-### Detection Questions
-
-- Is this documentation close enough to stay accurate?
-- Should this be a local comment, API doc, README, or architecture note?
-- Will future maintainers know where to update it?
-
----
-
-## Use Docstrings For Caller Contracts
-
-### Problem It Solves
-
-Blanket docstrings create noise, but missing docs on caller-facing code make contracts implicit and easy to misuse.
-
-### How to Apply
-
-Use docstrings, JSDoc, or equivalent API comments for public or shared modules, classes, functions, commands, endpoints, extension points, and cross-module helpers when callers depend on behavior beyond the name and type signature. Document the promises callers need: inputs, outputs, constraints, side effects, failure modes, idempotency, ordering, mutation, domain rules, or a small usage example. Skip docstrings for tiny private helpers when names, types, and nearby code make the usage obvious.
-
-```python
-def reserve_inventory(order_id: str) -> Reservation:
-    """Reserve stock for an order.
-
-    Idempotent for the same order_id. Raises OutOfStockError when any item
-    cannot be reserved; no partial reservations are kept.
-    """
-```
-
-### Detection Questions
-
-- Is this code public, exported, shared across modules, or used as an extension point?
-- Would a caller need to know effects, errors, constraints, or ordering before calling it?
-- Would the docstring only repeat the name, types, or obvious implementation?
-
----
-
-## Write For The Reader's Next Question
-
-### Problem It Solves
-
-Docs that stop too early leave callers guessing about order, shape, constraints, or common mistakes.
-
-### How to Apply
-
-Start short, then answer the next question a caller is likely to ask.
-
-```typescript
-/**
- * Registers a callback that runs at most once for each message id.
- */
-export function onMessageOnce(messageId: string, callback: MessageCallback): void {
-  // ...
-}
-```
-
-### Detection Questions
-
-- What will the reader likely ask next?
-- Would a short example answer faster than another paragraph?
-- Is surprising behavior explicit?
-
----
-
-## Prefer Stable Facts Over Temporary Narration
-
-### Problem It Solves
-
-Step-by-step implementation narration becomes stale after small refactors.
-
-### How to Apply
-
-Document behavior, contracts, and constraints that should remain true across implementation changes.
-
-```typescript
-/**
- * Retries only idempotent requests.
- */
-export async function sendWithRetry(request: ApiRequest): Promise<ApiResponse> {
-  // ...
-}
-```
-
-### Detection Questions
-
-- Is this fact stable across likely refactors?
-- Is this describing behavior or implementation order?
-- Would the doc stay true if helper functions changed?
-
----
-
-## Explain Edge Cases And Failure Modes
-
-### Problem It Solves
-
-Edge cases and failure modes are where callers lose data, retry incorrectly, or report false success.
-
-### How to Apply
-
-Call out behavior the caller must recover from, retry, validate, or treat carefully. If an operation is destructive, expensive, asynchronous, eventually consistent, partially successful, or not idempotent, say so clearly.
-
-```typescript
-/**
- * Imports contacts and returns per-row failures.
- *
- * The import may partially succeed. Callers should inspect `failedRows`
- * before reporting success to the user.
- */
-export async function importContacts(file: File): Promise<ContactImportResult> {
-  // ...
-}
-```
-
-### Detection Questions
-
-- Does the caller need to recover, retry, validate, or avoid data loss?
-- Is the operation destructive, expensive, asynchronous, or eventually consistent?
-- Can this run more than once, and does it need to be idempotent?
-- Are partial failures possible?
-
----
-
-## Keep Examples Small And Honest
-
-### Problem It Solves
-
-Examples are often copied. Large or unrealistic examples teach the wrong shape.
-
-### How to Apply
-
-Use the smallest example that shows correct usage.
-
-```typescript
-const page = await listInvoices(customerId, { limit: 25, cursor });
-```
-
-### Detection Questions
-
-- Is this the smallest useful example?
-- Does it show real behavior?
-- Would copying it lead to correct code?
-
----
-
-## Use Consistent Structure
-
-### Problem It Solves
-
-Inconsistent docs make readers hunt for errors, examples, and side effects.
-
-### How to Apply
-
-Use a simple proportional structure: summary, inputs, return value or effects, errors, example.
-
-```typescript
-/**
- * Creates an invoice.
- *
- * Throws `EmptyInvoiceError` when no lines are provided.
- */
-export function createInvoice(customer: Customer, lines: InvoiceLine[]): Invoice {
-  // ...
-}
-```
-
-### Detection Questions
-
-- Do similar public APIs use a similar documentation shape?
-- Is the template proportional to the code's importance?
-- Can readers find errors and examples quickly?
-
----
+- Show the minimum inputs needed.
+- Avoid fake options that do not work.
+- Include the edge case only when it changes correct use.
+- Update or delete examples when behavior changes.
 
 ## Remove Documentation That Lost Its Job
 
-### Problem It Solves
+Delete or rewrite docs that are stale, obvious, misleading, or duplicating better nearby documentation. A wrong comment is worse than no comment.
 
-Stale documentation is a bug because it makes readers trust the wrong thing.
+## Quick Checks
 
-### How to Apply
-
-Delete docs that repeat obvious code, describe removed behavior, or explain an old API shape.
-
-```typescript
-// BAD: comment repeats the name
-// Check if invoice needs review.
-const requiresManualReview = invoice.total.greaterThan(reviewThreshold);
-
-// GOOD
-const requiresManualReview = invoice.total.greaterThan(reviewThreshold);
-```
-
-### Detection Questions
-
-- Does this documentation still describe current behavior?
-- Did clearer code remove the need for the doc?
-- Is this doc helping a caller or preserving old noise?
-
----
-
-## Practical Checks
-
-- Can callers use the code safely without reading the implementation?
-- Do docstrings document caller contracts instead of obvious private helpers?
-- Are side effects, failure modes, and edge cases clear where they matter?
-- Is documentation close enough to the code to stay current?
-- Are examples small, real, and copy-safe?
-- Did you delete docs that no longer add value?
-
----
-
-## Quick Reference
-
-| Rule | Good | Red Flag |
-|------|------|----------|
-| Public Contract | Inputs, outputs, errors, effects | Callers must read implementation |
-| Close To Code | JSDoc/docstring near API | Only in a stale wiki |
-| Docstrings | Caller contracts, constraints, effects | Obvious helper narration |
-| Stable Facts | Behavior and constraints | Helper-by-helper narration |
-| Edge Cases | Partial failure, idempotency, destructive operations | Hidden retry or data-loss risks |
-| Examples | Small real usage | Huge toy setup |
-| Cleanup | Delete stale docs | Old behavior kept "for context" |
+- Would a caller know how to use this without reading the implementation?
+- Are constraints, side effects, and failure modes visible where they matter?
+- Is the documentation stable enough to survive small implementation changes?
+- Did this change make an existing comment or example inaccurate?

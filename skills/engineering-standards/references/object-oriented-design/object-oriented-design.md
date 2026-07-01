@@ -1,328 +1,92 @@
 # Object-Oriented Design
 
-## Responsibility-Driven Design (RDD)
+Object-oriented design is useful when behavior, state, identity, collaboration, or invariants need clear homes. Do not force objects or patterns where simple functions or data are clearer.
 
-The key insight: **Objects are defined by their responsibilities, not their data.**
+## Responsibility Checklist
 
-### Finding Objects
+For each unit, ask:
 
-Start with:
-1. **Nouns** in requirements → candidate objects
-2. **Verbs** → candidate methods/behaviors
-3. **Domain concepts** → value objects
+- What does it know?
+- What does it do?
+- What does it decide?
+- What invariant or contract does it protect?
+- What should callers not need to know about its internals?
 
-### Finding Responsibilities
+Use stereotypes such as entity, value object, coordinator, service provider, or gateway only as optional vocabulary after responsibilities are clear.
 
-Each object should answer:
-- What does this object **know**?
-- What does this object **do**?
-- What does this object **decide**?
+## Tell, Do Not Ask
 
-### Object Stereotypes
+Prefer asking an object for an outcome over pulling out its data and making the decision elsewhere.
 
-Every class fits one (or maybe two) stereotypes:
+Good pressure:
 
-| Stereotype | Purpose | Example |
-|------------|---------|---------|
-| **Information Holder** | Knows things, holds data | `User`, `Product`, `Address` |
-| **Structurer** | Maintains relationships | `OrderItems`, `UserGroup` |
-| **Service Provider** | Performs work | `PaymentProcessor`, `EmailSender` |
-| **Coordinator** | Orchestrates workflow | `OrderFulfillmentService` |
-| **Controller** | Makes decisions, delegates | `CheckoutController` |
-| **Interfacer** | Transforms between systems | `UserAPIAdapter`, `DatabaseMapper` |
+- A caller reaches through several properties.
+- The same decision appears near the same data in multiple places.
+- Callers must know internal state combinations to use an object safely.
 
-### The Two Questions
-
-For every class, ask:
-1. **"What pattern is this?"** - Which stereotype? Which design pattern?
-2. **"Is it doing too much?"** - Check object calisthenics rules
-
-If you can't answer clearly, the class needs refactoring.
-
----
-
-## Tell, Don't Ask
-
-**Command objects to do work. Don't interrogate them and do the work yourself.**
-
-```typescript
-// BAD: Asking, then doing
-if (account.getBalance() >= amount) {
-  account.setBalance(account.getBalance() - amount);
-  // more logic here...
-}
-
-// GOOD: Telling
-const result = account.withdraw(amount);
-if (result.isSuccess()) {
-  // ...
-}
-```
-
-The object that has the data should have the behavior.
-
----
-
-## Design by Contract (DbC)
-
-Every method has:
-- **Preconditions** - What must be true BEFORE calling
-- **Postconditions** - What will be true AFTER calling
-- **Invariants** - What is ALWAYS true about the object
-
-```typescript
-class BankAccount {
-  private balance: Money;
-
-  // INVARIANT: balance is never negative
-
-  // PRECONDITION: amount > 0
-  // POSTCONDITION: balance decreased by amount OR error returned
-  withdraw(amount: Money): WithdrawResult {
-    if (amount.isNegativeOrZero()) {
-      return WithdrawResult.invalidAmount();
-    }
-
-    if (this.balance.isLessThan(amount)) {
-      return WithdrawResult.insufficientFunds();
-    }
-
-    this.balance = this.balance.minus(amount);
-    return WithdrawResult.success(this.balance);
-  }
-}
-```
-
----
-
-## Composition Over Inheritance
-
-**Prefer composing objects over extending classes.**
-
-### Why Inheritance is Problematic:
-- Tight coupling between parent and child
-- Fragile base class problem
-- Difficult to change parent without breaking children
-- Forces "is-a" relationship that may not fit
-
-### When to Use Inheritance:
-- True "is-a" relationship (rare)
-- Framework requirements
-- Template Method pattern (intentional)
-
-### Prefer Composition:
-```typescript
-// BAD: Inheritance
-class PremiumUser extends User {
-  getDiscount(): number { return 20; }
-}
-
-// GOOD: Composition
-class User {
-  constructor(private discountPolicy: DiscountPolicy) {}
-
-  getDiscount(): number {
-    return this.discountPolicy.calculate();
-  }
-}
-
-// Now discount behavior is pluggable
-new User(new PremiumDiscount());
-new User(new StandardDiscount());
-new User(new NoDiscount());
-```
-
----
-
-## The Law of Demeter (Principle of Least Knowledge)
-
-**Only talk to your immediate friends.**
-
-A method should only call:
-1. Methods on `this`
-2. Methods on parameters
-3. Methods on objects it creates
-4. Methods on its direct components
-
-```typescript
-// BAD: Reaching through objects
-order.getCustomer().getAddress().getCity();
-
-// GOOD: Ask the immediate friend
-order.getShippingCity();
-```
-
-This reduces coupling - changes to `Address` don't ripple through all callers.
-
----
+Do not hide data blindly. Serialization, persistence mapping, UI display, and framework boundaries may legitimately expose data shapes.
 
 ## Encapsulation
 
-**Hide internal details, expose behavior.**
+Encapsulation means protecting useful invariants behind a clear contract.
 
-### Levels of Encapsulation:
-1. **Data** - private fields, no direct access
-2. **Implementation** - how things work internally
-3. **Type** - concrete class hidden behind interface
-4. **Design** - architectural decisions hidden from clients
+- Keep state private when direct mutation would break rules.
+- Expose operations that preserve valid transitions.
+- Keep validation near the concept it protects.
+- Avoid getter/setter objects that force callers to own domain behavior.
 
-```typescript
-// BAD: Exposed internals
-class Order {
-  public items: Item[] = [];
-  public total: number = 0;
-}
+## Composition And Inheritance
 
-// Client can corrupt state
-order.items.push(item);
-order.total = -999; // Oops!
+Prefer composition when behavior varies independently or can be assembled from collaborators.
 
-// GOOD: Encapsulated
-class Order {
-  private items: OrderItems;
-  private total: Money;
+Use inheritance only when:
 
-  addItem(item: Item): void {
-    this.items.add(item);
-    this.recalculateTotal();
-  }
+- The subtype is truly substitutable for the base type.
+- The base contract is stable and tested.
+- Shared behavior is real, not just shared fields.
 
-  getTotal(): Money {
-    return this.total; // Returns copy or immutable
-  }
-}
+If a subtype needs to disable parent behavior or surprise callers, use composition instead.
+
+## Law Of Demeter
+
+Talk to immediate collaborators rather than reaching through object graphs.
+
+Risky:
+
+```text
+order.customer.account.billingAddress.country
 ```
 
----
+Prefer a named operation near the owner of the knowledge:
+
+```text
+order.billingCountry()
+```
+
+Use this to reduce coupling, not to add layers of pass-through methods.
 
 ## Polymorphism
 
-**Replace conditionals with types.**
+Use polymorphism when behavior genuinely varies by type and branches are growing, volatile, or repeated.
 
-```typescript
-// BAD: Type checking
-function calculateShipping(method: string, value: number): number {
-  if (method === 'standard') return value < 50 ? 5 : 0;
-  if (method === 'express') return 15;
-  if (method === 'overnight') return 25;
-  throw new Error('Unknown method');
-}
+Prefer a simple conditional when:
 
-// GOOD: Polymorphism
-interface ShippingMethod {
-  calculateCost(orderValue: number): number;
-}
+- There are only one or two stable cases.
+- The branch is local and easy to test.
+- A new hierarchy would hide more than it clarifies.
 
-class StandardShipping implements ShippingMethod {
-  calculateCost(orderValue: number): number {
-    return orderValue < 50 ? 5 : 0;
-  }
-}
+## Domain Modeling
 
-class ExpressShipping implements ShippingMethod {
-  calculateCost(orderValue: number): number {
-    return 15;
-  }
-}
+Use richer domain models when they protect rules or clarify behavior:
 
-// Usage - no conditionals
-function calculateShipping(method: ShippingMethod, value: number): number {
-  return method.calculateCost(value);
-}
-```
+| Concept | Use When | Avoid When |
+| --- | --- | --- |
+| Value object | Equality is value-based and validation, units, or formatting matter. | A primitive is clear and has no rules. |
+| Entity | Identity and lifecycle matter more than attributes. | The data is transient or has no behavior. |
+| Aggregate | A cluster of objects must stay consistent through one root. | Simple persistence or flat data is enough. |
 
----
+Keep domain-driven design terms optional. They should clarify real domain complexity, not add ceremony to ordinary code.
 
-## Value Objects vs Entities
+## Pattern Question
 
-### Value Objects
-- Defined by their attributes (no identity)
-- Immutable
-- Comparable by value
-- Examples: `Money`, `Email`, `Address`, `DateRange`
-
-```typescript
-class Money {
-  constructor(
-    private readonly amount: number,
-    private readonly currency: string
-  ) {}
-
-  equals(other: Money): boolean {
-    return this.amount === other.amount &&
-           this.currency === other.currency;
-  }
-
-  add(other: Money): Money {
-    if (this.currency !== other.currency) {
-      throw new CurrencyMismatch();
-    }
-    return new Money(this.amount + other.amount, this.currency);
-  }
-}
-```
-
-### Entities
-- Have identity (survives attribute changes)
-- Usually mutable (via methods)
-- Comparable by identity
-- Examples: `User`, `Order`, `Product`
-
-```typescript
-class User {
-  constructor(
-    private readonly id: UserId,
-    private email: Email,
-    private name: Name
-  ) {}
-
-  equals(other: User): boolean {
-    return this.id.equals(other.id); // Identity comparison
-  }
-
-  changeEmail(newEmail: Email): void {
-    this.email = newEmail; // Still same user
-  }
-}
-```
-
----
-
-## Aggregates
-
-A cluster of objects treated as a single unit for data changes.
-
-- One object is the **aggregate root** (entry point)
-- External code only references the root
-- Root enforces invariants for the entire cluster
-
-```typescript
-// Order is the aggregate root
-class Order {
-  private items: OrderItem[] = [];
-
-  // All access through the root
-  addItem(product: Product, quantity: number): void {
-    const item = new OrderItem(product, quantity);
-    this.items.push(item);
-    this.validateTotal();
-  }
-
-  removeItem(itemId: ItemId): void {
-    this.items = this.items.filter(i => !i.id.equals(itemId));
-  }
-
-  // Root enforces invariants
-  private validateTotal(): void {
-    if (this.calculateTotal().exceeds(MAX_ORDER_VALUE)) {
-      throw new OrderTotalExceeded();
-    }
-  }
-}
-
-// BAD: Accessing items directly
-order.items.push(new OrderItem(...)); // Bypasses validation!
-
-// GOOD: Through the root
-order.addItem(product, 2); // Validation happens
-```
+Ask "Is a known pattern already present or clearly simplifying this?" only after a real design pressure appears. For pattern selection, use [design-patterns.md](./design-patterns.md).
