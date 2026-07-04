@@ -1,7 +1,7 @@
 # PHPStan configuration provisioned by the coding-agent baseline.
 #
 # Larastan and the cognitive-complexity rule are auto-registered via
-# phpstan/extension-installer (see QUALITY-PIPELINE.md for the install step),
+# phpstan/extension-installer (see docs/quality-pipeline.md for the install step),
 # so no manual `includes` for them are needed here.
 #
 # Tune `level` (0-10), `paths`, and the complexity thresholds to the project.

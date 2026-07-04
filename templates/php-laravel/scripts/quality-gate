@@ -9,7 +9,7 @@
 #
 # This repo is AGENT-ONLY by choice — there is no git pre-commit gate, so nothing
 # hard-blocks a commit and humans/other tools are not covered. A hard,
-# human-covering commit or CI gate can be added later (see QUALITY-PIPELINE.md).
+# human-covering commit or CI gate can be added later (see docs/quality-pipeline.md).
 #
 # ALL static-analysis findings are written to ONE artifact, static-report.json,
 # on every run — always fresh, so the reviewer never depends on someone producing
@@ -26,7 +26,7 @@ if ! command -v composer >/dev/null 2>&1; then
 fi
 
 if ! composer run-script --list 2>/dev/null | grep -q "quality:report"; then
-    echo "[quality-gate] 'composer quality:report' not defined yet; skipping (see QUALITY-PIPELINE.md)." >&2
+    echo "[quality-gate] 'composer quality:report' not defined yet; skipping (see docs/quality-pipeline.md)." >&2
     exit 0
 fi
 

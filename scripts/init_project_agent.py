@@ -951,7 +951,7 @@ def main() -> int:
         else:
             print("- templates already present")
         print(f"- finish setup (install tools): {laravel_quality_gate['require_command']}")
-        print("- then add composer scripts per QUALITY-PIPELINE.md")
+        print("- then add composer scripts per docs/quality-pipeline.md")
     print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")

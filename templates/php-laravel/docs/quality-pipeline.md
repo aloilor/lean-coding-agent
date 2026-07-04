@@ -2,7 +2,7 @@
 
 A deterministic quality gate for this Laravel repo, provisioned by the
 coding-agent baseline. It implements the determinism-in-the-loop model
-(`agent-context/determinism-in-the-loop-pipeline.md`): the implementer fixes
+(`../agent-context/determinism-in-the-loop-pipeline.md`): the implementer fixes
 mechanical slop before review; the reviewer audits how it was handled and owns
 the semantic layer.
 

@@ -115,7 +115,7 @@ the ceiling working together, not the floor pretending to be both.
 ## Concrete implementation
 
 See `templates/php-laravel/` in the coding-agent baseline and its
-`QUALITY-PIPELINE.md` for a worked PHP/Laravel instance (Laravel Pint +
+`docs/quality-pipeline.md` for a worked PHP/Laravel instance (Laravel Pint +
 PHPStan/Larastan + cognitive-complexity rule, ratcheted via
 `phpstan-baseline.neon`, enforced agent-only through Claude Code and Codex
 PostToolUse hooks).
