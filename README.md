@@ -76,7 +76,7 @@ flowchart TD
 
 ### Refactor Workflow
 
-A refactor writes no new failing test: it preserves behavior against the existing suite, so its report records a behavior-preserving exemption instead of red-green-refactor evidence.
+A refactor writes no new failing test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered — so its report records a behavior-preserving exemption instead of red-green-refactor evidence.
 
 ```mermaid
 flowchart TD
@@ -85,7 +85,7 @@ flowchart TD
     C --> D[Implementation plan]
     D --> E[User approval]
     E --> F[Implementer]
-    F --> G[Confirm baseline tests green]
+    F --> G[Confirm baseline tests green; add characterization tests if missing]
     G --> H[Apply one behavior-preserving change]
     H --> I[Run tests]
     I --> J{Behavior unchanged and refactor complete?}

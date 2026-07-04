@@ -78,13 +78,13 @@ Use this workflow when implementation is expected to preserve externally observa
 2. Refactor discovery:
    - Use `$refactor`, `$engineering-standards`, and `$tdd`.
    - Read the code and tests around the refactor target before proposing movement.
-   - Locate baseline tests or identify characterization checks before proposing risky movement.
+   - Locate the baseline tests covering the behavior to preserve. Where that behavior is not already covered, plan characterization tests that pin current behavior before any restructuring — do not treat manual inspection as the safety net.
    - Separate mechanical moves from possible behavior changes.
    - Use `$sql-code-review` when SQL, migrations, stored procedures, database access, permissions, persistence safety, or database-facing validation are in scope.
    - Use `$sql-optimization` when query performance, indexing, pagination, batching, execution plans, or database load are in scope.
 3. Create the refactor brief:
    - Save new refactor briefs under `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md`.
-   - Include current behavior to preserve, files/modules/boundaries in scope, files/modules/boundaries out of scope, explicit non-goals, baseline checks, post-refactor verification, behavior-drift risks, rollback risks, SQL/database risks, and required skills.
+   - Include current behavior to preserve, files/modules/boundaries in scope, files/modules/boundaries out of scope, explicit non-goals, baseline checks (including characterization tests to add first where the behavior to preserve is not yet covered), post-refactor verification, behavior-drift risks, rollback risks, SQL/database risks, and required skills.
    - State that no externally observable behavior should change unless the user explicitly approved a behavior change.
 4. Create the implementation plan using the shared implementation plan rules below.
 5. Show the refactor brief and implementation plan to the user for approval using the shared approval gate below.

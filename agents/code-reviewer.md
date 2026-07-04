@@ -343,7 +343,7 @@ When available, also check project-specific conventions from `CLAUDE.md` or proj
 - Draft incident report (with its Investigation section) that you finalize, for bug fixes
 - `$engineering-standards` guidance for reusable coding, design, refactoring, debugging, and review
 - `$refactor` guidance for behavior-preserving maintainability improvements
-- `$tdd` guidance for behavior-preserving verification and regression coverage
+- `$tdd` guidance for behavior-preserving verification and regression coverage. For refactors, confirm the behavior to preserve was already covered or that the implementer added characterization tests first; `BLOCK` a refactor of untested behavior that relied on manual inspection instead of a test safety net.
 - `$sql-code-review` guidance for SQL correctness, security, maintainability, and access control
 - `$sql-optimization` guidance for SQL performance, indexing, pagination, batching, and execution plans
 

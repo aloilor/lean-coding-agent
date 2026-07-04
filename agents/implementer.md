@@ -75,6 +75,7 @@ Use `$refactor` when changing internal structure without intended behavior chang
 
 - Pair `$refactor` with `$engineering-standards` for simple design, naming, responsibility boundaries, and minimal change.
 - Pair `$refactor` with `$tdd` to choose baseline and post-refactor verification that proves externally observable behavior stayed the same.
+- If the behavior to preserve is not already covered by tests, write characterization tests that pin the current behavior before restructuring. They pass immediately — a behavior-preserving exemption from red-green, not a TDD violation — so note it in the report's TDD Evidence section. Only start the refactor once that safety net is green.
 - If the refactor touches SQL, migrations, stored procedures, permissions, ORM queries, persistence, or database access patterns, also use `$sql-code-review`.
 - If the refactor can affect query performance, indexing, execution plans, pagination, batching, large datasets, database load, or user-facing latency, also use `$sql-optimization`.
 
