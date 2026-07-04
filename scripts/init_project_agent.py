@@ -329,8 +329,6 @@ def copy_shared_agents_baseline(target_repo: Path, shared_repo_root: Path) -> li
     for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
         relative_path = source_path.relative_to(source_dir)
         target_path = target_dir / relative_path
-        if target_path.exists():
-            continue
 
         target_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(source_path, target_path)
@@ -413,8 +411,6 @@ def install_tool_agents(target_repo: Path, shared_repo_root: Path) -> dict[str, 
         for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
             relative_path = source_path.relative_to(source_dir)
             target_path = claude_target_dir / relative_path
-            if target_path.exists():
-                continue
 
             target_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(source_path, target_path)
@@ -424,8 +420,6 @@ def install_tool_agents(target_repo: Path, shared_repo_root: Path) -> dict[str, 
         for source_path in sorted(path for path in source_dir.rglob("*.md") if path.is_file()):
             relative_path = source_path.relative_to(source_dir).with_suffix(".toml")
             target_path = codex_target_dir / relative_path
-            if target_path.exists():
-                continue
 
             target_path.parent.mkdir(parents=True, exist_ok=True)
             target_path.write_text(codex_agent_content(source_path), encoding="utf-8")
