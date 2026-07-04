@@ -6,4 +6,4 @@ Before running a skill, check `.agents/skill-overrides/INDEX.md` in the target r
 
 - [create-specification](create-specification.md) - save specifications under `docs/spec/` instead of the default `/spec/`.
 - [prd](prd.md) - save PRDs under `docs/prd/` as `prd-<name>.md`.
-- [tdd](tdd.md) - enforce repo-aware, assertion-red TDD with reliable behavior tests.
+- [tdd](tdd.md) - enforce repo-aware, assertion-red TDD with reliable behavior tests; also carries this repo's test-strategy, doubles, and testable-design guidance.

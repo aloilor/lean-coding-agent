@@ -4,7 +4,11 @@ This override extends the upstream `tdd` skill. When this file conflicts with th
 
 ## Scope
 
-Use `tdd` as the implementation driver for feature work, bug fixes, and any request that mentions test-first, red-green-refactor, regression coverage, or integration tests. Use `testing-standards` as supporting guidance for test level, repo conventions, fixtures, doubles, reliability, and final review.
+Use `tdd` as the implementation driver for feature work, bug fixes, and any request that mentions test-first, red-green-refactor, regression coverage, or integration tests. This override also carries this repo's test-strategy guidance — test level, repo conventions, fixtures, doubles, reliability, testable design, and final review — so apply it whenever you plan, write, or review tests, including non-TDD review and refactor work where the red-green loop does not run.
+
+## When To Add Or Update Tests
+
+Create or update tests when behavior changes, a bug needs reproduction before its fix, a refactor touches meaningful logic or contracts, or the change affects validation, authorization, persistence, external integrations, or user-visible workflows. Skip new tests only when existing coverage already proves the changed behavior and the risk is low. Start from risk: prioritize behavior that would hurt users, money, data, security, or operations if it broke.
 
 ## Before RED
 
@@ -36,7 +40,20 @@ Use `tdd` as the implementation driver for feature work, bug fixes, and any requ
 - Do not test private methods, internal call order, or internal collaborators.
 - Do not mock code the project owns unless the interaction itself is the public contract.
 - Mock at system boundaries only: external APIs, time, randomness, file systems, and sometimes databases. Prefer a test database or a working fake when that gives clearer confidence.
+- Know the double you use: dummy (unused argument), stub (canned return), spy (records calls), mock (asserts interactions), fake (working in-memory implementation). Prefer a fake or the real object over a mock when it gives clearer confidence.
+- Reuse existing builders, factories, fixtures, and contract tests before writing new ones. Prefer a shared builder over ad-hoc setup, and use contract tests to prove multiple implementations satisfy the same interface.
 - Expected values must come from an independent source of truth: a literal example, a worked example, a documented contract, or the spec. Do not recompute the expected value with the same logic as the implementation.
+
+## Make Hard-To-Test Code Testable
+
+Hard-to-test code is a design signal, not a reason to skip the test. When behavior is buried in a side effect or a hidden dependency, create a seam and test through it:
+
+- Inject dependencies (clock, database, HTTP, mailer, randomness) instead of constructing them inside the unit, so tests can pass fakes.
+- Return a value instead of only performing an effect.
+- Surface the effect through an injected collaborator you can spy on, or an observable result or event.
+- Separate decision from action: unit-test the logic as a pure function, keep a thin I/O wrapper for a small integration test.
+
+Prefer building the seam over testing private internals, monkeypatching globals, or scraping logs. If you genuinely cannot make it testable within the task's scope, flag it — do not silently drop the test.
 
 ## Reliability
 

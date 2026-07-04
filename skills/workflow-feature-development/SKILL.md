@@ -12,7 +12,7 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 ## Steps
 
 1. `planner` creates the specification and implementation plan.
-2. `implementer` reads them and implements test-first — driving each behavior through the `tdd` skill's red-green-refactor loop, with `testing-standards` for test shape and `engineering-standards` in the refactor step — then runs broader verification, loops internally until the selected tests/checks pass, and produces the implementation report with its TDD evidence.
+2. `implementer` reads them and implements test-first — driving each behavior through the `tdd` skill's red-green-refactor loop (which also carries test shape), with `engineering-standards` in the refactor step — then runs broader verification, loops internally until the selected tests/checks pass, and produces the implementation report with its TDD evidence.
 3. `code-reviewer` reviews the specification, implementation plan, implementer report, and touched files — including test-first evidence and SOLID, DRY, YAGNI, KISS, and code-smell design checks — then returns `APPROVE`, `WARNING`, or `BLOCK`.
 4. On `BLOCK`, return the review to `implementer`, who fixes only the reported findings, keeps the specification unchanged, reruns the relevant verification, and updates the report. Repeat the review-fix loop until `APPROVE` or a Shared Stop Condition triggers.
 5. Run broader final verification when the work touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.

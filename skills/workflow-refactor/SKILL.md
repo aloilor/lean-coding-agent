@@ -12,7 +12,7 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 ## Steps
 
 1. `planner` writes a refactor brief (current behavior to preserve; in-scope and out-of-scope boundaries; baseline and post-refactor verification; behavior-drift and rollback risks; any SQL/persistence risks needing `sql-code-review` or `sql-optimization`) plus a matching implementation plan, and shows both for approval before implementation.
-2. `implementer` performs only the approved refactor using `refactor`, `engineering-standards`, and `testing-standards` (plus the SQL skills when database access is touched), keeps changes surgical, runs the planned verification, and produces the implementation report.
+2. `implementer` performs only the approved refactor using `refactor`, `engineering-standards`, and `tdd` (plus the SQL skills when database access is touched), keeps changes surgical, runs the planned verification, and produces the implementation report.
 3. `code-reviewer` reviews the brief, plan, report, and touched files for behavior drift, scope creep, missed tests, and unnecessary abstraction. On `BLOCK`, loop with `implementer` until `APPROVE` or a Shared Stop Condition triggers.
 4. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 

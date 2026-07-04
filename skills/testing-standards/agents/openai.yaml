@@ -1,4 +1,0 @@
-interface:
-  display_name: "Testing Standards"
-  short_description: "Choose and write useful tests"
-  default_prompt: "Use $testing-standards to plan or review the tests for this change."

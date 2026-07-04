@@ -76,7 +76,7 @@ Use this workflow when implementation is expected to preserve externally observa
    - Identify files, modules, ownership boundaries, behavior changes, cleanup, or opportunistic improvements that are out of scope.
    - Ask clarifying questions only when repo exploration cannot determine the preservation boundary or risk.
 2. Refactor discovery:
-   - Use `$refactor`, `$engineering-standards`, and `$testing-standards`.
+   - Use `$refactor`, `$engineering-standards`, and `$tdd`.
    - Read the code and tests around the refactor target before proposing movement.
    - Locate baseline tests or identify characterization checks before proposing risky movement.
    - Separate mechanical moves from possible behavior changes.
@@ -96,7 +96,7 @@ After the specification or refactor brief is stable enough for implementation, c
 - Save the plan under `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`.
 - Treat the saved file as the source of truth for the implementer handoff. The planning summary may link to it or summarize it, but should not be the only place the plan exists.
 - Follow `$engineering-standards` when available for coding, design, refactoring, debugging, and review guidance.
-- Use `$testing-standards` when available for test strategy, test selection, test naming, Arrange-Act-Assert structure, regression coverage, and verification.
+- Use `$tdd` when available for test strategy, test selection, test naming, Arrange-Act-Assert structure, regression coverage, and verification.
 - Use `$rest-api-design` when REST API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, documentation, or API contract tests are in scope.
 - Use `$sql-code-review` when SQL, migrations, stored procedures, database access, permissions, persistence safety, or database-facing validation are in scope.
 - Use `$sql-optimization` when query performance, indexing, pagination, batching, execution plans, or database load are in scope.
@@ -154,7 +154,7 @@ Before any implementation starts, show the user the planning summary, specificat
 ## Implementation Plan
 
 - Artifact: [.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md]
-- Standards to apply: [`engineering-standards`; `testing-standards`; `rest-api-design` if API work applies; `sql-code-review` / `sql-optimization` if database work applies]
+- Standards to apply: [`engineering-standards`; `tdd`; `rest-api-design` if API work applies; `sql-code-review` / `sql-optimization` if database work applies]
 - Step 1: [implementation step tied to requirement IDs]
   - Files/modules: [known targets or discovery needed]
   - Verify: [test, command, or inspection check]
@@ -215,7 +215,7 @@ Before any implementation starts, show the user the planning summary, specificat
 ## Implementation Plan
 
 - Artifact: `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`
-- Standards to apply: [`refactor`; `engineering-standards`; `testing-standards`; `sql-code-review` / `sql-optimization` if database work applies]
+- Standards to apply: [`refactor`; `engineering-standards`; `tdd`; `sql-code-review` / `sql-optimization` if database work applies]
 - Step 1: [refactor step tied to refactor-brief section]
   - Files/modules: [known targets or discovery needed]
   - Verify: [test, command, or inspection check]
@@ -292,7 +292,7 @@ Add a team invitation flow so workspace admins can invite new members by email. 
 ## Implementation Plan
 
 - Artifact: `.agents/implementation-plans/implementation-plan_20260620_team_invitations.md`
-- Standards to apply: `engineering-standards`, `testing-standards`, `rest-api-design`, `sql-code-review`
+- Standards to apply: `engineering-standards`, `tdd`, `rest-api-design`, `sql-code-review`
 - Step 1: Add invitation persistence and token hashing tied to invitation requirements.
   - Files/modules: `src/workspaces/`, database migrations
   - Verify: migration applies cleanly; duplicate and expiration tests pass.
@@ -350,8 +350,8 @@ Path: `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md`
 
 ## Required Skills
 
-- Implementer: [`refactor`, `engineering-standards`, `testing-standards`, plus SQL skills when applicable]
-- Reviewer: [`refactor`, `engineering-standards`, `testing-standards`, plus SQL skills when applicable]
+- Implementer: [`refactor`, `engineering-standards`, `tdd`, plus SQL skills when applicable]
+- Reviewer: [`refactor`, `engineering-standards`, `tdd`, plus SQL skills when applicable]
 ```
 
 ## Red Flags to Check

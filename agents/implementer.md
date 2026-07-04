@@ -60,7 +60,7 @@ Use `$engineering-standards` before writing, refactoring, debugging, or reviewin
 
 ### Tests And Verification (Test-Driven)
 
-Drive every behavioral or logic change with the `$tdd` skill's red-green-refactor loop: write the failing test first, then the simplest code that passes, then refactor. Do not write production logic ahead of a failing test. Use `$testing-standards` for test shape — level selection, naming, Arrange-Act-Assert structure, and reliability.
+Drive every behavioral or logic change with the `$tdd` skill's red-green-refactor loop: write the failing test first, then the simplest code that passes, then refactor. Do not write production logic ahead of a failing test. `$tdd` also covers test shape — level selection, naming, Arrange-Act-Assert structure, and reliability.
 
 - Prefer behavior-focused tests that map to acceptance criteria.
 - Add regression tests for bugs and risky behavior changes.
@@ -74,7 +74,7 @@ Drive every behavioral or logic change with the `$tdd` skill's red-green-refacto
 Use `$refactor` when changing internal structure without intended behavior changes, cleaning up code smells, or improving maintainability.
 
 - Pair `$refactor` with `$engineering-standards` for simple design, naming, responsibility boundaries, and minimal change.
-- Pair `$refactor` with `$testing-standards` to choose baseline and post-refactor verification that proves externally observable behavior stayed the same.
+- Pair `$refactor` with `$tdd` to choose baseline and post-refactor verification that proves externally observable behavior stayed the same.
 - If the refactor touches SQL, migrations, stored procedures, permissions, ORM queries, persistence, or database access patterns, also use `$sql-code-review`.
 - If the refactor can affect query performance, indexing, execution plans, pagination, batching, large datasets, database load, or user-facing latency, also use `$sql-optimization`.
 
@@ -118,7 +118,7 @@ Use `$git-conventional-commit` only when the user asks to stage, commit, or prop
 
 ### 3. Implement Test-First (RED → GREEN → REFACTOR)
 
-Work one acceptance criterion or behavior at a time, following the implementation plan order unless repo evidence shows a safer order. For each one, run the `$tdd` red-green-refactor loop (use `$testing-standards` for test level, naming, and structure):
+Work one acceptance criterion or behavior at a time, following the implementation plan order unless repo evidence shows a safer order. For each one, run the `$tdd` red-green-refactor loop (which also carries test level, naming, and structure guidance):
 
 - **RED** — Write one small failing test that names the behavior in domain terms. Run it and confirm it fails on the *assertion* (the behavior is missing), not on a compile or import error. A test you never watched fail proves nothing.
 - **GREEN** — Write the simplest production code that makes that test pass. Reach green by changing production code, never by weakening, skipping, or deleting the test.
@@ -135,7 +135,7 @@ Record the RED evidence — the actual failing assertion message — for each be
 - If a test cannot be run, state why and provide the best available substitute check.
 - **Run the deterministic quality gate** if the repo provides one (e.g. a `scripts/quality-gate` script, PostToolUse hooks, `composer quality`, `npm run lint`, static-analysis configs like `phpstan.neon`). The gate collects all static-analysis findings — analyzed across the whole project, not just your edits — into a single artifact (e.g. `static-report.json`). **Scope your fixes to findings your change caused in the files you touched.** For that set, do not hand mechanical slop to the reviewer. New findings your change ripples into *untouched* files (e.g. a caller you did not open) — do **not** fix them; **flag them** in the implementation report for the reviewer to weigh, and leave them in the artifact. Pre-existing findings unrelated to your change are not yours to fix; the ratchet baseline grandfathers them. If you deliberately grandfather a finding into the baseline (e.g. `phpstan-baseline.neon`) instead of fixing it, that is a rare, justified exception you must call out in the report. The reviewer reads the artifact and audits the baseline diff. See the repo's pipeline doc (`agent-context/determinism-in-the-loop-pipeline.md`) and any `QUALITY-PIPELINE.md`.
 
-**Loop until done.** When a test fails or an acceptance criterion is unmet, fix the code (use `$engineering-standards` to keep the fix clean and minimal, `$testing-standards` for the test) and re-run. Repeat until **every** selected test passes and **each** acceptance criterion is demonstrably satisfied. Close the loop by fixing the code, never by weakening, skipping, or deleting a test. Do not report success while any required test is failing or skipped to dodge a failure, or while any acceptance criterion is unverified — if you cannot close the loop, stop and surface the blocker.
+**Loop until done.** When a test fails or an acceptance criterion is unmet, fix the code (use `$engineering-standards` to keep the fix clean and minimal, `$tdd` for the test) and re-run. Repeat until **every** selected test passes and **each** acceptance criterion is demonstrably satisfied. Close the loop by fixing the code, never by weakening, skipping, or deleting a test. Do not report success while any required test is failing or skipped to dodge a failure, or while any acceptance criterion is unverified — if you cannot close the loop, stop and surface the blocker.
 
 **Stop the loop when it stops making progress.** Each iteration must change something meaningful and be informed by the actual failure output — never re-run the same change hoping for a different result. Track whether you are converging (different error, fewer failures) or stuck (the same failure after distinct attempts). Hard-stop and surface the blocker when any of these holds:
 
