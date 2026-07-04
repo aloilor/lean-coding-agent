@@ -100,6 +100,7 @@ After the specification or refactor brief is stable enough for implementation, c
 - Use `$rest-api-design` when REST API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, documentation, or API contract tests are in scope.
 - Use `$sql-code-review` when SQL, migrations, stored procedures, database access, permissions, persistence safety, or database-facing validation are in scope.
 - Use `$sql-optimization` when query performance, indexing, pagination, batching, execution plans, or database load are in scope.
+- Include the repo's deterministic quality gate in verification when it exists, applying the Static-Analysis Complexity Gate from `AGENTS.md`.
 - Break the work into ordered implementation steps, with each step tied to the relevant requirement IDs or refactor-brief sections, files or modules to inspect/change when known, and a verification check.
 - Name supporting refactors only when they directly reduce risk, remove duplication introduced by the change, or prevent brittle implementation.
 - Keep the plan at engineering-task granularity; do not invent internal classes, interfaces, or architectural details unless the specification, refactor brief, existing architecture, or an ADR requires them.
@@ -244,7 +245,7 @@ Before any implementation starts, show the user the planning summary, specificat
 3. Minimize changes: prefer extending existing patterns over introducing new architecture.
 4. Preserve project language: use glossary terms from `agent-context/domain.md` when they exist.
 5. Keep requirements reviewable: acceptance criteria and test criteria should be concrete enough for implementation and code review.
-6. Make verification explicit: every implementation step needs a test, command, or inspection check.
+6. Make verification explicit: every implementation step needs a test, command, or inspection check, including the deterministic quality gate when the repo provides one.
 7. Make implementation plans standards-aware and durable: save the plan as a handoff artifact, route API work through REST API standards, and route database work through SQL review or optimization standards as applicable.
 8. Keep planning contracts clear: specifications define intended behavior changes; refactor briefs define behavior-preservation boundaries and verification.
 9. Document durable decisions: use ADRs only when the trade-off deserves future context.
@@ -340,6 +341,7 @@ Path: `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md`
 ## Verification Plan
 
 - Baseline checks before changes: [tests, commands, inspections, or "not feasible" with reason]
+- Static-analysis complexity gate: [apply `AGENTS.md`; in-scope findings to resolve, or "no gate in this repo"]
 - Post-refactor checks: [tests, commands, inspections]
 
 ## Risks
@@ -359,6 +361,7 @@ Path: `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md`
 - Specifications that skip `grill-with-docs` for domain-heavy work.
 - Specifications without requirement IDs, contracts, validation rules, or test criteria.
 - Refactor briefs without explicit behavior-preservation boundaries, baseline checks, or post-refactor verification.
+- Development plans that omit an available deterministic quality gate or the Static-Analysis Complexity Gate from `AGENTS.md`.
 - New abstractions that are not required by the specification or refactor brief.
 - Missing migration, rollback, permission, privacy, or failure-state coverage.
 - Testing strategy that only says "run tests" without naming what must be covered.

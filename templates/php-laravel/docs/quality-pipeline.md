@@ -84,6 +84,12 @@ Complexity is checked at the edit tier because it is per-file. Duplication and
 architecture are relationships *between* files, so they belong at the whole-repo
 CI tier, ratcheted — not scoped to touched files.
 
+## Standing complexity objective
+
+For every feature, bug-fix, and refactor workflow, apply the
+Static-Analysis Complexity Gate from `AGENTS.md`. In short: the gate is
+ratcheted, scoped, and blocking for in-scope target complexity findings.
+
 ## How the agents use it
 
 **Implementer** — after implementing, run the gate and resolve it before
@@ -99,7 +105,9 @@ findings across the project. Fix only the findings **your change caused in the
 files you touched**. New findings your change ripples into *untouched* files (a
 caller you did not open) — do **not** fix them for now; **flag them in the report**
 for the reviewer and leave them in the artifact. Pre-existing unrelated findings
-are grandfathered by the baseline, not yours to fix.
+are grandfathered by the baseline, not yours to fix. In-scope target complexity
+findings are not residual risk: keep fixing until they are below threshold, or
+stop under the shared stop conditions and report the blocker.
 
 Record in the implementation report: gate result, any new
 `phpstan-baseline.neon` entries with justification, and any flagged (unfixed)
@@ -110,6 +118,8 @@ ripple findings in untouched files.
 - Read `static-report.json` for the static-analysis findings — the gate keeps it
   current, so it is always present. If in doubt, regenerate with
   `sh scripts/quality-gate`.
+- `BLOCK` when the Static-Analysis Complexity Gate from `AGENTS.md` is not
+  satisfied.
 - Run `git diff -- phpstan-baseline.neon` — **new suppressions are the
   highest-signal review catch.** A finding baselined instead of fixed is a
   blocking issue unless explicitly justified.

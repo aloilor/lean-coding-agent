@@ -50,6 +50,8 @@ assignment**:
   stale, regenerate it (e.g. `sh scripts/quality-gate`). **Correlate** its
   findings with the smells you spot — static hotspots and semantic smells tend to
   co-locate.
+- **Apply the Static-Analysis Complexity Gate from `AGENTS.md`.** `BLOCK` when
+  the artifact still reports unresolved in-scope complexity findings.
 - **Check ripple, and check scope, against the touched-file list.** The
   implementer fixes only findings its change caused in files it touched; new
   findings the change rippled into *untouched* files should be **flagged in the
@@ -295,14 +297,13 @@ Use these exact verdict tokens so the review-fix loop can consume them:
 
 - `APPROVE`: no findings that should be fixed before handoff.
 - `WARNING`: findings exist, but they are not automatically blocking; fix when tied to the specification, a likely bug, a security/privacy risk, or a meaningful test gap.
-- `BLOCK`: critical issues, required specification or refactor-brief mismatches, serious correctness/security risks, or missing required review inputs.
+- `BLOCK`: critical issues, required specification or refactor-brief mismatches, unresolved in-scope static-analysis complexity findings, serious correctness/security risks, or missing required review inputs.
 
 ## Approval Criteria
 
-- **Approve**: No CRITICAL or HIGH issues, including clean reviews with zero
-  findings. This is a valid and expected outcome.
+- **Approve**: No CRITICAL or HIGH issues and no unresolved in-scope static-analysis complexity findings, including clean reviews with zero findings. This is a valid and expected outcome.
 - **Warning**: HIGH issues only (can merge with caution)
-- **Block**: CRITICAL issues found — must fix before merge
+- **Block**: CRITICAL issues or unresolved in-scope static-analysis complexity findings found — must fix before merge
 
 Do not withhold approval to appear rigorous. If the diff is clean, approve it.
 

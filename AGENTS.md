@@ -157,6 +157,18 @@ Stop the implementation or review-fix loop and surface a blocker when any of the
 
 When you stop, report the failing check, the actual error, what you tried, and your best hypothesis. Never silently keep looping or quietly expand scope to force green.
 
+### Static-Analysis Complexity Gate
+
+For all development workflows — feature development, bug fixing, and refactoring — static-analysis complexity is a standing ratcheted acceptance criterion when the repo provides a deterministic gate (`scripts/quality-gate`, `composer quality`, PHPStan cognitive complexity, lint/static-analysis scripts, or equivalent).
+
+- New code must stay under the configured complexity thresholds.
+- Changed methods/classes/files must not introduce or worsen complexity violations.
+- In-scope target methods/classes/files named by the request, specification, bug investigation, refactor brief, or implementation plan must have their reported complexity findings resolved before approval.
+- Pre-existing unrelated findings outside the approved scope are reported or left to the ratchet baseline, not fixed opportunistically.
+- "Improved but still over threshold" is incomplete for in-scope target code unless the user explicitly approved a partial-reduction objective.
+
+The implementer must keep going until in-scope complexity findings are resolved or a Shared Stop Condition applies. The reviewer must `BLOCK` approval when the current static-analysis artifact still reports in-scope complexity violations.
+
 ### Workflow Selection Rules
 
 Match the request to a row, then **invoke that workflow's skill** with the Skill tool and orchestrate it from the main agent. Each workflow's steps live in its skill; the shared rules above apply to all of them. When multiple rows match, use the most specific one that covers the requested outcome, and keep scope limited to what the user asked for.

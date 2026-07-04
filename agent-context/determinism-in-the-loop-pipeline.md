@@ -44,6 +44,13 @@ grandfather existing debt, and block only **regressions**. New code may not make
 duplication / complexity / type errors worse; existing debt can only trend down.
 Whole-repo static analysis is only deployable in ratcheted form.
 
+For agent development workflows, static-analysis complexity is always an
+objective under that ratchet: new code must be below threshold, changed code must
+not introduce or worsen violations, and any explicitly in-scope target code must
+have its reported complexity findings resolved before approval. Pre-existing
+unrelated findings stay in the baseline or the report; they are not an excuse for
+opportunistic cleanup outside the approved scope.
+
 ## Placement: implementer fixes, reviewer audits
 
 Static-analysis findings are deterministic and already-true; they do not need
@@ -66,11 +73,13 @@ reviewer ── receives the report as READ-ONLY context ──►
 Static analysis is the reviewer's **instrument panel**, not its **assignment**.
 
 **Fix scope.** When analysis is whole-project, the artifact holds findings beyond
-the change. The implementer fixes only findings **its change caused in the files
-it touched**. New findings the change ripples into *untouched* files (a caller it
-did not open) are **flagged for the reviewer, not fixed** — this keeps edits
-scoped without silently shipping a regression. Pre-existing unrelated findings
-are the baseline's job, not the change's.
+the change. The implementer fixes findings its change caused in the files it
+touched, plus any explicitly in-scope target findings named by the task,
+specification, bug investigation, refactor brief, or implementation plan. New
+findings the change ripples into *untouched* files (a caller it did not open) are
+**flagged for the reviewer, not fixed** — this keeps edits scoped without
+silently shipping a regression. Pre-existing unrelated findings are the
+baseline's job, not the change's.
 
 Two failure modes this ordering avoids:
 

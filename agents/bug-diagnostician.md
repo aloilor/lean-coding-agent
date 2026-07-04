@@ -66,7 +66,7 @@ Use skills deliberately. Do not load every skill for every investigation; choose
 
 ### 4. Handoff
 
-- Create or update one draft incident report under `docs/incidents/incident_YYYYMMDD_short_description.md`, including the Investigation section with evidence, root-cause hypothesis, fix direction, and verification plan.
+- Create or update one draft incident report under `docs/incidents/incident_YYYYMMDD_short_description.md`, including the Investigation section with evidence, root-cause hypothesis, fix direction, verification plan, and any repo-provided deterministic quality gate. Apply the Static-Analysis Complexity Gate from `AGENTS.md`.
 - Hand that path to the main agent so the investigation, proposed fix direction, and verification plan can be shown to the user for approval.
 - Do not start implementation yourself.
 - Do not hand off to `implementer` until the user explicitly approves implementation.
@@ -101,7 +101,7 @@ Working notes from diagnosis. Code-reviewer trims to a short summary when it fin
 - Areas involved: [`path/to/file.ext` → why it matters; `path/to/test.ext` → coverage or reproduction relevance]
 - Likely root cause: [fact-backed hypothesis]
 - Fix recommendation: [smallest responsible repair direction; tests or checks the implementer should add/update]
-- Verification plan: [check expected to fail before the fix or prove regression; check expected to pass after the fix]
+- Verification plan: [check expected to fail before the fix or prove regression; check expected to pass after the fix; deterministic quality gate, or "no gate in this repo"]
 - Unknowns / risks: [none, or concise uncertainty]
 
 ## Root Cause

@@ -11,9 +11,9 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 
 ## Steps
 
-1. `planner` writes a refactor brief (current behavior to preserve; in-scope and out-of-scope boundaries; baseline and post-refactor verification; behavior-drift and rollback risks; any SQL/persistence risks needing `sql-code-review` or `sql-optimization`) plus a matching implementation plan, and shows both for approval before implementation.
-2. `implementer` performs only the approved refactor using `refactor`, `engineering-standards`, and `tdd` (plus the SQL skills when database access is touched). Where the behavior to preserve has no test coverage, it first adds characterization tests that pin current behavior, then keeps changes surgical, runs the planned verification, and produces the implementation report.
-3. `code-reviewer` reviews the brief, plan, report, and touched files for behavior drift, scope creep, missed tests, and unnecessary abstraction. On `BLOCK`, loop with `implementer` until `APPROVE` or a Shared Stop Condition triggers.
+1. `planner` writes a refactor brief (current behavior to preserve; in-scope and out-of-scope boundaries; baseline and post-refactor verification, including any deterministic quality gate; behavior-drift and rollback risks; any SQL/persistence risks needing `sql-code-review` or `sql-optimization`) plus a matching implementation plan, and shows both for approval before implementation.
+2. `implementer` performs only the approved refactor using `refactor`, `engineering-standards`, and `tdd` (plus the SQL skills when database access is touched). Where the behavior to preserve has no test coverage, it first adds characterization tests that pin current behavior, then keeps changes surgical, runs the planned verification and any repo-provided deterministic quality gate, applies the Static-Analysis Complexity Gate from `AGENTS.md`, and produces the implementation report.
+3. `code-reviewer` reviews the brief, plan, report, deterministic gate artifact, and touched files for behavior drift, scope creep, complexity gate outcome, missed tests, and unnecessary abstraction. On `BLOCK`, loop with `implementer` until `APPROVE` or a Shared Stop Condition triggers.
 4. Run broader final verification when the refactor touches shared behavior, API contracts, persistence, auth, security, or user-facing workflows.
 
-A refactor is successful only if externally observable behavior is unchanged, unless the user explicitly approves a behavior change.
+A refactor is successful only if externally observable behavior is unchanged and the Static-Analysis Complexity Gate from `AGENTS.md` is satisfied, unless the user explicitly approves a behavior change or partial-reduction complexity objective.
