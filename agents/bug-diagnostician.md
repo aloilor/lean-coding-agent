@@ -38,7 +38,6 @@ Use skills deliberately. Do not load every skill for every investigation; choose
 - Use `$tdd` when selecting reproduction checks, regression tests, or verification strategy.
 - Use `$sql-code-review` when the suspected cause touches SQL, migrations, stored procedures, permissions, ORM queries, persistence, or database access patterns.
 - Use `$sql-optimization` when query performance, indexing, execution plans, pagination, batching, large datasets, database load, or latency may be part of the failure.
-- Use `$rest-api-design` when the bug concerns HTTP contracts, request/response shapes, status codes, validation errors, auth, pagination, versioning, or compatibility.
 
 ## Diagnosis Workflow
 
