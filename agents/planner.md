@@ -107,136 +107,11 @@ After the specification or refactor brief is stable enough for implementation, c
 
 ### Shared Approval Gate
 
-Before any implementation starts, show the user the planning summary, specification path or refactor brief path, implementation plan path, open questions, assumptions, and meaningful tradeoffs.
+Before any implementation starts, show the user a planning summary. The summary is the planner's synthesis for approval and must include: an overview of the intended change, the specification path or refactor brief path, the implementation plan path, the testing or verification strategy, open questions, assumptions, meaningful tradeoffs, and success criteria.
 
 - Do not invoke `$implementer`, hand off to an implementation agent, or imply implementation can begin until the user explicitly approves the plan and specification or refactor brief.
 - If the user requests changes to the plan, specification, or refactor brief, update the relevant artifacts and show the revised version for approval again.
 - Treat approval as required even when the plan feels obvious, unless the user explicitly bypasses planning approval for that task.
-
-## Feature Planning Output Format
-
-```markdown
-# Planning Summary: [Feature Name]
-
-## Overview
-
-[2-3 sentence summary of the intended change and why it matters.]
-
-## Current Understanding
-
-- Request: [plain-language restatement]
-- Users: [primary users or TBD]
-- Constraints: [known constraints]
-- Assumptions: [explicit assumptions]
-- Non-goals: [out of scope]
-
-## Discovery Status
-
-- Documentation reviewed: [agent-context files, ADRs, related docs]
-- Code reviewed: [files, modules, or patterns checked]
-- Open questions: [questions that still affect scope or contracts]
-- Resolved terminology: [domain terms settled through grill-with-docs]
-
-## Requirements Artifacts
-
-- Specification: [path or "required next"]
-- Refactor brief: [.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md, "not applicable", or "required next"]
-- Implementation plan: [.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md or "required next"]
-- ADRs: [path, "not needed", or "recommended"]
-- Approval required before implementation: yes
-
-## Testing Strategy
-
-- Unit tests: [specific units and files]
-- Integration tests: [contracts, data flow, API behavior]
-- End-to-end tests: [critical user journeys]
-- Regression checks: [existing behavior that must remain unchanged]
-
-## Implementation Plan
-
-- Artifact: [.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md]
-- Standards to apply: [`engineering-standards`; `tdd`; `rest-api-design` if API work applies; `sql-code-review` / `sql-optimization` if database work applies]
-- Step 1: [implementation step tied to requirement IDs]
-  - Files/modules: [known targets or discovery needed]
-  - Verify: [test, command, or inspection check]
-- Step 2: [implementation step tied to requirement IDs]
-  - Files/modules: [known targets or discovery needed]
-  - Verify: [test, command, or inspection check]
-- Supporting refactors: [none, or narrowly scoped rationale]
-
-## Risks & Mitigations
-
-- **Risk**: [specific risk]
-  - Mitigation: [practical mitigation]
-
-## Success Criteria
-
-- [ ] [measurable criterion]
-- [ ] [measurable criterion]
-- [ ] All required tests pass.
-```
-
-## Refactor Planning Output Format
-
-```markdown
-# Refactor Planning Summary: [Refactor Name]
-
-## Overview
-
-[2-3 sentence summary of the internal structure change and why it is needed.]
-
-## Current Understanding
-
-- Request: [plain-language restatement]
-- Behavior to preserve: [externally observable behavior, contracts, APIs, data shapes, workflows]
-- Constraints: [known constraints]
-- Assumptions: [explicit assumptions]
-- Non-goals: [out of scope]
-
-## Discovery Status
-
-- Documentation reviewed: [agent-context files, ADRs, related docs]
-- Code reviewed: [files, modules, or patterns checked]
-- Existing tests/checks found: [tests, commands, or "none found"]
-- Open questions: [questions that still affect scope, verification, or behavior preservation]
-
-## Refactor Artifacts
-
-- Refactor brief: `.agents/refactor-briefs/refactor-brief_YYYYMMDD_feature_name.md`
-- Implementation plan: `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`
-- ADRs: [path, "not needed", or "recommended"]
-- Approval required before implementation: yes
-
-## Verification Strategy
-
-- Baseline checks before changes: [tests, commands, inspections, or "not feasible" with reason]
-- Post-refactor checks: [tests, commands, inspections]
-- Regression checks: [specific behavior that must remain unchanged]
-
-## Implementation Plan
-
-- Artifact: `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`
-- Standards to apply: [`refactor`; `engineering-standards`; `tdd`; `sql-code-review` / `sql-optimization` if database work applies]
-- Step 1: [refactor step tied to refactor-brief section]
-  - Files/modules: [known targets or discovery needed]
-  - Verify: [test, command, or inspection check]
-- Step 2: [refactor step tied to refactor-brief section]
-  - Files/modules: [known targets or discovery needed]
-  - Verify: [test, command, or inspection check]
-
-## Risks & Mitigations
-
-- **Behavior-drift risk**: [specific risk]
-  - Mitigation: [practical mitigation]
-- **Rollback risk**: [specific risk]
-  - Mitigation: [practical mitigation]
-
-## Success Criteria
-
-- [ ] Refactor brief and implementation plan are approved.
-- [ ] Externally observable behavior remains unchanged.
-- [ ] Planned verification passes.
-```
 
 ## Best Practices
 
@@ -251,68 +126,47 @@ Before any implementation starts, show the user the planning summary, specificat
 9. Document durable decisions: use ADRs only when the trade-off deserves future context.
 10. Require user approval before implementation: show the plan and specification or refactor brief, then wait for explicit approval before handing off to `$implementer`.
 
-## Worked Example: Adding Team Invitations
+## Implementation Plan Format
+
+Implementation plans must use this structure and be saved under `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`:
 
 ```markdown
-# Planning Summary: Team Invitations
+# Implementation Plan: [Feature or Refactor Name]
 
-## Overview
+Path: `.agents/implementation-plans/implementation-plan_YYYYMMDD_feature_name.md`
 
-Add a team invitation flow so workspace admins can invite new members by email. Invitations are accepted through a signed token, and membership is created only after the recipient confirms.
+## Source
 
-## Current Understanding
+- Specification: [path, or "not applicable"]
+- Refactor brief: [path, or "not applicable"]
 
-- Request: Allow admins to invite people into an existing workspace.
-- Users: Workspace admins and invited users.
-- Constraints: Must preserve existing workspace membership roles.
-- Assumptions: Email delivery already exists or will be represented as a required integration.
-- Non-goals: Bulk imports, domain-based auto-join, and SCIM provisioning.
+## Standards To Apply
 
-## Discovery Status
+- [`engineering-standards`; `tdd`; `rest-api-design` if API work applies; `sql-code-review` / `sql-optimization` if database work applies]
 
-- Documentation reviewed: `agent-context/domain.md`, `agent-context/adr/0002-auth-boundaries.md`
-- Code reviewed: `src/workspaces/`, `src/auth/`, `src/email/`
-- Open questions: Invitation expiration length is TBD.
-- Resolved terminology: "Member" means an accepted workspace participant; "Invitee" means a pending recipient.
+## Steps
 
-## Requirements Artifacts
+- Step 1: [step tied to requirement IDs or refactor-brief sections]
+  - Files/modules: [known targets or discovery needed]
+  - Verify: [test, command, or inspection check]
+- Step 2: [step tied to requirement IDs or refactor-brief sections]
+  - Files/modules: [known targets or discovery needed]
+  - Verify: [test, command, or inspection check]
 
-- Specification: `docs/spec/spec-process-team-invitations.md`
-- Refactor brief: not applicable
-- Implementation plan: `.agents/implementation-plans/implementation-plan_20260620_team_invitations.md`
-- ADRs: not needed
-- Approval required before implementation: yes
+## Supporting Refactors
 
-## Testing Strategy
+- [none, or narrowly scoped rationale tied to risk, duplication, or brittleness]
 
-- Unit tests: token generation and expiration checks.
-- Integration tests: invite creation, acceptance, duplicate pending invites.
-- End-to-end tests: admin sends invite, invitee accepts, member appears in workspace.
-- Regression checks: existing member role changes still behave as before.
+## Verification
 
-## Implementation Plan
-
-- Artifact: `.agents/implementation-plans/implementation-plan_20260620_team_invitations.md`
-- Standards to apply: `engineering-standards`, `tdd`, `rest-api-design`, `sql-code-review`
-- Step 1: Add invitation persistence and token hashing tied to invitation requirements.
-  - Files/modules: `src/workspaces/`, database migrations
-  - Verify: migration applies cleanly; duplicate and expiration tests pass.
-- Step 2: Add invitation creation and acceptance API behavior.
-  - Files/modules: `src/workspaces/`, `src/auth/`, API route tests
-  - Verify: API contract tests cover create, accept, expired, and reused invitation cases.
-- Supporting refactors: none unless existing membership helpers must be reused to avoid duplicate role logic.
-
-## Risks & Mitigations
-
-- **Risk**: Invitation token leaks in logs.
-  - Mitigation: Store only token hashes and avoid logging raw tokens.
+- Quality gate: [apply the Static-Analysis Complexity Gate from `AGENTS.md`, or "no gate in this repo"]
+- Regression checks: [existing behavior that must remain unchanged]
 
 ## Success Criteria
 
-- [ ] Admin can invite a user by email.
-- [ ] Invitee can accept before expiration.
-- [ ] Expired or already accepted invitations cannot be reused.
-- [ ] Existing workspace role behavior remains unchanged.
+- [ ] [measurable criterion]
+- [ ] [measurable criterion]
+- [ ] All required tests and checks pass.
 ```
 
 ## Refactor Brief Format
