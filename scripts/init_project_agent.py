@@ -32,6 +32,15 @@ PLAYWRIGHT_DIRNAME = ".playwright"
 SHARED_AGENTS_DIRNAME = "agents"
 CLAUDE_AGENTS_DIR = Path(".claude") / "agents"
 CODEX_AGENTS_DIR = Path(".codex") / "agents"
+# Codex custom agents pin one model and vary reasoning effort, while Claude Code
+# selects by model tier. Derive the Codex effort from the shared subagent's
+# Claude `model:` frontmatter so a single source drives both harnesses.
+CODEX_AGENT_MODEL = "gpt-5.4"
+CLAUDE_MODEL_TO_CODEX_EFFORT = {
+    "opus": "high",
+    "sonnet": "medium",
+    "haiku": "low",
+}
 AGENTS_DIRNAME = ".agents"
 LESSONS_DIRNAME = "lessons"
 LESSONS_INDEX_NAME = "LESSONS.md"
@@ -362,14 +371,20 @@ def codex_agent_content(source_path: Path) -> str:
     if not body:
         raise SystemExit(f"Agent file is missing instructions: {source_path}")
 
-    return "\n".join(
-        [
-            f"name = {toml_string(name)}",
-            f"description = {toml_string(description)}",
-            f"developer_instructions = {toml_multiline_literal(body)}",
-            "",
-        ]
-    )
+    lines = [
+        f"name = {toml_string(name)}",
+        f"description = {toml_string(description)}",
+        f"model = {toml_string(CODEX_AGENT_MODEL)}",
+    ]
+
+    reasoning_effort = CLAUDE_MODEL_TO_CODEX_EFFORT.get(metadata.get("model", ""))
+    if reasoning_effort is not None:
+        lines.append(f"model_reasoning_effort = {toml_string(reasoning_effort)}")
+
+    lines.append(f"developer_instructions = {toml_multiline_literal(body)}")
+    lines.append("")
+
+    return "\n".join(lines)
 
 
 def install_tool_agents(target_repo: Path, shared_repo_root: Path) -> dict[str, list[Path]]:

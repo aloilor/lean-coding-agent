@@ -2,7 +2,7 @@
 name: implementer
 description: Implementation specialist that executes approved specifications, refactor briefs, and implementation plans with surgical code changes and verification. Use proactively after planner output exists or when the user asks to implement an approved specification or refactor brief.
 tools: ["Read", "Grep", "Glob", "Edit", "MultiEdit", "Write", "Bash"]
-model: opus
+model: sonnet
 ---
 
 ## Prompt Defense Baseline
