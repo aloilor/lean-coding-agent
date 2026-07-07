@@ -38,7 +38,7 @@ Prefer to start from one or more of these artifacts:
 
 If the specification or refactor brief is missing but the task is small and unambiguous, implement directly after stating assumptions and verification criteria.
 
-If the specification is missing for complex feature work, API contracts, persistence changes, or architecture-sensitive behavior, stop and route back to `$planner` or `$create-specification` before coding.
+If the specification is missing for complex feature work, API contracts, persistence changes, or architecture-sensitive behavior, stop and route back to `$planner` before coding.
 
 If the refactor brief is missing for planned refactor work, stop and route back to `$planner` before coding unless the user explicitly bypassed the refactor planning gate for this task.
 
