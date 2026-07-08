@@ -75,11 +75,7 @@ Drive every behavioral or logic change with the `$tdd` skill's red-green-refacto
 
 Use `$refactor` when changing internal structure without intended behavior changes, cleaning up code smells, or improving maintainability.
 
-- Pair `$refactor` with `$engineering-standards` for simple design, naming, responsibility boundaries, and minimal change.
-- Pair `$refactor` with `$tdd` to choose baseline and post-refactor verification that proves externally observable behavior stayed the same.
-- If the behavior to preserve is not already covered by tests, write characterization tests that pin the current behavior before restructuring. They pass immediately — a behavior-preserving exemption from red-green, not a TDD violation — so note it in the report's TDD Evidence section. Only start the refactor once that safety net is green.
-- If the refactor touches SQL, migrations, stored procedures, permissions, ORM queries, persistence, or database access patterns, also use `$sql-code-review`.
-- If the refactor can affect query performance, indexing, execution plans, pagination, batching, large datasets, database load, or user-facing latency, also use `$sql-optimization`.
+- Prove behavior is preserved with `$tdd`: choose baseline and post-refactor verification. If the behavior to preserve is not already covered by tests, write characterization tests that pin the current behavior before restructuring. They pass immediately — a behavior-preserving exemption from red-green, not a TDD violation — so note it in the report's TDD Evidence section. Only start the refactor once that safety net is green.
 
 ### REST APIs
 
@@ -87,12 +83,6 @@ Use `$rest-api-design` when implementing or changing HTTP APIs, REST endpoints, 
 
 - Treat API shapes, status codes, error formats, auth, pagination, and compatibility as client-facing contracts.
 - Preserve backward compatibility unless the specification explicitly includes migration or deprecation.
-
-### Domain Or Specification Drift
-
-Use `$grill-with-docs` when implementation reveals a conflict with `agent-context/`, glossary language, ADRs, or domain assumptions.
-
-Use `$update-specification` when the implementation uncovers a required behavior, contract, validation rule, or edge case that changes the approved specification. Route back to `$planner` when implementation uncovers a refactor scope, preservation, or verification conflict that changes the approved refactor brief.
 
 ### Specialized Work
 
