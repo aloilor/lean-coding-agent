@@ -32,9 +32,12 @@ PLAYWRIGHT_DIRNAME = ".playwright"
 SHARED_AGENTS_DIRNAME = "agents"
 CLAUDE_AGENTS_DIR = Path(".claude") / "agents"
 CODEX_AGENTS_DIR = Path(".codex") / "agents"
-# Codex custom agents pin one model and vary reasoning effort, while Claude Code
-# selects by model tier. Derive the Codex effort from the shared subagent's
-# Claude `model:` frontmatter so a single source drives both harnesses.
+# Codex custom agents pin a model and reasoning effort, while Claude Code selects
+# by model tier. By default the Codex model and effort are derived from the shared
+# subagent's Claude `model:` frontmatter so a single source drives both harnesses.
+# A subagent whose Codex routing must diverge from that tier (e.g. a different Codex
+# model, or a higher effort than its Claude tier implies) sets `codex_model:` and/or
+# `codex_reasoning_effort:` in its frontmatter to override the derived defaults.
 CODEX_AGENT_MODEL = "gpt-5.4"
 CLAUDE_MODEL_TO_CODEX_EFFORT = {
     "opus": "high",
@@ -371,13 +374,17 @@ def codex_agent_content(source_path: Path) -> str:
     if not body:
         raise SystemExit(f"Agent file is missing instructions: {source_path}")
 
+    model = metadata.get("codex_model") or CODEX_AGENT_MODEL
+
     lines = [
         f"name = {toml_string(name)}",
         f"description = {toml_string(description)}",
-        f"model = {toml_string(CODEX_AGENT_MODEL)}",
+        f"model = {toml_string(model)}",
     ]
 
-    reasoning_effort = CLAUDE_MODEL_TO_CODEX_EFFORT.get(metadata.get("model", ""))
+    reasoning_effort = metadata.get("codex_reasoning_effort") or CLAUDE_MODEL_TO_CODEX_EFFORT.get(
+        metadata.get("model", "")
+    )
     if reasoning_effort is not None:
         lines.append(f"model_reasoning_effort = {toml_string(reasoning_effort)}")
 
