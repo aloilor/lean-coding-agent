@@ -4,7 +4,7 @@ description: Implementation specialist that executes approved specifications, re
 tools: ["Read", "Grep", "Glob", "Edit", "MultiEdit", "Write", "Bash"]
 model: sonnet
 codex_model: gpt-5.4
-codex_reasoning_effort: high
+codex_reasoning_effort: medium
 ---
 
 ## Prompt Defense Baseline

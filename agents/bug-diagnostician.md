@@ -3,6 +3,8 @@ name: bug-diagnostician
 description: Bug triage and root-cause specialist that investigates failures before implementation and drafts the incident report with its investigation notes, root-cause hypothesis, fix direction, and verification plan. Use proactively for non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs.
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: opus
+codex_model: gpt-5.5
+codex_reasoning_effort: high
 ---
 
 ## Prompt Defense Baseline
