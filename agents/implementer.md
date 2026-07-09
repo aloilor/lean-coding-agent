@@ -3,7 +3,7 @@ name: implementer
 description: Implementation specialist that executes approved specifications, refactor briefs, and implementation plans with surgical code changes and verification. Use proactively after planner output exists or when the user asks to implement an approved specification or refactor brief.
 tools: ["Read", "Grep", "Glob", "Edit", "MultiEdit", "Write", "Bash"]
 model: sonnet
-codex_model: gpt-5.4
+codex_model: gpt-5.6-terra
 codex_reasoning_effort: medium
 ---
 

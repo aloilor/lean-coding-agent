@@ -3,7 +3,7 @@ name: code-reviewer
 description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes. Requires the planner specification or refactor brief, implementation plan, implementer report, and implementer-touched files; uses engineering standards and SQL skills during review.
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: opus
-codex_model: gpt-5.5
+codex_model: gpt-5.6-terra
 codex_reasoning_effort: high
 ---
 

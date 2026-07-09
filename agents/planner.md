@@ -3,7 +3,7 @@ name: planner
 description: Requirements-first planning specialist for complex features, architectural changes, and major refactors. Use proactively when a request needs discovery or specification work before coding.
 tools: ["Read", "Grep", "Glob"]
 model: opus
-codex_model: gpt-5.5
+codex_model: gpt-5.6-terra
 codex_reasoning_effort: high
 ---
 
@@ -61,7 +61,6 @@ Use this workflow when implementation is expected to create or change externally
    - When using `$create-specification`, use every resolved answer, refined term, scenario outcome, constraint, non-goal, trade-off, and decision from `$grill-with-docs` as source material for the saved specification. Condense that material into definitions, requirements, constraints, acceptance criteria, test criteria, rationale, or explicit `TBD`s. Do not leave implementation-relevant refinements only in chat, `agent-context/domain.md`, ADRs, or the planning summary.
    - Specify the problem statement, users, non-goals, behavior, inputs, outputs, validation rules, persistence rules, API contracts, integration points, edge cases, acceptance criteria, measurable success criteria, and test criteria.
    - Keep unknown constraints marked as `TBD` instead of inventing them.
-   - Include AI system requirements and evaluation strategy when the feature uses AI behavior.
    - Use precise requirement IDs and acceptance criteria.
    - Keep implementation details out unless they are true constraints or contract-level requirements.
 4. Create the implementation plan using the shared implementation plan rules below.
