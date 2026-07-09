@@ -95,10 +95,6 @@ UPSTREAM_SKILL_GROUPS = [
         "skills": ["changelog-automation"],
     },
     {
-        "source": "https://github.com/hardikpandya/stop-slop",
-        "skills": ["stop-slop"],
-    },
-    {
         "source": "https://github.com/github/awesome-copilot",
         "skills": [
             "create-readme",
@@ -109,6 +105,10 @@ UPSTREAM_SKILL_GROUPS = [
             "sql-optimization",
             "update-specification",
         ],
+    },
+    {
+        "source": "https://github.com/blader/humanizer",
+        "skills": ["humanizer"],
     },
 ]
 DEV_DEPENDENCY_INSTALL_COMMANDS = {
