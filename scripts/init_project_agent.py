@@ -52,11 +52,6 @@ LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
 LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
-TASK_IGNORE_LINES = [
-    ".agents/tasks/",
-    ".codex/tasks/",
-    ".claude/tasks/",
-]
 SHARED_AGENT_IGNORE_LINES = [
     ".agents/code-reviews/",
     ".agents/refactor-briefs/",
@@ -225,7 +220,6 @@ def ensure_local_gitignore(target_repo: Path) -> Path:
     existing_lines = set(existing.splitlines())
     managed_lines = [
         *LOCAL_FILENAMES,
-        *TASK_IGNORE_LINES,
         *SHARED_AGENT_IGNORE_LINES,
     ]
     missing_lines = [line for line in managed_lines if line not in existing_lines]

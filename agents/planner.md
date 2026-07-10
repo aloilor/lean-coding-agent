@@ -1,7 +1,6 @@
 ---
 name: planner
 description: Requirements-first planning specialist for complex features, architectural changes, and major refactors. Use proactively when a request needs discovery or specification work before coding.
-tools: ["Read", "Grep", "Glob"]
 model: opus
 codex_model: gpt-5.6-sol
 codex_reasoning_effort: high
