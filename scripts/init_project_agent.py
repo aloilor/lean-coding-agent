@@ -37,7 +37,7 @@ CODEX_AGENTS_DIR = Path(".codex") / "agents"
 # A subagent whose Codex routing must diverge from that tier (e.g. a different Codex
 # model, or a higher effort than its Claude tier implies) sets `codex_model:` and/or
 # `codex_reasoning_effort:` in its frontmatter to override the derived defaults.
-CODEX_AGENT_MODEL = "gpt-5.6-terra"
+CODEX_AGENT_MODEL = "gpt-5.6-sol"
 CLAUDE_MODEL_TO_CODEX_EFFORT = {
     "opus": "high",
     "sonnet": "medium",
