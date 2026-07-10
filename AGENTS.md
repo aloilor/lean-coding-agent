@@ -91,7 +91,7 @@ End every task with a brief "Did Not Do" note covering any meaningful: edge case
 
 ## Autonomous Bug Fixing
 
-When given a bug report, identify the smallest responsible repair and verify it. A clear bug with an evidence-backed root cause and bounded fix may proceed without an approval pause. Use diagnosis for ambiguous, recurring, CI-related, production-like, cross-module, security/privacy-sensitive, data-affecting, or otherwise non-trivial bugs. Pause after diagnosis only for a material decision (product or contract choice, irreversible action, security/privacy decision, unresolved ambiguity, or scope expansion) or when the user explicitly asks for approval. Medium-tier and larger bug fixes end with an incident report; genuinely trivial one-line (Small-tier) fixes skip it.
+When given a bug report: just fix it. Point at logs, errors, or failing tests, then resolve them with zero context switching required from the user — including fixing failing CI without being told how. For non-trivial bugs the procedure (diagnosis, approval gate, incident report) lives in the `workflow-bug-fixing` skill; Medium-tier and larger bug fixes end with an incident report, while genuinely trivial one-line (Small-tier) fixes skip it.
 
 ## Self-Improvement Loop
 
@@ -133,8 +133,6 @@ Workflow artifacts use the date-stamped naming `*_YYYYMMDD_short_description.md`
 | Implementation report | `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` | implementer |
 | Code review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` | code-reviewer |
 | Incident report (with Investigation section) | `docs/incidents/incident_YYYYMMDD_<name>.md` | diagnostician drafts; code-reviewer finalizes |
-
-Artifact applicability follows the selected tier: Small work creates no durable workflow artifacts; Medium work may use a concise plan, implementation summary, or review pass when risk warrants it; Full work uses the durable artifacts above. Each handoff has one responsibility and links to its source rather than copying the full specification or plan.
 | Task notes (local, never committed) | `.agents/tasks/todo_YYYYMMDD_<name>.md` | main agent |
 
 ### Workflow Tiering
