@@ -22,37 +22,9 @@ Preserve essential domain complexity. Remove accidental complexity introduced by
 | Separation of concerns | Split validation, domain rules, persistence, presentation, and integration when they change independently. | Splitting cohesive behavior just to satisfy a pattern. |
 | Simple design | First make it correct, then expressive, then remove meaningful duplication, then minimize. | Minimizing before behavior and intent are clear. |
 
-## Duplication Judgment
+## Duplication And Refactoring
 
-Repeated syntax is not always duplication. Repeated business knowledge usually is.
-
-Extract when:
-
-- The repeated code represents the same policy, invariant, calculation, or contract.
-- A bug fix would need to be made in multiple places.
-- The shared name would make the domain clearer.
-
-Tolerate local similarity when:
-
-- The branches are likely to change for different reasons.
-- The abstraction name would be vague.
-- The extraction would make callers understand more indirection than behavior.
-
-## Refactoring Boundary
-
-Refactor only when it is in scope, behavior-preserving, adequately verified, and materially reduces change risk or maintenance cost.
-
-Good reasons:
-
-- The requested change is hard because responsibilities are tangled.
-- A small extraction makes the behavior easier to verify.
-- A duplicated business rule would make the requested change fragile.
-
-Bad reasons:
-
-- The code merely looks imperfect.
-- The cleanup is unrelated to the task.
-- Verification is weak and the refactor is not necessary for the requested change.
+Use [duplication-and-refactoring.md](./duplication-and-refactoring.md) as the canonical guidance for deciding whether repeated code represents shared knowledge and whether a refactor is justified. Keep this reference focused on diagnosing complexity.
 
 ## Technical Debt
 

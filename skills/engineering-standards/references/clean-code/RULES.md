@@ -13,7 +13,6 @@ Use this as a routing map. Open a detail file only when the current task needs i
 | Duplication | Extract only when repeated code represents the same stable concept or business rule. | [duplication-and-refactoring.md](./duplication-and-refactoring.md) |
 | Complexity | Reduce accidental complexity: change amplification, cognitive load, and hidden coupling. | [complexity.md](./complexity.md) |
 | Smells | Treat smells as inspection signals, not automatic rewrite orders. | [code-smells.md](./code-smells.md) |
-| Object pressure | Use object-calisthenics prompts as optional pressure tests, not production laws. | [object-calisthenics.md](./object-calisthenics.md) |
 
 ## Apply First
 

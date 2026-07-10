@@ -24,31 +24,6 @@ Prefer small mechanical moves:
 
 Avoid mixing refactors with behavior changes unless the behavior change is the requested work and the refactor is needed to make it safe.
 
-## Example
-
-Repeated authorization logic is duplication because it is one policy:
-
-```typescript
-function assertCanEditInvoice(user: User, invoice: Invoice): void {
-  if (user.id !== invoice.ownerId || invoice.status === "paid") {
-    throw new ForbiddenError();
-  }
-}
-```
-
-A vague helper with flags is a warning sign:
-
-```typescript
-await updateInvoice(invoice, { recalculateTax: true, sendEmail: true });
-```
-
-Prefer separate names when intentions differ:
-
-```typescript
-await recalculateInvoiceTax(invoice);
-await sendInvoiceUpdatedEmail(invoice);
-```
-
 ## Checks
 
 - If this rule changes, how many places must be edited?

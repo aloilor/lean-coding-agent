@@ -1,4 +1,4 @@
 interface:
   display_name: "Engineering Standards"
-  short_description: "Always apply clean code and design standards"
-  default_prompt: "Use $engineering-standards to implement this change with clean code, object-oriented design, SOLID, DRY, YAGNI, KISS, clear naming, and appropriate documentation."
+  short_description: "Guide clear, maintainable code-level design"
+  default_prompt: "Use $engineering-standards to preserve correctness, keep contracts and responsibilities clear, avoid unnecessary complexity, and make maintainable code-level design decisions."

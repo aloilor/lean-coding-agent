@@ -17,18 +17,14 @@ Code smells are signals to inspect design. They are not automatic rewrite comman
 | Switch/type branching | Behavior varies by type. | Use polymorphism, strategy, or a dispatch table when branches are growing or volatile. |
 | Divergent change | One unit changes for unrelated reasons. | Split responsibilities along change boundaries. |
 | Shotgun surgery | One small behavior change touches many places. | Centralize the rule or create a clearer boundary. |
-| Duplicate code | Repeated knowledge or behavior. | Extract only when it is the same stable concept. |
+| Duplicate code | Repeated knowledge or behavior. | Apply the canonical [duplication and refactoring guidance](./duplication-and-refactoring.md). |
 | Speculative generality | Abstractions, hooks, or config have no current user. | Delete or inline unused flexibility. |
 | Dead code | Behavior no one calls or verifies. | Remove when safe; mention pre-existing dead code if out of scope. |
 | Lazy class | A wrapper adds no behavior, invariant, or boundary. | Inline unless it represents a useful contract. |
 
-## Response Checklist
+## Response
 
-1. Identify the smell and the concrete maintenance risk.
-2. Confirm the behavior that must not change.
-3. Choose the smallest in-scope refactor that reduces the risk.
-4. Verify with tests, focused checks, or a clear manual inspection.
-5. Stop before cleanup expands beyond the task.
+Name the concrete maintenance risk before changing the design. Use the linked topic guidance for the response; do not refactor solely because a smell label applies.
 
 ## When Not To Refactor
 

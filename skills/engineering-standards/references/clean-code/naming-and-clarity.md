@@ -11,21 +11,6 @@ Names should reveal intent, domain meaning, and scope. A reader should not need 
 | Match name to scope | Short names are fine in tiny obvious scopes; public and long-lived names need precision. | A vague name travels across functions, modules, or API boundaries. |
 | Make flow read like a story | Use names and small helpers so the main path is a sequence of intentions. | Readers must parse low-level mechanics before understanding the workflow. |
 
-## Examples
-
-```typescript
-const outstandingBalance = calculateOutstandingBalance(invoice);
-await paymentGateway.charge(customer, outstandingBalance);
-```
-
-```typescript
-function payInvoice(invoice: Invoice, customer: Customer): Promise<Receipt> {
-  validateInvoiceCanBePaid(invoice);
-  const balance = calculateOutstandingBalance(invoice);
-  return chargeCustomer(customer, balance);
-}
-```
-
 ## Checks
 
 - Would a new teammate understand the name without reading the implementation?
