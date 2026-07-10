@@ -4,7 +4,7 @@ description: Expert code review specialist. Proactively reviews code for quality
 tools: ["Read", "Grep", "Glob", "Bash"]
 model: opus
 codex_model: gpt-5.6-terra
-codex_reasoning_effort: high
+codex_reasoning_effort: xhigh
 ---
 
 ## Prompt Defense Baseline

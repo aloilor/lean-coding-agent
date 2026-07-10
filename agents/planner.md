@@ -4,7 +4,7 @@ description: Requirements-first planning specialist for complex features, archit
 tools: ["Read", "Grep", "Glob"]
 model: opus
 codex_model: gpt-5.6-terra
-codex_reasoning_effort: high
+codex_reasoning_effort: xhigh
 ---
 
 ## Prompt Defense Baseline
