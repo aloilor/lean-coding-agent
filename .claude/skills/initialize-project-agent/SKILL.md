@@ -17,7 +17,7 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
    - `CLAUDE.md` copied exactly from this repo's `CLAUDE.md`
    - `AGENTS.local.md` for local-private agent notes
    - `CLAUDE.local.md` for local-private Claude notes
-   - `.gitignore` entries for local files, local task folders, shared local handoff reports, and Playwright CLI generated artifacts
+   - `.gitignore` entries for local files, local task folders, and shared local handoff reports
    - `agent-context/`
    - baseline project-context starter files copied from this repo's `agent-context/`
    - `agent-context/README.md` as a shared project-specific context starter

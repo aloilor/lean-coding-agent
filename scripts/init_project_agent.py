@@ -28,7 +28,6 @@ AGENT_CONTEXT_README_NAME = "README.md"
 DOCS_DIRNAME = "docs"
 INCIDENTS_DIRNAME = "incidents"
 INCIDENTS_README_NAME = "README.md"
-PLAYWRIGHT_DIRNAME = ".playwright"
 SHARED_AGENTS_DIRNAME = "agents"
 CLAUDE_AGENTS_DIR = Path(".claude") / "agents"
 CODEX_AGENTS_DIR = Path(".codex") / "agents"
@@ -53,11 +52,6 @@ LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
 LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
 LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
-PLAYWRIGHT_IGNORE_LINES = [
-    ".playwright-cli/",
-    ".playwright/output/",
-    ".playwright/*.local.json",
-]
 TASK_IGNORE_LINES = [
     ".agents/tasks/",
     ".codex/tasks/",
@@ -69,7 +63,6 @@ SHARED_AGENT_IGNORE_LINES = [
     ".agents/implementation-plans/",
     ".agents/implementation-reports/",
 ]
-PLAYWRIGHT_CLI_PACKAGE = "@playwright/cli@latest"
 AGENT_BROWSER_PACKAGE = "agent-browser@latest"
 AGENT_BROWSER_COMMAND = "agent-browser"
 UPSTREAM_SKILL_AGENTS = ["codex", "claude-code"]
@@ -86,7 +79,6 @@ UPSTREAM_SKILL_GROUPS = [
         "source": "https://github.com/mattpocock/skills",
         "skills": [
             "handoff",
-            "improve-codebase-architecture",
             "tdd",
         ],
     },
@@ -103,12 +95,7 @@ UPSTREAM_SKILL_GROUPS = [
             "refactor",
             "sql-code-review",
             "sql-optimization",
-            "update-specification",
         ],
-    },
-    {
-        "source": "https://github.com/blader/humanizer",
-        "skills": ["humanizer"],
     },
 ]
 DEV_DEPENDENCY_INSTALL_COMMANDS = {
@@ -240,7 +227,6 @@ def ensure_local_gitignore(target_repo: Path) -> Path:
         *LOCAL_FILENAMES,
         *TASK_IGNORE_LINES,
         *SHARED_AGENT_IGNORE_LINES,
-        *PLAYWRIGHT_IGNORE_LINES,
     ]
     missing_lines = [line for line in managed_lines if line not in existing_lines]
 
@@ -250,30 +236,6 @@ def ensure_local_gitignore(target_repo: Path) -> Path:
         gitignore_path.write_text(existing + prefix + addition, encoding="utf-8")
 
     return gitignore_path
-
-
-def copy_playwright_baseline(target_repo: Path, shared_repo_root: Path) -> list[Path]:
-    source_dir = shared_repo_root / PLAYWRIGHT_DIRNAME
-    target_dir = target_repo / PLAYWRIGHT_DIRNAME
-    copied_paths: list[Path] = []
-
-    if not source_dir.exists():
-        return copied_paths
-
-    if source_dir.resolve() == target_dir.resolve():
-        return copied_paths
-
-    for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
-        relative_path = source_path.relative_to(source_dir)
-        target_path = target_dir / relative_path
-        if target_path.exists():
-            continue
-
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source_path, target_path)
-        copied_paths.append(target_path)
-
-    return copied_paths
 
 
 def detect_php_laravel(target_repo: Path) -> bool:
@@ -485,11 +447,6 @@ def install_dev_dependency(target_repo: Path, package_name: str) -> str:
         ) from exc
 
     return manager_name
-
-
-def install_playwright_cli(target_repo: Path) -> str:
-    manager_name = install_dev_dependency(target_repo, PLAYWRIGHT_CLI_PACKAGE)
-    return f"installed with {manager_name}"
 
 
 def install_agent_browser(target_repo: Path) -> str:
@@ -882,8 +839,6 @@ def main() -> int:
     agent_context_dir.mkdir(parents=True, exist_ok=True)
     copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
     installed_tool_agent_paths = install_tool_agents(target_repo, REPO_ROOT)
-    copied_playwright_paths = copy_playwright_baseline(target_repo, REPO_ROOT)
-    playwright_cli_install = install_playwright_cli(target_repo)
     agent_browser_install = install_agent_browser(target_repo)
     laravel_quality_gate = provision_laravel_quality_gate(target_repo, REPO_ROOT)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
@@ -926,11 +881,6 @@ def main() -> int:
         print(f"Installed {tool_name} agent files:")
         for agent_path in agent_paths:
             print(f"- {agent_path}")
-    if copied_playwright_paths:
-        print("Copied Playwright CLI baseline files:")
-        for playwright_path in copied_playwright_paths:
-            print(f"- {playwright_path}")
-    print(f"Playwright CLI dependency: {playwright_cli_install}")
     print(f"Agent Browser dependency: {agent_browser_install}")
     if laravel_quality_gate is not None:
         print("PHP/Laravel quality gate provisioned:")

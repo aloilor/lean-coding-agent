@@ -173,35 +173,10 @@ The skill will:
 - add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
 - copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
 - install or refresh upstream skills with `npx skills add`
-- copy missing Playwright CLI baseline files from `.playwright/`
-- install `@playwright/cli` as a dev dependency
 - install `agent-browser` as a dev dependency and run `agent-browser install`
-- add Playwright CLI generated-artifact paths to the target repo's `.gitignore`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 - write `skills-lock.json` for upstream skill installs
 - run `$codebase-onboarding` in the target repo so `agent-context/` contains structured, evidence-backed project documentation, including `agent-context/skills.md`
-
-## Playwright CLI Baseline
-
-The bootstrap copies `.playwright/cli.config.json` and `.playwright/README.md` into each target project when those files are missing.
-
-The bootstrap installs Playwright CLI as a dev dependency using the package manager implied by `packageManager` or the existing lockfile. When no `package.json` or lockfile exists, it defaults to npm, which creates the package metadata during installation.
-
-The equivalent manual npm command is:
-
-```bash
-npm install --save-dev @playwright/cli@latest
-```
-
-Use the project-local command:
-
-```bash
-npx playwright-cli --help
-npx playwright-cli config-print
-npx playwright-cli open http://localhost:3000 --headed
-```
-
-The CLI automatically loads `.playwright/cli.config.json` when present. Generated snapshots and output are ignored by the bootstrap-managed `.gitignore` entries.
 
 ## Agent Browser Baseline
 
@@ -229,27 +204,23 @@ The bootstrap installs or refreshes these upstream skills on every run:
 | `find-skills` | `vercel-labs/skills` | Search the skills ecosystem and install useful skills. |
 | `agent-browser` | `vercel-labs/agent-browser` | Use persistent browser automation across agent commands. |
 | `handoff` | `mattpocock/skills` | Create concise handoff documents for continuing work across sessions or agents. |
-| `improve-codebase-architecture` | `mattpocock/skills` | Identify architecture improvements in an existing codebase. |
 | `tdd` | `mattpocock/skills` | Guide behavior-focused test-driven development with red-green-refactor cycles. |
 | `changelog-automation` | `wshobson/agents` | Generate or maintain changelog entries from project changes. |
-| `stop-slop` | `hardikpandya/stop-slop` | Remove predictable AI writing patterns from prose. |
 | `create-readme` | `github/awesome-copilot` | Create a concise, useful project README. |
 | `create-specification` | `github/awesome-copilot` | Create durable AI-ready specifications before implementation. |
 | `prd` | `github/awesome-copilot` | Generate Product Requirements Documents from business vision and feature requirements. |
 | `refactor` | `github/awesome-copilot` | Refactor code safely without changing behavior. |
 | `sql-code-review` | `github/awesome-copilot` | Review SQL for correctness, security, maintainability, and performance. |
 | `sql-optimization` | `github/awesome-copilot` | Optimize SQL queries, indexes, and execution patterns. |
-| `update-specification` | `github/awesome-copilot` | Keep existing specifications aligned with new requirements and code changes. |
 
 The equivalent manual commands are:
 
 ```bash
 npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
 npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser --agent codex claude-code --copy -y
-npx skills add https://github.com/mattpocock/skills --skill handoff improve-codebase-architecture tdd --agent codex claude-code --copy -y
+npx skills add https://github.com/mattpocock/skills --skill handoff tdd --agent codex claude-code --copy -y
 npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
-npx skills add https://github.com/hardikpandya/stop-slop --skill stop-slop --agent codex claude-code --copy -y
-npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification prd refactor sql-code-review sql-optimization update-specification --agent codex claude-code --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification prd refactor sql-code-review sql-optimization --agent codex claude-code --copy -y
 ```
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
