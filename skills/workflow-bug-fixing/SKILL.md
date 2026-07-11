@@ -1,9 +1,9 @@
 ---
 name: workflow-bug-fixing
-description: Orchestration workflow for a reported bug, failing test, CI failure, runtime error, or regression. For non-trivial bugs spawns bug-diagnostician (diagnose plus approval gate), then implementer, then code-reviewer. Medium-tier and larger fixes end with an incident report; genuinely trivial one-liners skip it. Invoke from the main agent for defect fixes.
+description: Orchestration workflow for a reported bug, failing test, CI failure, runtime error, or regression. Owns bug tiering, diagnosis routing, the mandatory approval gate, implementation, review, and tier-appropriate artifacts.
 ---
 
-# Autonomous Bug Fixing Workflow
+# Bug Fixing Workflow
 
 Use when the user reports a bug, failing test, CI failure, runtime error, or regression.
 
@@ -11,9 +11,15 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 
 ## Steps
 
-1. For non-trivial, ambiguous, recurring, CI-related, production-like, cross-module, or user-facing bugs, `bug-diagnostician` investigates first and writes a draft incident report whose **Investigation** section carries the evidence, root-cause hypothesis, fix direction, and verification plan.
-2. Show the draft incident report (investigation, proposed fix direction, verification plan) to the user. Wait for explicit approval before implementation starts.
-3. `implementer` reads the approved draft and applies `tdd` plus `engineering-standards` throughout the repair: reproduce the bug with an existing failing test or a new focused regression test and observe the intended RED; make the smallest root-cause fix; then refactor only while green. If automated reproduction is genuinely impractical, document the reason and strongest available substitute in the implementation report. Run broader verification and any repo-provided deterministic quality gate, apply the Static-Analysis Complexity Gate from `AGENTS.md`, and record the confirmed root cause, fix, TDD evidence or exemption, verification, gate result, and follow-ups in the implementation report. Do not edit the incident report.
-4. `code-reviewer` reviews the change, implementation report, deterministic gate artifact, and complexity gate outcome, then on `APPROVE` finalizes the incident report — transcribing confirmed root cause, fix, and verification from the implementation report and diff, trimming the Investigation section to a short summary, and updating follow-ups.
+1. Classify the bug using `AGENTS.md` tiering. The main agent diagnoses Small bugs in conversation. For Medium or Full bugs—and whenever the failure is ambiguous, recurring, CI-related, production-like, cross-module, security/privacy-sensitive, data-affecting, or user-facing—`bug-diagnostician` investigates and drafts the incident report.
+2. Show the user the symptom, evidence or likely root cause, proposed fix direction, and verification plan. Wait for explicit approval before any implementation, regardless of tier.
+3. After approval, the main agent handles Small repairs; Medium and Full repairs go to `implementer`. Apply `tdd` plus `engineering-standards`: reproduce the bug with an existing failing test or a focused regression test and observe RED; make the smallest root-cause fix; then refactor only while green. If automated reproduction is impractical, document why and record the strongest substitute evidence. Run broader verification, the repository's deterministic quality gate, and the Static-Analysis Complexity Gate from `AGENTS.md`.
+4. Medium and Full changes go to `code-reviewer`. On `APPROVE`, the reviewer finalizes the incident report from the confirmed root cause, fix, and verification evidence and trims Investigation to a durable summary.
 
-For obvious one-line bugs, the main agent may skip `bug-diagnostician`. Incident reports are required for Medium-tier and larger fixes — `code-reviewer` finalizes the report during review — but genuinely trivial one-line (Small-tier) fixes skip the incident report entirely. Use the `workflow-feature-development` skill only when the fix expands into feature-level behavior or contract work.
+## Artifacts By Tier
+
+- **Small:** conversational diagnosis, proposed repair, verification plan, and user approval; no durable incident, implementation report, or review pass.
+- **Medium:** durable incident plus concise implementation and review summaries at the standard paths.
+- **Full:** durable incident, implementation report, deterministic-gate evidence, and review passes at all standard paths.
+
+Use `workflow-feature-development` only when the repair expands into feature-level behavior or contract work.

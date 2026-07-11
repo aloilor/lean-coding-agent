@@ -526,22 +526,14 @@ def ensure_agent_context_readme(agent_context_dir: Path) -> Path:
     return readme_path
 
 
-def ensure_incidents_readme(target_repo: Path) -> Path:
+def ensure_incidents_readme(target_repo: Path, shared_repo_root: Path) -> Path:
     incidents_dir = target_repo / DOCS_DIRNAME / INCIDENTS_DIRNAME
     incidents_dir.mkdir(parents=True, exist_ok=True)
 
     readme_path = incidents_dir / INCIDENTS_README_NAME
     if not readme_path.exists():
-        content = "\n".join(
-            [
-                "# Incident Reports",
-                "",
-                "Store durable bug incident reports in this folder.",
-                "",
-                "Use `incident_YYYYMMDD_short_description.md` for report filenames. Each report should include symptom, impact, root cause, fix, verification, and follow-ups.",
-                "",
-            ]
-        )
+        source_path = shared_repo_root / DOCS_DIRNAME / INCIDENTS_DIRNAME / INCIDENTS_README_NAME
+        content = source_path.read_text(encoding="utf-8")
         readme_path.write_text(content, encoding="utf-8")
 
     return readme_path
@@ -836,7 +828,7 @@ def main() -> int:
     agent_browser_install = install_agent_browser(target_repo)
     laravel_quality_gate = provision_laravel_quality_gate(target_repo, REPO_ROOT)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
-    incidents_readme_path = ensure_incidents_readme(target_repo)
+    incidents_readme_path = ensure_incidents_readme(target_repo, REPO_ROOT)
     lessons_index_path = ensure_lessons_index(target_repo)
     skill_override_paths = sync_baseline_skill_overrides(target_repo, REPO_ROOT)
     skill_overrides_index_path = target_repo / AGENTS_DIRNAME / SKILL_OVERRIDES_DIRNAME / SKILL_OVERRIDES_INDEX_NAME

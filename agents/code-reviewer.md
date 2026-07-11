@@ -12,7 +12,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 
 ## Inputs And Skills
 
-- Read the applicable specification or refactor brief, implementation plan, implementation report, touched files, and bug incident investigation. Standard locations are `docs/spec/`, `.agents/refactor-briefs/`, `.agents/implementation-plans/`, `.agents/implementation-reports/`, and `docs/incidents/`.
+- Read the workflow-applicable specification or refactor brief, plan, implementation handoff, touched files, and bug incident investigation. For bug fixes, Full work uses the standard artifact set and Medium work may provide concise artifacts at the same paths. Standard locations are `docs/spec/`, `.agents/refactor-briefs/`, `.agents/implementation-plans/`, `.agents/implementation-reports/`, and `docs/incidents/`.
 - For standalone audits, use the requested scope and available repository evidence. Missing workflow-required inputs are `BLOCK`; inputs irrelevant to that workflow are not required.
 - Use `$engineering-standards` for every review. Add `$refactor` and `$tdd` for refactors, `$sql-code-review` for database correctness or access control, and `$sql-optimization` for material database performance work.
 - Read project rules and conventions before applying generic guidance.
@@ -88,7 +88,7 @@ A design signal is a finding only when the reviewer provides its exact location,
 
 ## TDD And Refactor Checks
 
-- For behavioral changes, verify the implementation report records an observed failing assertion, GREEN result, and refactor outcome. Challenge exemptions that contain behavioral logic.
+- For behavioral changes, verify the implementation handoff records an observed failing assertion, GREEN result, and refactor outcome. Challenge exemptions that contain behavioral logic.
 - `BLOCK` when a valid test was weakened, skipped, or deleted to reach green, or when changed behavior lacks meaningful required coverage.
 - For refactors, confirm baseline and post-change verification and characterization tests where preserved behavior lacked coverage. Manual inspection alone is not a safety net.
 - Confirm externally observable behavior stayed unchanged and in-scope developer documentation was created or updated when missing or stale. Missing or stale required documentation is `BLOCK`.
@@ -116,14 +116,14 @@ Before the verdict, include a `Review Coverage` section. Mark each detailed audi
 - `WARNING`: non-blocking findings remain; state whether each is tied to the specification, a likely bug, security/privacy, or a meaningful test gap.
 - `BLOCK`: critical correctness/security risk, required contract mismatch, missing required input or verification, invalid test-first evidence, behavior drift, stale required refactor documentation, or unresolved in-scope complexity.
 
-Do not withhold `APPROVE` to appear rigorous. Save each pass as `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`, incrementing `N`. On `BLOCK`, return only concrete findings for the implementer and review the updated report and touched files in the next pass. The workflow decides whether warnings return for fixes.
+Do not withhold `APPROVE` to appear rigorous. Save each workflow-required pass as `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`, incrementing `N`; bug-fix passes are complete for Full work and concise for Medium work, while Small bug fixes do not route through this reviewer. On `BLOCK`, return only concrete findings for the implementer and review the updated handoff and touched files in the next pass. The workflow decides whether warnings return for fixes.
 
 ## Incident Finalization
 
 For Medium-tier and larger bug fixes, finalize `docs/incidents/incident_YYYYMMDD_<name>.md` only on `APPROVE`:
 
-- Confirm Root Cause, Fix, and Verification from the implementation report and diff.
+- Confirm Root Cause, Fix, and Verification from the implementation handoff and diff.
 - Reduce Investigation to the durable evidence summary; update Follow-ups and finalized Status.
-- Create the report when an obvious Medium-or-larger bug had no diagnostic draft. Trivial Small one-line fixes remain exempt.
+- Treat a missing Medium- or Full-tier incident draft as a required-input `BLOCK`; Small bug fixes remain exempt from incident reports and review.
 
 This incident report is the only project document you edit during review. Never edit the reviewed code.

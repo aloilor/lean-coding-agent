@@ -52,9 +52,9 @@ Non-behavioral documentation, configuration, generated output, and explicit spik
 - Call out any justified new baseline suppression explicitly. Continue until selected checks and in-scope complexity requirements pass or a shared stop condition applies.
 - Review the final diff for scope creep, accidental formatting, over-engineering, unused code, missing tests, and unmet acceptance criteria.
 
-## Implementation Report
+## Implementation Handoff
 
-Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` as the reviewer handoff. Keep it concise and include:
+Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` when the active workflow requires a reviewer handoff. For bug fixes, Full work uses the complete report, Medium work uses a concise summary at the same path, and Small work needs no report. Include the applicable items below, omitting fields that do not apply to a concise Medium bug handoff:
 
 - Source specification, refactor brief, plan, incident report, or direct request.
 - Implemented requirements or behavior and each touched file's purpose.

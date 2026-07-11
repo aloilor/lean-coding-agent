@@ -89,14 +89,14 @@ End every task with a brief "Did Not Do" note covering any meaningful: edge case
 - If a fix feels hacky: "Knowing everything I know now, implement the elegant solution."
 - Skip this for simple, obvious fixes — don't over-engineer. Challenge your own work before presenting it.
 
-## Autonomous Bug Fixing
+## Bug Fixing
 
-When given a bug report: just fix it. Point at logs, errors, or failing tests, then resolve them with zero context switching required from the user — including fixing failing CI without being told how. For non-trivial bugs the procedure (diagnosis, approval gate, incident report) lives in the `workflow-bug-fixing` skill; Medium-tier and larger bug fixes end with an incident report, while genuinely trivial one-line (Small-tier) fixes skip it.
+When given a bug report, diagnose it before changing code. Show the user the symptom, evidence or likely root cause, proposed fix direction, and verification plan, then wait for explicit approval before every repair. The `workflow-bug-fixing` skill owns tiering and diagnosis routing. Small bugs need only a conversational diagnosis and approval summary; Medium and Full bugs use a durable incident report.
 
 ## Self-Improvement Loop
 
 - Keep shared agent lessons in `.agents/lessons/`, one short descriptive file per lesson (e.g. `.agents/lessons/avoid-broad-git-add.md`). Never keep a single `lessons.md`.
-- After any user correction that reveals a reusable agent behavior rule, create or update the matching lesson automatically without asking for approval.
+- After a user correction, first update the authoritative agent prompt, workflow, guideline, project context, or other policy source when the rule belongs there. Create or update a lesson automatically only for a reusable agent-behavior mistake that has no better canonical owner; never duplicate established policy in lessons.
 - Do not add lessons for one-off task details that will not prevent a repeatable mistake.
 - Each lesson file states the mistake pattern and the rule that prevents repeating it.
 - Keep `.agents/lessons/LESSONS.md` as an index: one clickable markdown link per lesson file followed by a one-line summary. Add a matching entry whenever you add a lesson.
@@ -135,6 +135,8 @@ Workflow artifacts use the date-stamped naming `*_YYYYMMDD_short_description.md`
 | Code review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` | code-reviewer |
 | Incident report (with Investigation section) | `docs/incidents/incident_YYYYMMDD_<name>.md` | diagnostician drafts; code-reviewer finalizes |
 | Task notes (local, never committed) | `.agents/tasks/todo_YYYYMMDD_<name>.md` | main agent |
+
+For bug fixes, artifact depth follows the selected tier: Small uses no durable artifact; Medium uses an incident report plus concise implementation and review summaries at the standard paths; Full uses the complete incident, implementation report, gate evidence, and review-pass set. The user-approval gate applies to every tier and may be conversational for Small bugs.
 
 ### Workflow Tiering
 
@@ -179,7 +181,7 @@ Match the request to a row, then **invoke that workflow's skill** with the Skill
 | Build, add, implement, or change product behavior for a feature. | `workflow-feature-development` | Use when code changes are expected and the requested behavior is externally observable. |
 | Refactor, restructure, clean up, extract, rename, or simplify code while preserving behavior. | `workflow-refactor` | Use only when the outcome is internal structure change with no behavior change. If behavior changes too, treat it as feature work. |
 | Code review, review, audit, or risk assessment without asking for edits. | `workflow-review` | Use when the deliverable is review findings, not code changes. |
-| Bug, failing test, CI failure, runtime error, or regression. | `workflow-bug-fixing` | For non-trivial bugs, diagnose first and gate on approval. For obvious bugs, fix directly. Incident report for Medium-tier and larger fixes; genuinely trivial one-liners skip it. |
+| Bug, failing test, CI failure, runtime error, or regression. | `workflow-bug-fixing` | Diagnose and obtain explicit approval before every repair. Small bugs need no durable artifact; Medium and Full bugs require an incident report. |
 | Direct question, small documentation edit, or narrow mechanical change. | Normal task execution (Small tier) | Do the smallest useful thing. Don't force workflows unless the change grows into a row above. |
 
 ---

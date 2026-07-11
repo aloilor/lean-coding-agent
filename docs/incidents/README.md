@@ -1,5 +1,50 @@
 # Incident Reports
 
-Store durable bug incident reports in this folder.
+Store durable Medium- and Full-tier bug investigations in this folder. Small-tier bugs use a concise conversational diagnosis and approval summary instead of a durable incident file.
 
-Use `incident_YYYYMMDD_short_description.md` for report filenames. Each report should include symptom, impact, root cause, fix, verification, and follow-ups.
+Use `incident_YYYYMMDD_short_description.md`. The diagnostician drafts the Investigation section before implementation; the code reviewer confirms the final facts after repair and verification, trims Investigation to a durable summary, and finalizes Status, Root Cause, Fix, Verification, and Follow-ups.
+
+## Canonical Template
+
+```markdown
+# Incident Report: [Short Name]
+
+## Status
+
+Draft from diagnosis — awaiting user approval and repair.
+
+## Symptom
+
+- [observable failure]
+
+## Impact
+
+- [affected users, workflows, data, security/privacy, or "unknown"]
+- Severity: [low/medium/high/critical with brief rationale]
+
+## Investigation
+
+- Reproduction / evidence: [command, log, test, or check → result and key output summary; omit secrets]
+- Areas involved: [`path/to/file.ext` → why it matters]
+- Likely root cause: [fact-backed hypothesis]
+- Material alternatives: [why less likely, or "none"]
+- Fix recommendation: [smallest responsible repair direction and regression coverage]
+- Verification plan: [pre-fix reproduction, post-fix checks, and deterministic quality gate or "no gate in this repo"]
+- Unknowns / risks: [none, or concise uncertainty]
+
+## Root Cause
+
+- Pending confirmation — see Investigation.
+
+## Fix
+
+- Pending implementation.
+
+## Verification
+
+- Pending implementation.
+
+## Follow-ups
+
+- [none, or candidate follow-up]
+```
