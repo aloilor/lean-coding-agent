@@ -53,6 +53,7 @@ LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
 LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
 SHARED_AGENT_IGNORE_LINES = [
+    ".quality-reports/",
     ".agents/code-reviews/",
     ".agents/refactor-briefs/",
     ".agents/implementation-plans/",
@@ -117,7 +118,8 @@ LEGACY_QUALITY_GATE_HOOK_CONFIG_PATHS = [
 QUALITY_GATE_COMMAND_MARKER = "scripts/quality-gate"
 LARAVEL_QUALITY_REQUIRE_COMMAND = (
     "composer require --dev larastan/larastan:^3.0 "
-    "tomasvotruba/cognitive-complexity phpstan/extension-installer laravel/pint"
+    "tomasvotruba/cognitive-complexity phpstan/extension-installer laravel/pint "
+    "deptrac/deptrac"
 )
 
 
@@ -356,11 +358,35 @@ def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) ->
     if gate_script.is_file():
         make_executable(gate_script)
 
+    package_json_path = target_repo / "package.json"
+    package_json = load_package_json(package_json_path) if package_json_path.exists() else {}
+    package_manager = detect_package_manager(target_repo, package_json)
+    jscpd_install_command = " ".join(
+        [*DEV_DEPENDENCY_INSTALL_COMMANDS[package_manager], "jscpd"]
+    )
+
     return {
         "copied_paths": copied_paths,
         "removed_hook_paths": removed_hook_paths,
         "require_command": LARAVEL_QUALITY_REQUIRE_COMMAND,
+        "jscpd_install_command": jscpd_install_command,
     }
+
+
+def print_laravel_quality_gate_setup(setup: dict) -> None:
+    print("PHP/Laravel quality gate provisioned:")
+    if setup["removed_hook_paths"]:
+        print("- removed legacy quality-gate hooks from:")
+        for hook_path in setup["removed_hook_paths"]:
+            print(f"  - {hook_path}")
+    if setup["copied_paths"]:
+        for gate_path in setup["copied_paths"]:
+            print(f"- {gate_path}")
+    else:
+        print("- templates already present")
+    print(f"- install Composer development tools: {setup['require_command']}")
+    print(f"- install project-local jscpd: {setup['jscpd_install_command']}")
+    print("- then add composer scripts per docs/quality-pipeline.md")
 
 
 def parse_agent_source(source_path: Path) -> tuple[dict[str, str], str]:
@@ -949,18 +975,7 @@ def main() -> int:
             print(f"- {agent_path}")
     print(f"Agent Browser dependency: {agent_browser_install}")
     if laravel_quality_gate is not None:
-        print("PHP/Laravel quality gate provisioned:")
-        if laravel_quality_gate["removed_hook_paths"]:
-            print("- removed legacy quality-gate hooks from:")
-            for hook_path in laravel_quality_gate["removed_hook_paths"]:
-                print(f"  - {hook_path}")
-        if laravel_quality_gate["copied_paths"]:
-            for gate_path in laravel_quality_gate["copied_paths"]:
-                print(f"- {gate_path}")
-        else:
-            print("- templates already present")
-        print(f"- finish setup (install tools): {laravel_quality_gate['require_command']}")
-        print("- then add composer scripts per docs/quality-pipeline.md")
+        print_laravel_quality_gate_setup(laravel_quality_gate)
     print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")

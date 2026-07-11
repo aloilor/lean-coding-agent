@@ -16,8 +16,8 @@ Determinism raises the floor cheaply and objectively; it never reaches the ceili
 
 Placement follows a single property: **is the check meaningful on one file, or does it need the whole graph?**
 
-- **Review tier.** Style, complexity, and per-file type checks run once after the reviewer inventories the diff. Findings become inputs to semantic review and blocking findings return through the review-fix loop.
-- **Commit / CI tier (whole-repo, ratcheted).** Duplication, architecture / dependency direction, dead code, security. These are *relationships between* files — scoping them to touched files destroys what they measure, so they stay whole-repo.
+- **Review tier.** After inventorying the diff, the reviewer runs one local full-repository gate containing style, static analysis and complexity, tests, duplication, architecture, and dependency audit. Findings become inputs to semantic review and blocking findings return through the review-fix loop.
+- **CI-class analyses (whole-repo, ratcheted).** Duplication, architecture / dependency direction, dead code, and security need the whole graph. They remain CI-class analyses even when the reviewer-owned local gate executes them against the exact worktree under review; scoping them to touched files destroys what they measure.
 
 ### The ratchet
 
@@ -32,8 +32,9 @@ Static-analysis findings are deterministic and already-true; they do not need to
 ```
 implementer ── implement + run behavior verification ──► handoff
       ▼
-reviewer ── inventory diff, then run deterministic gate ──► fresh findings
-      • AUDIT the baseline diff — were findings SUPPRESSED instead of fixed?
+reviewer ── inventory diff, then run full deterministic gate ──► fresh manifest + reports
+      • AUDIT baseline, threshold, ruleset, ignore, and dependency-policy diffs
+        — were findings SUPPRESSED instead of fixed?
         (gaming the ratchet is the highest-signal thing a reviewer can catch)
       • CORRELATE static hotspots with the smells it spots
       • does NOT re-list mechanical findings as its own discoveries
@@ -41,9 +42,9 @@ reviewer ── inventory diff, then run deterministic gate ──► fresh find
       • returns blocking gate findings to the implementer for the next pass
 ```
 
-Static analysis is the reviewer's **instrument panel**, not its **assignment**. Running the gate after inventorying the diff makes that instrument panel independent and current. Blocking findings return through the normal review-fix loop.
+The deterministic gate is the reviewer's **instrument panel**, not its **assignment**. Running it after inventorying the diff makes that instrument panel independent and current. The reviewer reads the fresh manifest, treats skips or missing reports as missing verification, blocks on test failures, and returns other blocking findings through the normal review-fix loop.
 
-**Fix scope.** When analysis is whole-project, the artifact holds findings beyond the change. The reviewer returns change-caused findings in touched files, plus unresolved explicitly in-scope target findings named by the task, specification, bug investigation, refactor brief, or implementation plan, for the implementer to fix. New findings that ripple into *untouched* files are flagged as review findings but not assigned as implementation scope without approval. Pre-existing unrelated findings are the baseline's job, not the change's.
+**Inspection breadth is not fix scope.** Whole-project analysis and semantic review may inspect untouched callers, dependencies, and neighboring code to determine whether the implementation caused a regression. That broader inspection does not authorize cleanup. The reviewer returns change-caused findings in touched files, plus unresolved explicitly in-scope target findings named by the task, specification, bug investigation, refactor brief, or implementation plan, for the implementer to fix. New findings that ripple into *untouched* files are flagged as review findings but not assigned as implementation scope without approval. Pre-existing unrelated findings are the baseline's job, not the change's.
 
 The main risk is an extra review round-trip when the reviewer is the first explicit consumer of a mechanical finding. In exchange, there is one authoritative run and no handoff ambiguity about artifact freshness. Auditing the baseline diff still catches an implementer suppressing a finding instead of fixing it.
 
@@ -55,6 +56,7 @@ Enforcement can sit at three layers. The distinction that matters: a hook in one
 |-------|-----------|--------|------|
 | Agent workflow | shared `code-reviewer` instruction, installed to both `.claude/agents/` and `.codex/agents/` | reviewers | runs the gate once per review pass and uses fresh findings |
 | Commit gate | git `pre-commit` running the gate | Claude Code + Codex + **humans** | a hard, human-covering stop |
+| Hosted CI | CI service running the same project scripts for each pushed commit | every pushed worktree | independent remote enforcement |
 
 The reviewer calls `scripts/quality-gate` directly. A git `pre-commit` can call the same script when hard enforcement for humans and other tools is wanted, but it is not provisioned by this baseline.
 
@@ -66,4 +68,4 @@ This pipeline catches **structural** slop — too complex, duplicated, tangled, 
 
 ## Concrete implementation
 
-See `templates/php-laravel/` in the coding-agent baseline and its `docs/quality-pipeline.md` for a worked PHP/Laravel instance (Laravel Pint + PHPStan/Larastan + cognitive-complexity rule, ratcheted via `phpstan-baseline.neon`, run explicitly by the code reviewer).
+See `templates/php-laravel/` in the coding-agent baseline and its `docs/quality-pipeline.md` for a worked PHP/Laravel instance: Pint, PHPStan/Larastan with cognitive complexity, tests, jscpd, Deptrac, and Composer audit, run explicitly by the code reviewer with committed ratchets where needed.

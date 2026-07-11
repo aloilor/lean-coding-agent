@@ -50,5 +50,5 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
   - It regenerates Codex custom agent TOML files in `.codex/agents/` from the shared subagent Markdown on every run.
   - It recopies the current repo-local shared skills into the target repo.
   - It removes previously managed installed skills that are no longer present in `skills/`.
-  - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. The code reviewer owns execution; the initializer removes legacy quality-gate PostToolUse hooks and installs no edit or git hooks.
+  - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. The code reviewer owns execution and may inspect whole-repository evidence, but only change-caused or explicitly approved in-scope findings become implementation work; unrelated pre-existing debt stays out of scope. The initializer removes legacy quality-gate PostToolUse hooks and installs no edit or git hooks.
 - The bootstrap script also cleans up legacy external-skill bootstrap artifacts if an older target repo still has them.

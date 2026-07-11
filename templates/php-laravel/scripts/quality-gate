@@ -1,38 +1,110 @@
 #!/usr/bin/env sh
-# Deterministic quality gate — run explicitly by the code reviewer after it
-# inventories the diff and before it begins semantic review.
-#
-# This repo is REVIEWER-ONLY by choice — there are no edit or git pre-commit hooks, so nothing
-# hard-blocks a commit and humans/other tools are not covered. A hard,
-# human-covering commit or CI gate can be added later (see docs/quality-pipeline.md).
-#
-# ALL static-analysis findings are written to ONE artifact, static-report.json,
-# on every run — always fresh, so the reviewer never depends on someone producing
-# it. Formatting (Pint) is a console-only step: it is fixes, not analysis findings.
-#
-# Exit 0 = clean OR not-yet-provisioned (never wedge a half-set-up repo).
-# Exit 2 = findings.
+# Run explicitly by the code reviewer after diff inventory and before semantic review.
+# This local full-repository gate is reviewer-owned; it does not install commit hooks or CI.
+
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
-cd "$ROOT" || exit 0
+cd "$ROOT" || exit 2
 
-if ! command -v composer >/dev/null 2>&1; then
-    echo "[quality-gate] composer not on PATH; skipping." >&2
-    exit 0
+REPORT_DIR=".quality-reports"
+ENTRIES_FILE="$REPORT_DIR/.manifest-entries"
+MANIFEST_TEMP="$REPORT_DIR/.manifest.json.tmp"
+gate_status=0
+first_entry=1
+
+if ! rm -rf "$REPORT_DIR" || ! mkdir -p "$REPORT_DIR"; then
+    echo "[quality-gate] could not recreate $REPORT_DIR." >&2
+    exit 2
 fi
 
-if ! composer run-script --list 2>/dev/null | grep -q "quality:report"; then
-    echo "[quality-gate] 'composer quality:report' not defined yet; skipping (see docs/quality-pipeline.md)." >&2
-    exit 0
+if ! : > "$ENTRIES_FILE"; then
+    echo "[quality-gate] could not initialize manifest evidence." >&2
+    exit 2
 fi
 
-status=0
-composer quality:style || status=2      # formatting check (console only, not persisted)
-composer quality:report || status=2     # writes ALL static-analysis findings to static-report.json
-
-if [ "$status" -eq 0 ]; then
-    exit 0
+composer_available=0
+composer_scripts=""
+if command -v composer >/dev/null 2>&1; then
+    composer_available=1
+    composer_scripts="$(composer run-script --list 2>/dev/null || true)"
 fi
 
-echo "[quality-gate] Static-analysis findings written to static-report.json — read it." >&2
-echo "[quality-gate] Fix them, or justify a baseline entry, before proceeding (formatting issues, if any, are in the console above)." >&2
-exit "$status"
+script_is_available() {
+    printf '%s\n' "$composer_scripts" | grep -q "^[[:space:]]*$1[[:space:]]"
+}
+
+append_manifest_entry() {
+    name=$1
+    status=$2
+    report=$3
+    stderr_log=$4
+    exit_code=$5
+
+    prefix=","
+    if [ "$first_entry" -eq 1 ]; then
+        prefix=""
+        first_entry=0
+    fi
+
+    if ! printf '    %s{"name":"%s","status":"%s","report":"%s","stderr":"%s","exit_code":%s}\n' \
+        "$prefix" "$name" "$status" "$report" "$stderr_log" "$exit_code" \
+        >> "$ENTRIES_FILE"; then
+        echo "[quality-gate] could not write manifest evidence." >&2
+        exit 2
+    fi
+}
+
+run_check() {
+    name=$1
+    script_name=$2
+    report=$3
+    stderr_log=$4
+    status="skipped"
+    exit_code="null"
+
+    if ! : > "$report" || ! : > "$stderr_log"; then
+        echo "[quality-gate] could not initialize evidence for $name." >&2
+        exit 2
+    fi
+
+    if [ "$composer_available" -eq 1 ] && script_is_available "$script_name"; then
+        if composer --quiet "$script_name" > "$report" 2> "$stderr_log"; then
+            status="pass"
+            exit_code=0
+        else
+            exit_code=$?
+            status="fail"
+            gate_status=2
+        fi
+    fi
+
+    append_manifest_entry "$name" "$status" "$report" "$stderr_log" "$exit_code"
+}
+
+run_check "style" "quality:style" "$REPORT_DIR/style.txt" "$REPORT_DIR/style.stderr.log"
+run_check "static" "quality:static" "$REPORT_DIR/static-analysis.json" "$REPORT_DIR/static.stderr.log"
+run_check "tests" "quality:test" "$REPORT_DIR/tests.txt" "$REPORT_DIR/tests.stderr.log"
+run_check "duplication" "quality:duplication" "$REPORT_DIR/duplication.txt" "$REPORT_DIR/duplication.stderr.log"
+run_check "architecture" "quality:architecture" "$REPORT_DIR/architecture.json" "$REPORT_DIR/architecture.stderr.log"
+run_check "audit" "quality:audit" "$REPORT_DIR/dependency-audit.json" "$REPORT_DIR/audit.stderr.log"
+
+if ! generated_at="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"; then
+    echo "[quality-gate] could not generate the manifest timestamp." >&2
+    exit 2
+fi
+
+if ! {
+    printf '{\n  "schema_version":1,\n  "generated_at":"%s",\n  "checks":[\n' "$generated_at"
+    cat "$ENTRIES_FILE"
+    printf '  ]\n}\n'
+} > "$MANIFEST_TEMP" || ! mv "$MANIFEST_TEMP" "$REPORT_DIR/manifest.json"; then
+    echo "[quality-gate] could not write $REPORT_DIR/manifest.json." >&2
+    exit 2
+fi
+
+rm -f "$ENTRIES_FILE"
+
+if [ "$composer_available" -eq 0 ]; then
+    echo "[quality-gate] composer not on PATH; all checks skipped." >&2
+fi
+echo "[quality-gate] evidence written to $REPORT_DIR/manifest.json." >&2
+exit "$gate_status"

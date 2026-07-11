@@ -151,6 +151,7 @@ class InitializationIntegrationTest(unittest.TestCase):
         expected_ignore_lines = [
             "AGENTS.local.md",
             "CLAUDE.local.md",
+            ".quality-reports/",
             ".agents/code-reviews/",
             ".agents/refactor-briefs/",
             ".agents/implementation-plans/",
@@ -537,7 +538,51 @@ class RemoveLegacyQualityGateHooksTest(unittest.TestCase):
         self.assertEqual([hook_path], result["removed_hook_paths"])
         self.assertFalse(hook_path.exists())
         self.assertTrue((self.repo / "scripts" / "quality-gate").exists())
+        self.assertTrue((self.repo / "docs" / "quality-pipeline.md").exists())
+        self.assertTrue((self.repo / "phpstan.neon.dist").exists())
+        self.assertTrue((self.repo / "phpstan-baseline.neon").exists())
+        self.assertIn("deptrac/deptrac", result["require_command"])
+        self.assertEqual("npm install --save-dev jscpd", result["jscpd_install_command"])
         self.assertFalse((self.repo / ".claude" / "settings.json").exists())
+
+    def test_laravel_provisioning_preserves_existing_assets_and_uses_detected_node_tool(self) -> None:
+        (self.repo / "artisan").touch()
+        (self.repo / "package.json").write_text(
+            json.dumps({"packageManager": "pnpm@10.0.0"}),
+            encoding="utf-8",
+        )
+        existing_docs = self.repo / "docs" / "quality-pipeline.md"
+        existing_docs.parent.mkdir()
+        existing_docs.write_text("project-owned guidance\n", encoding="utf-8")
+
+        result = INIT_PROJECT_AGENT.provision_laravel_quality_gate(
+            self.repo,
+            SCRIPT_PATH.parents[1],
+        )
+
+        self.assertIsNotNone(result)
+        assert result is not None
+        self.assertEqual("project-owned guidance\n", existing_docs.read_text(encoding="utf-8"))
+        self.assertNotIn(existing_docs, result["copied_paths"])
+        self.assertEqual("pnpm add --save-dev jscpd", result["jscpd_install_command"])
+
+    def test_laravel_setup_output_names_both_required_toolchains(self) -> None:
+        setup = {
+            "copied_paths": [],
+            "removed_hook_paths": [],
+            "require_command": "composer require --dev deptrac/deptrac",
+            "jscpd_install_command": "yarn add --dev jscpd",
+        }
+        output = io.StringIO()
+
+        with redirect_stdout(output):
+            INIT_PROJECT_AGENT.print_laravel_quality_gate_setup(setup)
+
+        self.assertIn(
+            "install Composer development tools: composer require --dev deptrac/deptrac",
+            output.getvalue(),
+        )
+        self.assertIn("install project-local jscpd: yarn add --dev jscpd", output.getvalue())
 
 
 if __name__ == "__main__":
