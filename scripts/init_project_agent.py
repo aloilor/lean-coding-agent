@@ -107,6 +107,11 @@ AGENT_BROWSER_BROWSER_INSTALL_COMMANDS = {
 }
 LARAVEL_TEMPLATE_SUBPATH = Path("templates") / "php-laravel"
 QUALITY_GATE_SCRIPT_SUBPATH = Path("scripts") / "quality-gate"
+LEGACY_QUALITY_GATE_HOOK_CONFIG_PATHS = [
+    Path(".claude") / "settings.json",
+    Path(".codex") / "hooks.json",
+]
+QUALITY_GATE_COMMAND_MARKER = "scripts/quality-gate"
 LARAVEL_QUALITY_REQUIRE_COMMAND = (
     "composer require --dev larastan/larastan:^3.0 "
     "tomasvotruba/cognitive-complexity phpstan/extension-installer laravel/pint"
@@ -254,6 +259,76 @@ def make_executable(path: Path) -> None:
     path.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
+def remove_legacy_quality_gate_hooks(target_repo: Path) -> list[Path]:
+    updated_paths: list[Path] = []
+
+    for relative_path in LEGACY_QUALITY_GATE_HOOK_CONFIG_PATHS:
+        config_path = target_repo / relative_path
+        if not config_path.exists():
+            continue
+
+        try:
+            config = json.loads(config_path.read_text(encoding="utf-8-sig"))
+        except json.JSONDecodeError:
+            continue
+
+        if not isinstance(config, dict):
+            continue
+
+        hooks = config.get("hooks")
+        if not isinstance(hooks, dict):
+            continue
+
+        post_tool_use = hooks.get("PostToolUse")
+        if not isinstance(post_tool_use, list):
+            continue
+
+        retained_entries: list[object] = []
+        changed = False
+        for entry in post_tool_use:
+            if not isinstance(entry, dict) or not isinstance(entry.get("hooks"), list):
+                retained_entries.append(entry)
+                continue
+
+            retained_commands = [
+                hook
+                for hook in entry["hooks"]
+                if not (
+                    isinstance(hook, dict)
+                    and isinstance(hook.get("command"), str)
+                    and QUALITY_GATE_COMMAND_MARKER in hook["command"].replace("\\", "/")
+                )
+            ]
+            if len(retained_commands) == len(entry["hooks"]):
+                retained_entries.append(entry)
+                continue
+
+            changed = True
+            if retained_commands:
+                retained_entry = dict(entry)
+                retained_entry["hooks"] = retained_commands
+                retained_entries.append(retained_entry)
+
+        if not changed:
+            continue
+
+        if retained_entries:
+            hooks["PostToolUse"] = retained_entries
+        else:
+            hooks.pop("PostToolUse", None)
+
+        if not hooks:
+            config.pop("hooks", None)
+
+        if config:
+            config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+        else:
+            config_path.unlink()
+        updated_paths.append(config_path)
+
+    return updated_paths
+
+
 def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) -> dict | None:
     if not detect_php_laravel(target_repo):
         return None
@@ -262,6 +337,7 @@ def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) ->
     if not source_dir.exists():
         return None
 
+    removed_hook_paths = remove_legacy_quality_gate_hooks(target_repo)
     copied_paths: list[Path] = []
     for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
         relative_path = source_path.relative_to(source_dir)
@@ -279,6 +355,7 @@ def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) ->
 
     return {
         "copied_paths": copied_paths,
+        "removed_hook_paths": removed_hook_paths,
         "require_command": LARAVEL_QUALITY_REQUIRE_COMMAND,
     }
 
@@ -870,6 +947,10 @@ def main() -> int:
     print(f"Agent Browser dependency: {agent_browser_install}")
     if laravel_quality_gate is not None:
         print("PHP/Laravel quality gate provisioned:")
+        if laravel_quality_gate["removed_hook_paths"]:
+            print("- removed legacy quality-gate hooks from:")
+            for hook_path in laravel_quality_gate["removed_hook_paths"]:
+                print(f"  - {hook_path}")
         if laravel_quality_gate["copied_paths"]:
             for gate_path in laravel_quality_gate["copied_paths"]:
                 print(f"- {gate_path}")

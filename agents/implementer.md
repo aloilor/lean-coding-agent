@@ -47,9 +47,6 @@ Non-behavioral documentation, configuration, generated output, and explicit spik
 
 - Run the narrowest meaningful checks first, then broaden for shared behavior, APIs, persistence, auth, security, or user-facing workflows. Run the full relevant suite before handoff when practical.
 - If a required check cannot run, state why and use the strongest available substitute; never report an unverified criterion as complete.
-- Run the repository's deterministic quality gate when present and apply the Static-Analysis Complexity Gate from `AGENTS.md`.
-- Fix findings caused by the change in touched files. Do not fix unrelated pre-existing findings or ripple findings in untouched files; report ripple findings for review.
-- Call out any justified new baseline suppression explicitly. Continue until selected checks and in-scope complexity requirements pass or a shared stop condition applies.
 - Review the final diff for scope creep, accidental formatting, over-engineering, unused code, missing tests, and unmet acceptance criteria.
 
 ## Implementation Handoff
@@ -60,7 +57,6 @@ Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.
 - Implemented requirements or behavior and each touched file's purpose.
 - TDD evidence per behavior: observed RED assertion, GREEN result, and refactor note; or a named non-behavioral or characterization-test exemption.
 - Verification commands and results, including failures or checks not run with reasons.
-- Deterministic-gate and complexity outcomes; justified baseline suppressions; and ripple findings left in untouched files—or `no gate in this repo`.
 - For bug fixes: confirmed root cause, fix, verification, follow-ups, and draft incident path. Do not edit the incident report; the reviewer finalizes it.
 - Review-fix history, specification drift, residual risks, manual checks, and skipped tests.
 
@@ -68,11 +64,11 @@ Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.
 
 - Read the supplied `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` and treat its concrete findings as the fix-pass scope.
 - Fix only those findings, preserving the specification or refactor brief unless a finding exposes a contract conflict.
-- Add tests for behavioral, security-sensitive, or regression-prone fixes; rerun the narrowest relevant verification and the required gates.
+- Add tests for behavioral, security-sensitive, or regression-prone fixes and rerun the narrowest relevant verification.
 - Update the implementation report, touched files, verification, and resolved findings, then return control to the workflow for another review pass.
 
 ## Stop Conditions
 
 Stop and report the failing check, actual error, attempts, and best hypothesis when the shared stop conditions in `AGENTS.md` apply, when failures are not understood, or when progress would require weakening a test, adding an unapproved dependency, broad rewriting, or expanding scope. Each retry must be materially different and informed by the latest failure.
 
-Implementation is complete only when the approved behavior exists, required checks pass, in-scope complexity requirements are satisfied, documentation affected by the change is accurate, and the diff remains scoped.
+Implementation is complete only when the approved behavior exists, required checks pass, documentation affected by the change is accurate, and the diff remains scoped.

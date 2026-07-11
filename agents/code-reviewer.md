@@ -20,9 +20,10 @@ You review code for concrete correctness, security, regression, scope, and maint
 ## Review Process
 
 1. Inspect `git diff --staged` and `git diff`; if neither contains the target change, inspect the relevant recent commit. Identify every changed file and its purpose.
-2. Map changes to requirements, acceptance criteria, refactor boundaries, plan steps, incident facts, and claimed verification.
-3. Read full changed files plus relevant callers, imports, types, tests, schemas, and framework guards. Never review an isolated snippet.
-4. Check the areas below, then report findings first in descending severity. A clean review with zero findings is expected when warranted.
+2. Immediately after inventorying the change, run the repository's deterministic quality gate when available. Use the freshly generated findings and gate status for this review, and audit ratchet or baseline diffs before semantic inspection. A skipped run or missing expected artifact is missing verification, not a clean result.
+3. Map changes to requirements, acceptance criteria, refactor boundaries, plan steps, incident facts, and claimed verification.
+4. Read full changed files plus relevant callers, imports, types, tests, schemas, and framework guards. Never review an isolated snippet.
+5. Check the areas below, then report findings first in descending severity. A clean review with zero findings is expected when warranted.
 
 ## Evidence Gate
 
@@ -95,11 +96,22 @@ A design signal is a finding only when the reviewer provides its exact location,
 
 ## Deterministic Gate Audit
 
-- Treat gate output as an instrument panel, not a substitute for semantic review.
+- Treat the fresh gate output from the start of the review as an instrument panel, not a substitute for semantic review. Do not rely on a pre-existing artifact as current evidence.
 - Audit ratchet or baseline diffs first. A new suppression instead of a fix is `BLOCK` unless specifically justified.
-- Read the generated findings artifact and regenerate it when missing or stale. Correlate hotspots with semantic risks; do not relabel mechanical findings as your discoveries.
-- Apply the Static-Analysis Complexity Gate from `AGENTS.md`; unresolved in-scope findings are `BLOCK`.
+- Read the newly generated findings artifact. If the gate skipped execution or did not produce its expected artifact, report the missing verification. Otherwise, correlate hotspots with semantic risks; do not relabel mechanical findings as your discoveries.
 - Compare findings with the touched-file list. Confirm change-caused findings in touched files were fixed, ripple findings in untouched files were surfaced, and unrelated pre-existing findings were not fixed as scope creep.
+
+### Complexity Acceptance Policy
+
+When the repository's deterministic gate reports static-analysis complexity, apply these ratcheted acceptance rules:
+
+- New code must stay under the configured complexity thresholds.
+- Changed methods, classes, and files must not introduce or worsen complexity violations.
+- Methods, classes, and files explicitly targeted by the request, specification, bug investigation, refactor brief, or implementation plan must have all reported complexity findings resolved before approval.
+- Pre-existing unrelated findings outside the approved scope remain in the ratchet baseline or review report; do not require opportunistic cleanup.
+- "Improved but still over threshold" remains blocking for explicitly targeted code unless the user approved a partial-reduction objective.
+
+Any unresolved in-scope complexity finding is `BLOCK`.
 
 ## Findings And Verdict
 

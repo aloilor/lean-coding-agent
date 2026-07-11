@@ -29,7 +29,7 @@ Draft from diagnosis — awaiting user approval and repair.
 - Likely root cause: [fact-backed hypothesis]
 - Material alternatives: [why less likely, or "none"]
 - Fix recommendation: [smallest responsible repair direction and regression coverage]
-- Verification plan: [pre-fix reproduction, post-fix checks, and deterministic quality gate or "no gate in this repo"]
+- Verification plan: [pre-fix reproduction and post-fix checks]
 - Unknowns / risks: [none, or concise uncertainty]
 
 ## Root Cause

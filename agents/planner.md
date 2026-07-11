@@ -49,7 +49,7 @@ For either planning path, save `.agents/implementation-plans/implementation-plan
 - Applicable standards and skills: `$engineering-standards`, `$tdd`, and REST or SQL skills when relevant.
 - Ordered engineering steps tied to requirement IDs or refactor-brief sections, with known files or modules and a verification check for every step.
 - Supporting refactors only when they reduce direct risk, remove introduced duplication, or prevent brittle implementation.
-- The repository's deterministic quality gate and the Static-Analysis Complexity Gate from `AGENTS.md` when available, plus regression checks.
+- Regression checks proportionate to the affected behavior and risk.
 - Measurable success criteria and any unresolved `TBD`s.
 
 Keep the plan at engineering-task granularity. Do not invent internal design that the planning contract does not require.

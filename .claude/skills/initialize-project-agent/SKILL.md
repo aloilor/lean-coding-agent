@@ -28,7 +28,7 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
    - `.claude/agents/` with Claude Code subagent files
    - `.codex/agents/` with Codex custom agent files
    - `agent-context/skills-installed.json`
-   - for PHP/Laravel targets: `phpstan.neon.dist`, `phpstan-baseline.neon`, `scripts/quality-gate` (executable), PostToolUse hooks in `.claude/settings.json` and `.codex/hooks.json`, and `QUALITY-PIPELINE.md` (agent-only enforcement; no git hook)
+   - for PHP/Laravel targets: `phpstan.neon.dist`, `phpstan-baseline.neon`, `scripts/quality-gate` (executable), and `QUALITY-PIPELINE.md` (reviewer-only execution; no edit or git hooks)
    - `.agents/skills/` and `.claude/skills/` with the copied skill folders from this repo's `skills/`
    - `agent-context/` docs created or refreshed by `codebase-onboarding`, including `agent-context/skills.md`
 5. Tell the user which skills were installed and which `agent-context/` docs were created or updated by `codebase-onboarding`.
@@ -50,5 +50,5 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
   - It regenerates Codex custom agent TOML files in `.codex/agents/` from the shared subagent Markdown on every run.
   - It recopies the current repo-local shared skills into the target repo.
   - It removes previously managed installed skills that are no longer present in `skills/`.
-  - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. Enforcement is agent-only via PostToolUse hooks; it installs no git hook.
+  - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. The code reviewer owns execution; the initializer removes legacy quality-gate PostToolUse hooks and installs no edit or git hooks.
 - The bootstrap script also cleans up legacy external-skill bootstrap artifacts if an older target repo still has them.

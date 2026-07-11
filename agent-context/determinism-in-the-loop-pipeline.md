@@ -16,40 +16,36 @@ Determinism raises the floor cheaply and objectively; it never reaches the ceili
 
 Placement follows a single property: **is the check meaningful on one file, or does it need the whole graph?**
 
-- **Edit tier (fast, scoped to touched files).** Style, complexity, and per-file type checks. Runs in the implementer's inner loop. Findings should reach review *already fixed*, not freshly reported.
+- **Review tier.** Style, complexity, and per-file type checks run once after the reviewer inventories the diff. Findings become inputs to semantic review and blocking findings return through the review-fix loop.
 - **Commit / CI tier (whole-repo, ratcheted).** Duplication, architecture / dependency direction, dead code, security. These are *relationships between* files — scoping them to touched files destroys what they measure, so they stay whole-repo.
 
 ### The ratchet
 
 You cannot hard-fail a check against an existing messy repo — every file trips it on day one. The ratchet fixes this: record the current metric as a baseline, grandfather existing debt, and block only **regressions**. New code may not make duplication / complexity / type errors worse; existing debt can only trend down. Whole-repo static analysis is only deployable in ratcheted form.
 
-For agent development workflows, static-analysis complexity is always an objective under that ratchet: new code must be below threshold, changed code must not introduce or worsen violations, and any explicitly in-scope target code must have its reported complexity findings resolved before approval. Pre-existing unrelated findings stay in the baseline or the report; they are not an excuse for opportunistic cleanup outside the approved scope.
+The shared `code-reviewer` instruction owns the exact ratcheted complexity acceptance policy and applies it to the fresh gate artifact during review.
 
-## Placement: implementer fixes, reviewer audits
+## Placement: reviewer runs, implementer fixes returned findings
 
-Static-analysis findings are deterministic and already-true; they do not need the reviewer's *judgment*. So the **implementer** is the first consumer, not the reviewer:
+Static-analysis findings are deterministic and already-true; they do not need to be rediscovered through semantic judgment. The reviewer owns one fresh, explicit gate execution for the exact worktree under review:
 
 ```
-implementer ── run deterministic gate (fast, scoped) ──► fix, or baseline
-      │
-      │  emits: ONE artifact with all static-analysis findings + the baseline diff
+implementer ── implement + run behavior verification ──► handoff
       ▼
-reviewer ── receives the report as READ-ONLY context ──►
+reviewer ── inventory diff, then run deterministic gate ──► fresh findings
       • AUDIT the baseline diff — were findings SUPPRESSED instead of fixed?
         (gaming the ratchet is the highest-signal thing a reviewer can catch)
       • CORRELATE static hotspots with the smells it spots
       • does NOT re-list mechanical findings as its own discoveries
       • spends its budget on SEMANTIC review
+      • returns blocking gate findings to the implementer for the next pass
 ```
 
-Static analysis is the reviewer's **instrument panel**, not its **assignment**.
+Static analysis is the reviewer's **instrument panel**, not its **assignment**. Running the gate after inventorying the diff makes that instrument panel independent and current. Blocking findings return through the normal review-fix loop.
 
-**Fix scope.** When analysis is whole-project, the artifact holds findings beyond the change. The implementer fixes findings its change caused in the files it touched, plus any explicitly in-scope target findings named by the task, specification, bug investigation, refactor brief, or implementation plan. New findings the change ripples into *untouched* files (a caller it did not open) are **flagged for the reviewer, not fixed** — this keeps edits scoped without silently shipping a regression. Pre-existing unrelated findings are the baseline's job, not the change's.
+**Fix scope.** When analysis is whole-project, the artifact holds findings beyond the change. The reviewer returns change-caused findings in touched files, plus unresolved explicitly in-scope target findings named by the task, specification, bug investigation, refactor brief, or implementation plan, for the implementer to fix. New findings that ripple into *untouched* files are flagged as review findings but not assigned as implementation scope without approval. Pre-existing unrelated findings are the baseline's job, not the change's.
 
-Two failure modes this ordering avoids:
-
-1. **Reviewer-as-slow-linter** — spending a full review round-trip to surface a complexity violation the gate could have bounced back in seconds.
-2. **Baseline gaming** — an implementer making the gate green by *suppressing* a finding into the baseline instead of fixing it. If the reviewer only sees "gate passed," this is invisible; auditing the baseline diff catches it.
+The main risk is an extra review round-trip when the reviewer is the first explicit consumer of a mechanical finding. In exchange, there is one authoritative run and no handoff ambiguity about artifact freshness. Auditing the baseline diff still catches an implementer suppressing a finding instead of fixing it.
 
 ## Cross-tool enforcement
 
@@ -57,13 +53,12 @@ Enforcement can sit at three layers. The distinction that matters: a hook in one
 
 | Layer | Mechanism | Covers | Role |
 |-------|-----------|--------|------|
-| Edit-tier hook | PostToolUse on `Edit`/`Write` — Claude Code `.claude/settings.json` **and** Codex `.codex/hooks.json` (same `{"hooks":{"PostToolUse":[…]}}` shape, both act on exit 2) | Claude Code + Codex | fast advisory feedback per edit |
-| Agent workflow | shared `implementer` / `code-reviewer` instructions, installed to both `.claude/agents/` and `.codex/agents/` | agents | puts findings in the loop before handoff |
+| Agent workflow | shared `code-reviewer` instruction, installed to both `.claude/agents/` and `.codex/agents/` | reviewers | runs the gate once per review pass and uses fresh findings |
 | Commit gate | git `pre-commit` running the gate | Claude Code + Codex + **humans** | a hard, human-covering stop |
 
-The edit-tier hooks and the commit gate call the **same** gate script (`scripts/quality-gate`), so the check is defined once. The severity differs by trigger: a PostToolUse hook fires *after* the edit landed, so its exit 2 informs the model rather than undoing anything (advisory); a git `pre-commit` turns the same failure into a hard stop and is the only layer that also covers humans and other tools.
+The reviewer calls `scripts/quality-gate` directly. A git `pre-commit` can call the same script when hard enforcement for humans and other tools is wanted, but it is not provisioned by this baseline.
 
-**Agent-only vs. hard gate is a deliberate choice.** The two edit-tier hooks give cross-*agent* enforcement without touching anyone's git workflow. Adding the git `pre-commit` upgrades that to a hard, human-covering gate. The PHP/Laravel reference implementation ships **agent-only** (PostToolUse hooks, no git hook); the commit gate is documented as the next layer to add when a hard stop is wanted.
+**Reviewer-only vs. hard gate is a deliberate choice.** The PHP/Laravel reference implementation ships with reviewer-only execution and no PostToolUse or git hooks. Adding a git `pre-commit` changes that ownership model by upgrading the script to a hard, human-covering gate.
 
 ## The honest ceiling
 
@@ -71,4 +66,4 @@ This pipeline catches **structural** slop — too complex, duplicated, tangled, 
 
 ## Concrete implementation
 
-See `templates/php-laravel/` in the coding-agent baseline and its `docs/quality-pipeline.md` for a worked PHP/Laravel instance (Laravel Pint + PHPStan/Larastan + cognitive-complexity rule, ratcheted via `phpstan-baseline.neon`, enforced agent-only through Claude Code and Codex PostToolUse hooks).
+See `templates/php-laravel/` in the coding-agent baseline and its `docs/quality-pipeline.md` for a worked PHP/Laravel instance (Laravel Pint + PHPStan/Larastan + cognitive-complexity rule, ratcheted via `phpstan-baseline.neon`, run explicitly by the code reviewer).

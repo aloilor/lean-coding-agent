@@ -13,8 +13,8 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 
 1. Classify the bug using `AGENTS.md` tiering. The main agent diagnoses Small bugs in conversation. For Medium or Full bugs—and whenever the failure is ambiguous, recurring, CI-related, production-like, cross-module, security/privacy-sensitive, data-affecting, or user-facing—`bug-diagnostician` investigates and drafts the incident report.
 2. Show the user the symptom, evidence or likely root cause, proposed fix direction, and verification plan. Wait for explicit approval before any implementation, regardless of tier.
-3. After approval, the main agent handles Small repairs; Medium and Full repairs go to `implementer`. Apply `tdd` plus `engineering-standards`: reproduce the bug with an existing failing test or a focused regression test and observe RED; make the smallest root-cause fix; then refactor only while green. If automated reproduction is impractical, document why and record the strongest substitute evidence. Run broader verification, the repository's deterministic quality gate, and the Static-Analysis Complexity Gate from `AGENTS.md`.
-4. Medium and Full changes go to `code-reviewer`. On `APPROVE`, the reviewer finalizes the incident report from the confirmed root cause, fix, and verification evidence and trims Investigation to a durable summary.
+3. After approval, the main agent handles Small repairs; Medium and Full repairs go to `implementer`. Apply `tdd` plus `engineering-standards`: reproduce the bug with an existing failing test or a focused regression test and observe RED; make the smallest root-cause fix; then refactor only while green. If automated reproduction is impractical, document why and record the strongest substitute evidence. Run broader verification.
+4. Medium and Full changes go to `code-reviewer`, which runs the repository's deterministic quality gate after inventorying the diff and uses the fresh findings during review. On `APPROVE`, the reviewer finalizes the incident report from the confirmed root cause, fix, and verification evidence and trims Investigation to a durable summary.
 
 ## Artifacts By Tier
 

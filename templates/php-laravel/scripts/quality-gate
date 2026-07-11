@@ -1,13 +1,8 @@
 #!/usr/bin/env sh
-# Deterministic quality gate — the agent-side enforcement for this repo.
-# Invoked by the PostToolUse hooks in:
-#   - .claude/settings.json   (Claude Code)
-#   - .codex/hooks.json       (Codex)
+# Deterministic quality gate — run explicitly by the code reviewer after it
+# inventories the diff and before it begins semantic review.
 #
-# Both hooks fire after an Edit/Write, so the edit already happened: exit 2
-# surfaces the findings to the model as feedback (it does not undo the change).
-#
-# This repo is AGENT-ONLY by choice — there is no git pre-commit gate, so nothing
+# This repo is REVIEWER-ONLY by choice — there are no edit or git pre-commit hooks, so nothing
 # hard-blocks a commit and humans/other tools are not covered. A hard,
 # human-covering commit or CI gate can be added later (see docs/quality-pipeline.md).
 #

@@ -25,7 +25,7 @@ Load only skills relevant to the bug shape:
 2. Read the relevant errors, logs, tests, code, configuration, project context, and recent related changes. Run the narrowest safe reproduction when possible; preserve exact commands and summarize their results. If reproduction is impractical, explain why and record the strongest substitute evidence.
 3. Separate observed facts from hypotheses. Identify the most likely root cause, explain why material alternatives are less likely, and name the involved files, modules, contracts, data shapes, or dependencies.
 4. Surface contract ambiguity, missing requirements, flakiness, environment-only behavior, migration risk, or other scope-expanding discoveries.
-5. Create or update `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical template in `docs/incidents/README.md`. Record the applicable deterministic quality-gate command, or state that none exists; enforcement belongs to implementation and review.
+5. Create or update `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical template in `docs/incidents/README.md`.
 6. Return the incident path and a concise summary to the main agent. Do not implement or hand work directly to the implementer.
 
 ## Stop Conditions
