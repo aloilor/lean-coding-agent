@@ -57,6 +57,9 @@ SHARED_AGENT_IGNORE_LINES = [
     ".agents/refactor-briefs/",
     ".agents/implementation-plans/",
     ".agents/implementation-reports/",
+    ".agents/tasks/",
+    ".codex/tasks/",
+    ".claude/tasks/",
 ]
 AGENT_BROWSER_PACKAGE = "agent-browser@latest"
 AGENT_BROWSER_COMMAND = "agent-browser"

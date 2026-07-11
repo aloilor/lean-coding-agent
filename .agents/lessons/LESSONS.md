@@ -6,3 +6,4 @@
 - [Honor Bootstrap Installation Scope](honor-bootstrap-installation-scope.md) - When asked to install tooling in initialized projects, make the bootstrap create the required project files instead of only documenting manual commands.
 - [Prefer Engineering Standards Over Local Style](prefer-engineering-standards-over-local-style.md) - Follow the `engineering-standards` skill for style guidance instead of preserving inconsistent nearby code style.
 - [Update Bootstrap Managed Ignore Rules](update-bootstrap-managed-ignore-rules.md) - When ignore rules must apply to initialized repos, update the bootstrap-managed list instead of only editing this repo's root `.gitignore`.
+- [Test Initialization Structure Changes](test-initialization-structure-changes.md) - Every structural change to project initialization must include a regression test for the new structure and a rerun of the initialization checks.
