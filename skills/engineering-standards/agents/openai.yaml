@@ -1,4 +1,4 @@
 interface:
   display_name: "Engineering Standards"
-  short_description: "Enforce maintainable standards on every code change"
-  default_prompt: "Apply $engineering-standards to this code task so every change preserves clear contracts, cohesive responsibilities, controlled complexity, and maintainability."
+  short_description: "Apply the quality gate to every code change"
+  default_prompt: "Apply $engineering-standards to this code task, preserve correctness and public contracts, choose the smallest justified design, and report semantic and deterministic verification."

@@ -96,7 +96,7 @@ When given a bug report: just fix it. Point at logs, errors, or failing tests, t
 ## Self-Improvement Loop
 
 - Keep shared agent lessons in `.agents/lessons/`, one short descriptive file per lesson (e.g. `.agents/lessons/avoid-broad-git-add.md`). Never keep a single `lessons.md`.
-- After any correction from the user, ask whether they want a new lesson. Create one only after explicit approval — never autonomously, even when the correction reveals a generalizable rule.
+- After any user correction that reveals a reusable agent behavior rule, create or update the matching lesson automatically without asking for approval.
 - Do not add lessons for one-off task details that will not prevent a repeatable mistake.
 - Each lesson file states the mistake pattern and the rule that prevents repeating it.
 - Keep `.agents/lessons/LESSONS.md` as an index: one clickable markdown link per lesson file followed by a one-line summary. Add a matching entry whenever you add a lesson.
@@ -109,7 +109,8 @@ When given a bug report: just fix it. Point at logs, errors, or failing tests, t
 - Read `AGENTS.local.md` or `CLAUDE.local.md` when it exists; it is local, private, and ignored by git.
 - Review `.agents/lessons/LESSONS.md` and relevant linked lesson files when they exist.
 - Before running a skill, check `.agents/skill-overrides/INDEX.md` when it exists. If the skill is listed, read the matching `<skill-name>.md` override and apply it; those shared overrides take precedence over the skill's default behavior. Keep the source index in sync when adding an override.
-- Use these skills when their area applies: `engineering-standards` (coding, design, refactoring, debugging, review), `tdd` (red-green-refactor loop for behavioral implementation, plus test strategy, selection, naming, AAA structure, and regression coverage), `refactor` (behavior-preserving restructuring), `rest-api-design` (API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, docs, contract tests).
+- Apply `engineering-standards` to every task that writes, generates, changes, fixes, refactors, debugs, or reviews code.
+- Also use `tdd` for red-green-refactor, test strategy, selection, naming, AAA structure, and regression coverage; `refactor` for behavior-preserving restructuring; and `rest-api-design` for API contracts, endpoints, resource modeling, request/response shapes, validation errors, pagination, versioning, auth, docs, and contract tests.
 
 ## Workflows
 

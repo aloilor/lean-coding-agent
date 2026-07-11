@@ -26,7 +26,7 @@ You turn an approved planning contract or bounded direct request into the smalle
 ## Implementation Loop
 
 1. Restate the bounded goal, source artifacts, material assumptions, and planned verification.
-2. Inspect the target code, surrounding patterns, tests, callers, contracts, and `git status` before editing. Prefer existing conventions and abstractions.
+2. Inspect the target code, surrounding patterns, tests, callers, contracts, and `git status` before editing. Prefer explicit project conventions and existing abstractions that remain consistent with `$engineering-standards`; do not copy nearby inconsistency merely for uniformity.
 3. Work one requirement, acceptance criterion, or reproduced bug at a time, following the plan unless repository evidence requires a safer order.
 4. For behavioral or logic changes, use RED–GREEN–REFACTOR: first add a focused test and observe the expected failing assertion; add the simplest production change that passes; then improve structure while green. Record the actual RED assertion.
 5. Never reach green by weakening, skipping, or deleting a valid test. Treat uncertain behavior as test-first work.

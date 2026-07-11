@@ -1,47 +1,63 @@
 ---
 name: engineering-standards
-description: Apply this skill to every task that writes, generates, changes, refactors, debugs, or reviews code, including production code, tests, scripts, migrations, examples, and executable configuration. Use it for every code-level design decision to enforce clear contracts, cohesive responsibilities, controlled coupling and complexity, appropriate object design, naming, documentation, and maintainability.
+description: Apply this skill to every task that writes, generates, changes, fixes, refactors, debugs, or reviews code, including production code, tests, scripts, migrations, examples, and executable configuration. Use it for every code-level design decision to enforce a language-neutral baseline for correctness, safety, compatibility, clear contracts, controlled complexity, and maintainability.
 ---
 
 # Engineering Standards
 
-Reusable, cross-project baseline for code and code-level design. Apply it to every code change, proportionate to the change's scope and risk; even a trivial edit must satisfy the relevant rules. Use this skill for engineering judgment about the code.
+Apply this semantic quality gate to every code change, proportionate to scope and risk. Use it with the applicable workflow and repository checks; never substitute prose review for deterministic evidence.
 
-## Always Apply
+## Precedence And Scope
 
-- Make behavior and contracts clear through names, types, structure, and focused tests.
-- Keep functions, modules, classes, APIs, and tests cohesive around one responsibility or invariant.
-- Minimize unnecessary concepts, branches, state, dependencies, and hidden coupling.
-- Introduce abstractions and extension points only for a concrete shared concept, boundary, or variation.
-- Remove duplication only when it represents the same stable concept or business rule.
-- Document public contracts, constraints, side effects, edge cases, and failure modes; avoid comments that narrate obvious code.
-- When objects are involved, keep responsibilities cohesive, encapsulate state and behavior, protect invariants, and prefer composition over inheritance.
+- Preserve approved requirements, correctness, security, data integrity, and public compatibility before optimizing code shape.
+- Follow explicit project rules and repository-enforced tooling, then language and framework contracts. Apply this baseline over inconsistent nearby style or precedent.
+- Read project context before changing architecture, domain rules, persistence, integrations, or operational behavior.
+- Do not hand-edit generated or vendored code unless the task explicitly requires it and the source of truth cannot be changed.
 
-## Apply The Skill
+## Non-Negotiable Gate
 
-1. **Identify the code decision.** Name the behavior or contract involved, the unit that should own it, and any invariant, side effect, or failure mode that constrains the design.
-2. **Name the concrete design pressure.** Look for unclear intent, independent reasons to change, hidden side effects, repeated business knowledge, excessive branching or state, reach-through coupling, or dependence on volatile details. Do not restructure code because of size, personal preference, or a smell label alone.
-3. **Load only relevant guidance.** Use the routing table below, then open a detail file only when the decision remains unclear.
-4. **Choose the smallest justified code shape.** Prefer a direct implementation while the behavior is local and stable. Extract a function, object, interface, or pattern only when it gives a shared concept, invariant, boundary, or recurring variation a clear owner.
-5. **Evaluate the resulting code before completion.** Re-read the changed code or diff. Confirm that names expose intent, responsibilities remain cohesive, dependencies and side effects are visible, repeated business rules have one owner, and the change did not introduce unused flexibility or indirection. Run applicable deterministic checks; use this review for semantic design concerns those checks cannot judge.
-6. **Handle red flags explicitly.** Remove each in-scope red flag or justify it with a current requirement, invariant, external boundary, or demonstrated variation. If it cannot be justified concretely, simplify the design.
+- Preserve existing behavior and public contracts unless an approved requirement changes them; make migrations and compatibility consequences explicit.
+- Validate untrusted input at trust boundaries. Make failure behavior, side effects, state transitions, resource ownership, and transactional boundaries visible where they matter.
+- Express intent through names, types, contracts, and cohesive units with one clear reason to change.
+- Choose the smallest justified design. Avoid unnecessary concepts, branches, state, dependencies, indirection, configurability, and extension points.
+- Give each stable rule, invariant, or policy one authoritative owner. Allow repeated boundary validation when it independently protects a boundary.
+- Document caller-relevant constraints, side effects, and failure modes that names and types cannot express; do not narrate obvious code.
+- Encapsulate state when mutation could break an invariant. Prefer composition unless inheritance is required by a stable subtype or framework contract.
 
-For implementation and refactoring, use these steps to guide code-shape decisions while following the applicable workflow for scope and verification. For review, report a standards issue only when you can cite the concrete code, the maintenance or correctness risk, and the smallest responsible correction; do not report taste as a defect.
+## Apply The Gate
+
+1. **Understand.** Read the complete changed unit, relevant callers, tests, and contracts. Name the required behavior, trust boundaries, invariants, side effects, failure modes, and compatibility constraints.
+2. **Route And Design.** For every code decision, find every matching row in the References table and open each linked file before finalizing the design. Apply that guidance with the core gate; if no row matches, use the core gate alone. Then choose the smallest project-compatible shape that gives each current responsibility, rule, effect, or external boundary a clear owner. Do not load unrelated references or add an abstraction or dependency unless it removes more risk or complexity than it adds.
+3. **Verify.** Re-read the complete changed units and diff, inspect affected callers and documentation, run the repository's applicable deterministic checks, and record exact results or explicit limitations.
+
+## Completion Gate
+
+- Require both semantic review and deterministic evidence; neither replaces the other.
+- Do not complete work with an unresolved in-scope correctness, security, data-integrity, compatibility, contract, or required quality-gate failure.
+- For review findings, cite the concrete code, trigger, risk, and smallest responsible correction. Do not report taste, raw size, or a smell label as a defect.
+
+## Companion Skills
+
+| Decision | Also Use |
+| --- | --- |
+| Behavioral implementation, regression fixes, test design, or verification | `$tdd` |
+| Behavior-preserving restructuring | `$refactor` |
+| HTTP resource and API contract changes | `$rest-api-design` |
+| Database correctness, access control, or material query performance | `$sql-code-review` and, when performance matters, `$sql-optimization` |
 
 ## References
 
-| Current Decision | Read |
+Use this table during **Route And Design**. Open and apply every matched detail file before finalizing the decision.
+
+| Decision | Read |
 | --- | --- |
-| Naming, functions, control flow, comments, documentation, duplication, smells, or complexity | `references/clean-code/RULES.md` |
-| Object responsibilities, invariants, collaboration, inheritance, polymorphism, SOLID, patterns, or domain modeling | `references/object-oriented-design/RULES.md` |
-| No concrete design pressure beyond the core rules | Do not load a detail reference. |
-
-Open detail files only when their examples or deeper questions are directly useful. Do not load the whole `references/` folder by default.
-
-## Red Flags
-
-- A new abstraction exists before a stable shared concept exists.
-- A change adds flexibility for a hypothetical future.
-- Code reaches through another object's internals instead of asking for behavior.
-
-Treat these as decisions that require correction or concrete justification, not as automatic rewrite commands. Prefer a little local duplication over the wrong abstraction. Let structure earn its place.
+| Naming and intent | [Naming And Clarity](references/clean-code/naming-and-clarity.md) |
+| Functions and control flow | [Functions And Control Flow](references/clean-code/functions-and-control-flow.md) |
+| Inline comments | [Inline Comments](references/clean-code/inline-comments.md) |
+| Caller-facing documentation | [Code Documentation](references/clean-code/code-documentation.md) |
+| Duplication and safe refactoring | [Duplication And Refactoring](references/clean-code/duplication-and-refactoring.md) |
+| Complexity and technical debt | [Managing Complexity](references/clean-code/complexity.md) |
+| Smell diagnosis | [Code Smells](references/clean-code/code-smells.md) |
+| Object responsibilities, invariants, collaboration, inheritance, polymorphism, or domain modeling | [Object-Oriented Design](references/object-oriented-design/object-oriented-design.md) |
+| SOLID contract questions | [SOLID Principles](references/object-oriented-design/solid-principles.md) |
+| Pattern selection after demonstrated design pressure | [Design Patterns](references/object-oriented-design/design-patterns.md) |
