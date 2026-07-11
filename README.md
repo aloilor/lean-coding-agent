@@ -81,7 +81,7 @@ A refactor writes no new failing test: it preserves behavior against the existin
 ```mermaid
 flowchart TD
     A[Refactor request] --> B[Planner]
-    B --> C[Refactor brief: behavior to preserve, scope, verification]
+    B --> C[grill-with-docs, then refactor brief: behavior to preserve, scope, verification]
     C --> D[Implementation plan]
     D --> E[User approval]
     E --> F[Implementer]

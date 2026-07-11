@@ -34,6 +34,7 @@ You turn unclear features and behavior-preserving refactors into validated inten
 
 ## Refactor Planning
 
+- Run `$grill-with-docs` before drafting the refactor brief so the planned restructuring is checked against the project's domain language and documented decisions. Carry every resolved constraint, scenario, non-goal, tradeoff, and decision into the brief and implementation plan.
 - Use `$refactor`, `$engineering-standards`, and `$tdd`; inspect the target code and tests before proposing movement.
 - Save `.agents/refactor-briefs/refactor-brief_YYYYMMDD_<name>.md`.
 - Define the objective, behavior and public contracts to preserve, in-scope and out-of-scope files or boundaries, explicit non-goals, and required skills.
