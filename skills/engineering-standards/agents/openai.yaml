@@ -1,4 +1,4 @@
 interface:
   display_name: "Engineering Standards"
-  short_description: "Guide clear, maintainable code-level design"
-  default_prompt: "Use $engineering-standards to preserve correctness, keep contracts and responsibilities clear, avoid unnecessary complexity, and make maintainable code-level design decisions."
+  short_description: "Enforce maintainable standards on every code change"
+  default_prompt: "Apply $engineering-standards to this code task so every change preserves clear contracts, cohesive responsibilities, controlled complexity, and maintainability."
