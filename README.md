@@ -155,7 +155,7 @@ Gate evidence has three scope rules:
 - Only findings caused by the reviewed change or explicitly targeted by the approved request, specification, bug investigation, refactor brief, or implementation plan become implementation work.
 - Ripple findings in untouched code are surfaced without assignment until scope is approved. Unrelated pre-existing debt remains governed by its committed ratchet.
 
-A failed executed check is blocking according to the reviewer policy. A skipped check or missing report is missing verification, never evidence that the worktree is clean. The abstract model and ratchet rationale are documented in [Determinism-in-the-Loop Pipeline](agent-context/determinism-in-the-loop-pipeline.md).
+A failed executed check is blocking according to the reviewer policy. A skipped check or missing report is missing verification, never evidence that the worktree is clean. The abstract model and ratchet rationale are documented in [Determinism-in-the-Loop Pipeline](docs/determinism-in-the-loop-pipeline.md).
 
 ### PHP/Laravel Implementation
 
