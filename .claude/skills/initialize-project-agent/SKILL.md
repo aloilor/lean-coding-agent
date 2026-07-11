@@ -25,7 +25,6 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
    - `.agents/lessons/LESSONS.md` as a shared agent lessons index
    - `.agents/skill-overrides/`
    - `.agents/skill-overrides/INDEX.md` as a shared skill-overrides index
-   - `agents/` with shared subagent source files
    - `.claude/agents/` with Claude Code subagent files
    - `.codex/agents/` with Codex custom agent files
    - `agent-context/skills-installed.json`
@@ -47,8 +46,8 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
   - It creates `agent-context/README.md` only when it does not already exist.
   - It creates `.agents/lessons/LESSONS.md` only when it does not already exist.
   - It creates `.agents/skill-overrides/INDEX.md` only when it does not already exist.
-  - It copies shared subagent files only when the target file does not already exist.
-  - It creates Codex custom agent TOML files from the shared subagent Markdown only when the target file does not already exist.
+  - It refreshes Claude Code subagent files in `.claude/agents/` from this repo's `agents/` source on every run.
+  - It regenerates Codex custom agent TOML files in `.codex/agents/` from the shared subagent Markdown on every run.
   - It recopies the current repo-local shared skills into the target repo.
   - It removes previously managed installed skills that are no longer present in `skills/`.
   - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. Enforcement is agent-only via PostToolUse hooks; it installs no git hook.

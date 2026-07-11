@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes. Requires the planner specification or refactor brief, implementation plan, implementer report, and implementer-touched files; uses engineering standards and SQL skills during review.
+description: Expert code review specialist for workflow-required Medium and Full changes and explicitly requested standalone audits. Do not invoke automatically for Small work. Reviews code for quality, security, and maintainability using the applicable planning and implementation handoffs, engineering standards, and SQL skills.
 model: opus
 codex_model: gpt-5.6-sol
 codex_reasoning_effort: high

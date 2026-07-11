@@ -124,7 +124,7 @@ The main agent only orchestrates: it routes the request to a workflow, relays ar
 
 ### Standard Artifacts
 
-Workflow artifacts use the date-stamped naming `*_YYYYMMDD_short_description.md` and live in fixed locations. Reference these paths rather than inventing new ones.
+Local coordination artifacts, incident reports, and task notes use the date-stamped naming shown below. Feature specifications keep the undated `spec-<name>.md` convention. Reference these fixed paths rather than inventing new ones.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |
