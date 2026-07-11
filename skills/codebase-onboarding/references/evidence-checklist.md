@@ -12,6 +12,7 @@ Use this checklist to gather facts before writing `agent-context/` docs. Read on
 ## Stack And Tooling
 
 - JavaScript / TypeScript: `package.json`, lockfiles, `tsconfig*.json`, framework config.
+- PHP / Laravel: `composer.json`, `composer.lock`, `artisan`, `phpstan.neon*`, `pint.json`, `phpunit.xml*`, Pest config, `.jscpd.json`, `deptrac.yaml`, quality-gate scripts and reports.
 - Python: `pyproject.toml`, `requirements*.txt`, `tox.ini`, `noxfile.py`.
 - .NET: `*.sln`, `*.csproj`, `Directory.Build.props`.
 - Java / Kotlin: `pom.xml`, `build.gradle*`, `settings.gradle*`.
@@ -34,6 +35,7 @@ Use this checklist to gather facts before writing `agent-context/` docs. Read on
 - Local setup docs.
 - Release, deployment, or environment docs.
 - Hook scripts and generated-artifact rules.
+- Reviewer-owned gate manifests, ratchets, baselines, architecture rules, and audit policy.
 
 ## Testing Evidence
 

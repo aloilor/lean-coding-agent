@@ -62,7 +62,7 @@ The documentation supplies concrete PHP/Laravel examples:
 
 - Pint for `quality:style`;
 - PHPStan/Larastan plus cognitive-complexity for `quality:static`;
-- the Laravel test runner for `quality:test`;
+- the Laravel test runner via Sail (`sail artisan test`) for `quality:test`;
 - `jscpd` for `quality:duplication`;
 - Deptrac for `quality:architecture`; and
 - `composer audit --locked --format=json` for `quality:audit`.

@@ -11,7 +11,7 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
 
 1. Identify the target project repo path.
 2. Run `python scripts/init_project_agent.py <target-repo>` from this repo root.
-3. Switch context to the target repo and use `$codebase-onboarding` to analyze the project and create or update structured `agent-context/` docs. If the newly installed skill is not auto-discovered in the current thread yet, read `<target-repo>/.agents/skills/codebase-onboarding/SKILL.md` and follow it directly.
+3. Switch context to the target repo and use `$codebase-onboarding` to analyze the project and create or update structured `agent-context/` docs. For a provisioned Laravel gate, onboarding also inventories quality-tool readiness, presents project-specific scripts, thresholds, architecture rules, and baselines for explicit approval, then activates the approved configuration and records each check's operational status. If the newly installed skill is not auto-discovered in the current thread yet, read `<target-repo>/.agents/skills/codebase-onboarding/SKILL.md` and follow it directly.
 4. Verify the target repo now contains:
    - `AGENTS.md` copied exactly from this repo's `AGENTS.md`
    - `CLAUDE.md` copied exactly from this repo's `CLAUDE.md`
@@ -28,17 +28,18 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
    - `.claude/agents/` with Claude Code subagent files
    - `.codex/agents/` with Codex custom agent files
    - `agent-context/skills-installed.json`
-   - for PHP/Laravel targets: `phpstan.neon.dist`, `phpstan-baseline.neon`, `scripts/quality-gate` (executable), and `QUALITY-PIPELINE.md` (reviewer-only execution; no edit or git hooks)
+   - for PHP/Laravel targets: `phpstan.neon.dist`, `phpstan-baseline.neon`, `scripts/quality-gate` (executable), and `docs/quality-pipeline.md` (reviewer-only execution; no edit or git hooks)
    - `.agents/skills/` and `.claude/skills/` with the copied skill folders from this repo's `skills/`
    - `agent-context/` docs created or refreshed by `codebase-onboarding`, including `agent-context/skills.md`
-5. Tell the user which skills were installed and which `agent-context/` docs were created or updated by `codebase-onboarding`.
+   - for an applicable Laravel gate: an onboarding report that distinguishes operational, failing, skipped, and approval-pending checks without silently accepting baselines or architecture policy
+5. Tell the user which skills were installed, which `agent-context/` docs were created or updated, and the Laravel quality-gate activation outcome when applicable.
 
 ## Notes
 
 - Keep the folder name `agent-context` exactly as requested by this repo's convention.
 - Keep this skill in this repo's `.agents/skills/` folder because it is only for maintaining this shared repo itself.
 - Do not place this skill in `skills/`, because `skills/` is the source copied into initialized project repos.
-- Run `codebase-onboarding` only after the bootstrap script finishes so the generated `agent-context/skills.md` can include the installed project-local skills.
+- Run `codebase-onboarding` only after the bootstrap script finishes so it can inventory the provisioned Laravel gate and the generated `agent-context/skills.md` can include the installed project-local skills.
 - The bootstrap script is idempotent for the managed pieces:
   - It recopies the shared `AGENTS.md` and `CLAUDE.md` baseline files.
   - It creates local files only when they do not already exist.

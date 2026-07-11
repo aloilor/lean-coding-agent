@@ -37,7 +37,7 @@ npm install --save-dev jscpd
 # bun add --dev jscpd
 ```
 
-The initializer prints the matching installation command. It does not modify `composer.json`, `package.json`, architecture rules, or ratchet values.
+The initializer prints the matching installation command. It does not modify `composer.json`, `package.json`, architecture rules, or ratchet values. The follow-up `codebase-onboarding` pass inventories the existing project configuration and uses staged approval when missing tools must be installed before current debt can be measured. It installs dependencies or writes scripts, thresholds, architecture rules, baselines, or audit policy only after the applicable explicit approval; setup approval never implies acceptance of measured debt or architecture policy.
 
 ## Define the Composer scripts
 
@@ -48,7 +48,7 @@ This npm-based example keeps tool output on stdout so the gate can capture it. F
   "scripts": {
     "quality:style": "pint --test",
     "quality:static": "phpstan analyse --error-format=json --no-progress",
-    "quality:test": "php artisan test",
+    "quality:test": "sail artisan test",
     "quality:duplication": "npx --no-install jscpd --config .jscpd.json .",
     "quality:architecture": "deptrac analyse --formatter=json",
     "quality:audit": "composer audit --locked --format=json",
@@ -57,7 +57,7 @@ This npm-based example keeps tool output on stdout so the gate can capture it. F
 }
 ```
 
-Composer makes its `vendor/bin` directory available to scripts, so `pint`, `phpstan`, and `deptrac` resolve to the committed Composer development dependencies. The gate captures stdout as the primary report and stderr in a separate log. Do not redirect output inside these Composer scripts: redirecting structured output would leave the gate's JSON report empty.
+Composer makes its `vendor/bin` directory available to scripts, so `pint`, `phpstan`, `deptrac`, and `sail` resolve to the committed Composer development dependencies. `quality:test` runs the suite through Laravel Sail so it executes inside the application container against the same PHP version, extensions, and services (database, cache, queue) the app uses; never wire `quality:test` to a bare `php artisan test` or `phpunit`/`pest` invocation that runs on the host. The gate captures stdout as the primary report and stderr in a separate log. Do not redirect output inside these Composer scripts: redirecting structured output would leave the gate's JSON report empty.
 
 ## Configure the ratchets
 

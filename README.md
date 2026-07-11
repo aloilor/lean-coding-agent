@@ -6,7 +6,7 @@ It contains the general agent guidance that should apply everywhere, regardless 
 
 The shared baseline stays in `AGENTS.md` and `CLAUDE.md`. This repo bootstraps both files into each project as exact copies of the shared defaults.
 
-Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, extended by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery lives in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
+Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, extended by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery and approved Laravel quality-gate activation live in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
@@ -41,7 +41,7 @@ The baseline is organized around a few repeatable workflows that keep context, p
 flowchart LR
     A[Update shared baseline] --> B[Run initialize-project-agent skill]
     B --> C[Bootstrap agents, skills, and browser tooling]
-    C --> D[Run codebase-onboarding for project facts]
+    C --> D[Run codebase-onboarding for project facts and gate activation]
     D --> E[Use skills and subagents during work]
     E --> F[Capture lessons, specs, reviews, and incidents]
     F --> A
@@ -171,14 +171,14 @@ The gate attempts all six Composer contracts in order:
 | --- | --- | --- | --- |
 | Formatting | `quality:style` | Laravel Pint | text report and stderr log |
 | Static analysis and cognitive complexity | `quality:static` | PHPStan/Larastan with cognitive-complexity | JSON report and stderr log |
-| Behavior | `quality:test` | Laravel test runner | text report and stderr log |
+| Behavior | `quality:test` | Laravel test runner via Sail (`sail artisan test`) | text report and stderr log |
 | Duplication | `quality:duplication` | `jscpd` | text report and stderr log |
 | Architecture boundaries | `quality:architecture` | Deptrac with project-authored rules | JSON report and stderr log |
 | Dependency security | `quality:audit` | Composer audit | JSON report and stderr log |
 
 Every run recreates `.quality-reports/` and writes `.quality-reports/manifest.json` with a `pass`, `fail`, or `skipped` status, exit code, primary report path, and stderr path for each check. The gate exits `2` when an executed check fails and `0` otherwise, but the reviewer must still read the manifest because exit `0` can include skipped checks.
 
-PHPStan, duplication, and architecture debt are ratcheted through committed project configuration. The gate never generates or relaxes baselines, invents project architecture, edits package manifests, or installs hooks. It is a local reviewer-owned execution point; hosted CI may call the same project scripts independently but is not provisioned by this baseline.
+PHPStan, duplication, and architecture debt are ratcheted through committed project configuration. The gate itself never generates or relaxes baselines, invents project architecture, edits package manifests, or installs hooks. After discovery, `codebase-onboarding` may propose project-specific dependencies, script wiring, thresholds, architecture rules, and baselines; it applies them only after explicit approval and records skipped or pending checks honestly. The gate remains a local reviewer-owned execution point; hosted CI may call the same project scripts independently but is not provisioned by this baseline.
 
 Installation commands, Composer script examples, artifact paths, ratchet setup, and reviewer handling are documented in the [PHP/Laravel Quality Pipeline](templates/php-laravel/docs/quality-pipeline.md).
 
@@ -225,6 +225,7 @@ The skill will:
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 - write `skills-lock.json` for upstream skill installs
 - run `$codebase-onboarding` in the target repo so `agent-context/` contains structured, evidence-backed project documentation, including `agent-context/skills.md`
+- for a provisioned Laravel gate, have onboarding inventory all six checks, propose project-specific configuration for approval, activate approved tooling, run the gate, and record operational, failing, skipped, or approval-pending status
 
 ## Agent Browser Baseline
 
@@ -273,7 +274,7 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
 
-`codebase-onboarding` is installed from this repo's [skills/codebase-onboarding](skills/codebase-onboarding) instead of upstream so it fills `agent-context/` with structured, evidence-backed project documentation.
+`codebase-onboarding` is installed from this repo's [skills/codebase-onboarding](skills/codebase-onboarding) instead of upstream so it fills `agent-context/` with structured, evidence-backed project documentation and activates provisioned Laravel quality tooling through an evidence-backed approval boundary.
 
 ## Shared Subagents
 
