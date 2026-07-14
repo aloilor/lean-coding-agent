@@ -39,12 +39,15 @@ The baseline is organized around a few repeatable workflows that keep context, p
 
 ```mermaid
 flowchart LR
-    A[Update shared baseline] --> B[Run initialize-project-agent skill]
-    B --> C[Bootstrap agents, skills, and browser tooling]
-    C --> D[Run codebase-onboarding for project facts and gate activation]
-    D --> E[Use skills and subagents during work]
-    E --> F[Capture lessons, specs, reviews, and incidents]
-    F --> A
+    A[Update shared baseline] --> B{New or existing project?}
+    B -->|New| C[Run initialize-project-agent]
+    B -->|Existing| D[Run sync-project-agent]
+    C --> E[Bootstrap and run codebase-onboarding]
+    D --> F[Refresh initializer-managed content]
+    E --> G[Use skills and subagents during work]
+    F --> G
+    G --> H[Capture lessons, specs, reviews, and incidents]
+    H --> A
 ```
 
 ### Feature Development Workflow
@@ -227,6 +230,16 @@ The skill will:
 - run `$codebase-onboarding` in the target repo so `agent-context/` contains structured, evidence-backed project documentation, including `agent-context/skills.md`
 - for a provisioned Laravel gate, have onboarding inventory all six checks, propose project-specific configuration for approval, activate approved tooling, run the gate, and record operational, failing, skipped, or approval-pending status
 
+## Sync An Existing Project
+
+After updating this baseline, ask an agent in this repo to run `$sync-project-agent` with an already initialized target project path:
+
+```text
+Use $sync-project-agent to refresh ../your-project-repo
+```
+
+The sync skill reruns the initializer's idempotent managed-file contract, checks for conflicting target edits, and verifies the refresh. It updates baseline-owned files, agents, skills, overrides, manifests, ignore rules, and tool installations while preserving project-owned context and private local files. It does not rerun `codebase-onboarding` unless the update requires project-context regeneration or you explicitly request it.
+
 ## Agent Browser Baseline
 
 The bootstrap installs Agent Browser as a dev dependency using the package manager implied by `packageManager` or the existing lockfile. It then runs the package manager's local executable command for:
@@ -293,7 +306,7 @@ The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) r
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
-Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Keep this local set intentionally small: `git-conventional-commit` and `initialize-project-agent`. Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
+Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Keep this local set intentionally small: [git-conventional-commit](.agents/skills/git-conventional-commit), [initialize-project-agent](.agents/skills/initialize-project-agent), and [sync-project-agent](.agents/skills/sync-project-agent). Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
 
 Why both skill folders:
 
