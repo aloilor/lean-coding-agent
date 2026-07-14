@@ -5,151 +5,53 @@ description: Review git changes, propose commit messages, and create commits usi
 
 # Git Conventional Commit
 
-Follow the Conventional Commits 1.0.0 specification:
-https://www.conventionalcommits.org/en/v1.0.0/
+Use Conventional Commits 1.0.0:
 
-Use this header format:
 `<type>[optional scope][!]: <description>`
 
-The `<description>` should be a concise, repository-specific summary of the change.
-
-Optional sections:
-- body
-- footer(s)
+Add an optional body or footers only when they help future readers.
 
 ## Workflow
 
-1. Inspect the repo state before staging or committing anything.
-   Run `git status --short` first.
-   Review the actual content with `git diff` for unstaged changes and `git diff --cached` for staged changes.
+1. Inspect `git status --short`, `git diff`, and `git diff --cached` before staging or committing.
+2. Define coherent commit boundaries. Unless the user narrows the scope, include the entire worktree, split across logical commits when necessary. Do not exclude changes because they predate the current session or were written manually.
+3. Stage the intended files. Use targeted `git add <paths>` when splitting changes; use `git add -A` when one commit should include the remaining worktree.
+4. Verify each staged set with `git diff --cached --stat` and `git diff --cached`. Correct the staging when it does not match the intended commit; do not revert unrelated working-tree changes.
+5. Write a message based on the staged change's intent. If the user asked only for a proposed message, stop after proposing it.
+6. Commit only a non-empty staged set. For multiple commits, repeat the workflow until `git status --short` is empty unless the user explicitly excluded changes.
+7. Confirm each result with `git log -1 --pretty=format:%s`. If explicitly excluded changes remain, identify them and the instruction that excluded them.
 
-2. Define the intended commit set.
-   When the user asks you to commit work, treat the entire current git worktree as the default requested scope unless the user explicitly narrows it.
-   Do not exclude changes just because they were created before the current session or appear to be manual user edits.
-   Never revert, delete, or "clean up" manual edits just to make the commit set simpler unless the user explicitly asks for that.
-   If many changed files are not part of one coherent change, split them into separate commits for each independent logical change set instead of forcing one mixed commit.
+## Message Guide
 
-3. Stage only the intended files.
-   Use targeted `git add <paths>` commands when splitting the worktree into independent logical change sets.
-   When one commit should include the remaining worktree state, broad staging like `git add -A` is acceptable.
-   When splitting a large mixed worktree, stage and commit one independent logical change set at a time, reviewing each staged subset before moving to the next one.
+Use the most specific applicable type:
 
-4. Review exactly what will be committed.
-   Run `git diff --cached --stat` and `git diff --cached`.
-   If the staged diff does not match the requested change set, fix the staging before writing the commit message.
-   Fix the staging by adjusting what is staged, not by reverting unrelated working-tree changes.
-
-5. Choose the Conventional Commit header.
-   Pick the type from the actual change intent.
-   Add a short scope when it helps identify the changed area.
-   Keep the description concise, imperative, and without a trailing period.
-
-6. Add body or footers only when they add real value.
-   Use a body for context that is useful to future readers.
-   Use footers for metadata such as `BREAKING CHANGE:` or issue references.
-
-7. Commit only when there is something to commit.
-   If the staged diff is empty, report that clearly instead of creating an empty commit.
-   If the user only asked for a proposed message, stop after proposing it.
-   If the requested work requires multiple commits, keep going commit by commit until no intended logical change sets remain.
-   After each commit in a multi-commit run, rerun `git status --short` and continue until it is empty unless the user explicitly excluded some remaining changes.
-   If you stop while changes remain, say exactly what is left and cite the explicit user instruction that caused those changes to be left uncommitted.
-
-8. Confirm the result after committing.
-   Run `git log -1 --pretty=format:%s` to confirm the final subject line.
-
-## Commit Types
-
-Use these common types:
-
-- `feat`: add a new feature or behavior
-- `fix`: fix a bug or incorrect behavior
-- `docs`: documentation-only changes
-- `style`: formatting-only changes with no logic changes
-- `refactor`: restructure code without changing feature behavior
-- `perf`: improve performance
-- `test`: add or update tests
-- `build`: change build tooling or dependencies
-- `ci`: change CI configuration or automation
-- `chore`: maintenance work that does not fit the other types
+- `feat`: new behavior
+- `fix`: corrected behavior
+- `docs`: documentation only
+- `style`: formatting only
+- `refactor`: restructuring without behavior changes
+- `perf`: performance improvement
+- `test`: test changes
+- `build`: build tooling or dependencies
+- `ci`: CI configuration or automation
+- `chore`: maintenance not covered above
 - `revert`: revert a previous commit
 
-## Scope Guidance
+Use a short lowercase scope only when it adds useful context. Keep the description concise, repository-specific, imperative, and without a trailing period.
 
-- Prefer a short scope derived from the changed area.
-- Use lowercase scopes.
-- Omit the scope when the change spans multiple unrelated areas.
+Mark a breaking change with `!`. Add a `BREAKING CHANGE:` footer when migration impact needs explanation. Use bodies for durable context and other footers for metadata such as issue references.
 
-Examples of useful scopes:
+Examples:
 
-- `readme`
-- `agents`
-- `skills`
-- `git-commit`
-- `src`
-- `api`
-- `auth`
-
-## Message Rules
-
-- Keep the description imperative: `add`, `update`, `remove`, `fix`, `rename`.
-- Make the description a concise summary tied to this repository's actual change.
-- Keep the type and scope lowercase.
-- Do not end the description with a period.
-- Use `!` in the header for breaking changes when appropriate.
-- Add a `BREAKING CHANGE:` footer when the migration impact needs explanation.
-
-## Examples
-
-Simple documentation update:
-- `docs(readme): explain shared baseline and project overrides`
-
-Add a new reusable skill:
-- `feat(skills): add git commit workflow skill`
-
-Fix a bug in a focused area:
-- `fix(auth): handle expired session token during refresh`
-
-Refactor with breaking change:
+- `docs(readme): explain project overrides`
+- `feat(skills): add git commit workflow`
+- `fix(auth): handle expired refresh tokens`
 - `refactor(api)!: rename agent config endpoint`
 
-Commit with body:
+## Safety
 
-```text
-feat(git-commit): add staged diff review workflow
-
-Require reviewing git diff and git diff --cached before committing.
-Document safer staging guidance for partially dirty repositories.
-```
-
-Commit with breaking change footer:
-
-```text
-refactor(config)!: replace agents root path setting
-
-Move project-level agent config to a new key used across all repos.
-
-BREAKING CHANGE: existing automation that reads the old config key must be updated.
-```
-
-## Safety Rules
-
-- Never run destructive git commands unless the user explicitly requests them.
-- Treat `git reset --hard`, `git checkout -- <path>`, `git clean -fd`, history rewrites, and force pushes as destructive.
-- Do not amend an existing commit unless the user explicitly asks for it.
-- Do not exclude worktree changes only because they predate the current session or were not created by you.
-- When asked to commit work, default to committing the whole current worktree, split across multiple logical commits when needed, unless the user explicitly narrows the scope.
-- When the worktree contains multiple unrelated logical change sets, do not combine them into one commit just to reduce the commit count.
-- Do not revert, delete, or overwrite existing user changes in order to make a commit cleaner or narrower. Preserve manual edits unless the user explicitly asks to discard them.
-- If there is nothing to commit, say so clearly and do not create an empty commit.
-- If the requested commit boundaries are unclear, pause and clarify before committing.
-
-## Output Checklist
-
-- Review `git status --short` first.
-- Review `git diff` and `git diff --cached` before finalizing the commit.
-- Stage only the intended files.
-- If the user asked to commit work, continue until `git status --short` is empty unless the user explicitly excluded some paths.
-- Use a valid Conventional Commits header.
-- Add body or footers only when they help.
-- Confirm the final commit subject after `git commit`.
+- Do not revert, delete, or overwrite existing user changes to make a commit cleaner or narrower. Preserve manual edits unless the user explicitly asks to discard them.
+- Never amend, rewrite history, force-push, or run destructive commands such as `git reset --hard`, `git checkout -- <path>`, or `git clean -fd` unless the user explicitly requests that operation.
+- Split unrelated logical changes instead of forcing them into one commit.
+- If there is nothing to commit, report it clearly; do not create an empty commit.
+- Clarify materially ambiguous commit boundaries before committing.
