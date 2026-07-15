@@ -111,4 +111,4 @@ Use this table for subagents routed directly by the main agent. Subagents named 
 
 | User request | Subagent | Boundary |
 | --- | --- | --- |
-| Stage changes, propose a commit message, or create a commit | `committer` | Route only when the user explicitly requests the operation. Spawn with `fork_turns="none"`. |
+| Create a commit, or otherwise commit the current changes | `committer` | Always route requests to commit through this subagent. Spawn with `fork_turns="none"`. |
