@@ -37,7 +37,8 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 ## Context And Skills
 
 - This file is the shared baseline. Put project-specific shared rules in `agent-context/`.
-- Read relevant `agent-context/`, `.agents/lessons/LESSONS.md`, and local-private, git-ignored `AGENTS.local.md` or `CLAUDE.local.md` content when present.
+- Read relevant `agent-context/` content only when the task involves inspecting, developing, debugging, reviewing, or otherwise working on that codebase. Do not load it for unrelated conversation or general tasks.
+- Read `.agents/lessons/LESSONS.md` and local-private, git-ignored `AGENTS.local.md` or `CLAUDE.local.md` content when present.
 - Before using a skill, check `.agents/skill-overrides/INDEX.md`. Apply a listed `<skill-name>.md` override before the skill and keep the index synchronized when adding overrides.
 - Apply `engineering-standards` to every code-writing, generation, change, fix, refactor, debug, or review task, even when nearby style differs.
 - Also apply `tdd` to test strategy and red-green-refactor work, `refactor` to behavior-preserving restructuring, and `rest-api-design` to API contracts and related tests or documentation.
