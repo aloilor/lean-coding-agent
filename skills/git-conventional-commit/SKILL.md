@@ -1,9 +1,11 @@
 ---
 name: git-conventional-commit
-description: Review git changes, propose commit messages, and create commits using Conventional Commits 1.0.0. Use when asked to commit work, suggest a commit message, stage the right files, or enforce a safe conventional commit workflow with type, optional scope, description, optional body, and optional footers.
+description: Create git commits using Conventional Commits 1.0.0. Use only when the user explicitly asks Codex to commit changes. Do not use for requests that only ask to propose a commit message, review changes, or stage files without committing.
 ---
 
 # Git Conventional Commit
+
+Complete the request by creating one or more commits. Do not use this skill for advisory-only commit-message work or stop after proposing a message.
 
 Use Conventional Commits 1.0.0:
 
@@ -17,7 +19,7 @@ Add an optional body or footers only when they help future readers.
 2. Define coherent commit boundaries. Unless the user narrows the scope, include the entire worktree, split across logical commits when necessary. Do not exclude changes because they predate the current session or were written manually.
 3. Stage the intended files. Use targeted `git add <paths>` when splitting changes; use `git add -A` when one commit should include the remaining worktree.
 4. Verify each staged set with `git diff --cached --stat` and `git diff --cached`. Correct the staging when it does not match the intended commit; do not revert unrelated working-tree changes.
-5. Write a message based on the staged change's intent. If the user asked only for a proposed message, stop after proposing it.
+5. Write a message based on the staged change's intent and create the commit.
 6. Commit only a non-empty staged set. For multiple commits, repeat the workflow until `git status --short` is empty unless the user explicitly excluded changes.
 7. Confirm each result with `git log -1 --pretty=format:%s`. If explicitly excluded changes remain, identify them and the instruction that excluded them.
 

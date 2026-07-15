@@ -202,7 +202,7 @@ The resulting docs should collectively cover the same information as the onboard
 ## Skills Index
 | Skill | Use when | Source |
 | --- | --- | --- |
-| `git-conventional-commit` | Creating or proposing Conventional Commit messages | `.agents/skills/git-conventional-commit/SKILL.md` |
+| `git-conventional-commit` | Creating Conventional Commits when explicitly asked to commit | `.agents/skills/git-conventional-commit/SKILL.md` |
 
 ## Where to Look
 | I want to... | Look at... |
