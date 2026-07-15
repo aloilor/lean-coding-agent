@@ -1,0 +1,4 @@
+interface:
+  display_name: "Light Refactor"
+  short_description: "Safely restructure a small, localized code area"
+  default_prompt: "Use $workflow-light-refactor to plan, perform, verify, and review this small behavior-preserving refactor."

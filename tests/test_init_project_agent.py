@@ -192,10 +192,13 @@ class InitializationIntegrationTest(unittest.TestCase):
                 self.assertEqual(source_path.read_bytes(), target_path.read_bytes())
 
         installs = INIT_PROJECT_AGENT.discover_shared_skills(REPO_ROOT / "skills")
-        self.assertIn(
+        installed_skill_names = {install["installed_as"] for install in installs}
+        for expected_workflow in (
             "workflow-light-feature-development",
-            {install["installed_as"] for install in installs},
-        )
+            "workflow-light-refactor",
+        ):
+            with self.subTest(expected_workflow=expected_workflow):
+                self.assertIn(expected_workflow, installed_skill_names)
         manifest = json.loads(
             (self.repo / "agent-context" / INIT_PROJECT_AGENT.MANIFEST_NAME).read_text(
                 encoding="utf-8"

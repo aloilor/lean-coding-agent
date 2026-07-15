@@ -84,15 +84,23 @@ flowchart TD
 
 ### Refactor Workflow
 
-A refactor writes no new failing test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered — so its report records a behavior-preserving exemption instead of red-green-refactor evidence.
+Clear, small, localized, low-risk refactors use [workflow-light-refactor](skills/workflow-light-refactor): the main agent defines the preservation boundary, confirms a green baseline, refactors in small green steps, verifies, and self-reviews without coordination artifacts. Broader or higher-risk refactors use the delegated workflow below.
+
+A refactor writes no new failing behavior test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered. Delegated refactors record a behavior-preserving exemption instead of red-green-refactor evidence.
 
 ```mermaid
 flowchart TD
-    A[Refactor request] --> B[Planner]
-    B --> C[grill-with-docs, then refactor brief: behavior to preserve, scope, verification]
-    C --> D[Implementation plan]
-    D --> E[User approval]
-    E --> F[Implementer]
+    A[Refactor request] --> B{Qualifies as light?}
+    B -->|Yes| C[Main agent: grill-with-docs and concise plan]
+    C --> D[Confirm green baseline and characterization coverage]
+    D --> E[Refactor in small green steps]
+    E --> N[Verification and self-review]
+    N --> O[Done]
+    B -->|No| P[Planner]
+    P --> Q[grill-with-docs, then refactor brief: behavior to preserve, scope, verification]
+    Q --> R[Implementation plan]
+    R --> S[User approval]
+    S --> F[Implementer]
     F --> G[Confirm baseline tests green; add characterization tests if missing]
     G --> H[Apply one behavior-preserving change]
     H --> I[Run tests]
@@ -101,11 +109,11 @@ flowchart TD
     J -->|Yes| K[Implementation report]
     K --> L[Code reviewer]
     L --> M{Review result}
-    M -->|APPROVE| N[Done]
+    M -->|APPROVE| O
     M -->|BLOCK| F
-    M -->|WARNING| O{Tied to brief, behavior drift, or test gap?}
-    O -->|Yes| F
-    O -->|No| N
+    M -->|WARNING| T{Tied to brief, behavior drift, or test gap?}
+    T -->|Yes| F
+    T -->|No| O
 ```
 
 ### Bug Workflow
