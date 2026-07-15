@@ -45,17 +45,19 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Workflows
 
-Route the latest request using **Workflow Selection Rules**, invoke the matching `workflow-*` skill, and orchestrate its steps. The shared rules below apply to every workflow.
+Route the latest request using **Workflow Selection Rules**, invoke the matching `workflow-*` skill, and orchestrate its steps. The light feature workflow is executed entirely by the main agent; the shared subagent and artifact rules apply to the delegated workflows.
 
 ### Always Spawn The Named Subagents
 
-When a workflow names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
+`workflow-light-feature-development` is main-agent-only: do not spawn workflow subagents for it. The main agent plans with `grill-with-docs`, implements, verifies, and self-reviews as directed by the skill.
+
+For every other workflow, when it names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
 
 The main agent routes work, relays artifacts, enforces approval gates, runs broader final verification, and handles Small-tier work not assigned by a workflow.
 
 ### Standard Artifacts
 
-Use these fixed paths rather than inventing alternatives:
+Use these fixed paths rather than inventing alternatives. The light feature workflow creates no coordination artifacts; delegated workflows use the applicable artifacts below.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |
@@ -68,11 +70,12 @@ Use these fixed paths rather than inventing alternatives:
 
 ### Workflow Tiering
 
-- **Small** — direct question, one-liner, documentation edit, or narrow mechanical change. Use no workflow subagents or coordination artifacts.
-- **Medium** — a few files with low architectural risk. A plan may replace a full specification; review behavior changes.
-- **Full** — product behavior, API contracts, persistence, auth, security, cross-module, or user-facing work. Use the complete workflow.
+- **Small** — direct question, one-liner, documentation edit, or narrow mechanical change. Use no workflow skill, subagents, or coordination artifacts.
+- **Light feature** — a clear, small, localized, low-risk feature or change request with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. Use `workflow-light-feature-development`; the main agent performs the complete workflow without coordination artifacts.
+- **Medium** — multiple connected changes where independent planning or review materially improves confidence, but architectural risk remains limited. A plan may replace a full specification.
+- **Full** — complex product behavior, material API contracts, persistence, auth, security, privacy, cross-module architecture, or broad user-facing workflows. Use the complete workflow.
 
-Start with the lowest tier that covers the risk and escalate if scope grows. Bug fixes always require user approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
+Start with the lowest tier that covers the risk and escalate if scope grows. File count is only a signal; risk, ambiguity, and blast radius decide whether a feature qualifies as light. Bug fixes always require user approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
 
 ### Shared Stop Conditions
 
@@ -92,7 +95,8 @@ When several rows match, choose the most specific outcome the user requested.
 | User request | Workflow | Boundary |
 | --- | --- | --- |
 | Define or update requirements, acceptance criteria, contracts, or a feature specification | `workflow-feature-specification` | Deliver specification and plan, not production code. |
-| Build, add, implement, or change externally observable behavior | `workflow-feature-development` | Production behavior changes. |
+| Build or add a clear, small, low-risk feature or change request that meets every Light feature criterion | `workflow-light-feature-development` | The main agent plans with `grill-with-docs`, implements with TDD, verifies, and self-reviews. |
+| Build, add, implement, or change externally observable behavior that does not qualify as a Light feature | `workflow-feature-development` | Use delegated planning, implementation, and review for complex feature work. |
 | Refactor, restructure, extract, rename, or simplify while preserving behavior | `workflow-refactor` | Use feature development if behavior also changes. |
 | Review, audit, or assess risk without edits | `workflow-review` | Report findings only. |
 | Fix a bug, regression, failing test, CI failure, or runtime error | `workflow-bug-fixing` | Diagnose and obtain approval before repair. |

@@ -52,15 +52,20 @@ flowchart LR
 
 ### Feature Development Workflow
 
-The implementer drives each behavior with the `tdd` red-green-refactor loop one slice at a time and records the red failing-assertion evidence in the implementation report. The reviewer checks that evidence alongside SOLID, DRY, YAGNI, KISS, security, and stack-specific findings before approving.
+Clear, small, low-risk features and change requests use [workflow-light-feature-development](skills/workflow-light-feature-development): the main agent plans with `grill-with-docs`, implements through the `tdd` red-green-refactor loop, verifies, and self-reviews without coordination artifacts. Complex features use the delegated workflow below; the implementer records TDD evidence and the reviewer checks it alongside semantic and deterministic quality evidence.
 
 ```mermaid
 flowchart TD
-    A[Feature request] --> B[Planner]
-    B --> C[grill-with-docs, then create-specification]
-    C --> D[Implementation plan]
-    D --> E[User approval]
-    E --> F[Implementer]
+    A[Feature request] --> B{Qualifies as light?}
+    B -->|Yes| C[Main agent: grill-with-docs and concise plan]
+    C --> D[Main agent: TDD implementation]
+    D --> E[Verification and self-review]
+    E --> O[Done]
+    B -->|No| Q[Planner]
+    Q --> R[grill-with-docs, then create-specification]
+    R --> S[Implementation plan]
+    S --> T[User approval]
+    T --> F[Implementer]
     F --> G[RED: write one failing behavior test]
     G --> H[GREEN: simplest code that passes]
     H --> I[REFACTOR: apply engineering-standards]

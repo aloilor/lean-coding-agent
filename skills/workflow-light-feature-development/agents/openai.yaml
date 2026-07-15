@@ -1,0 +1,4 @@
+interface:
+  display_name: "Light Feature Development"
+  short_description: "Plan and build a small feature end to end"
+  default_prompt: "Use $workflow-light-feature-development to plan, implement, verify, and review this small feature."
