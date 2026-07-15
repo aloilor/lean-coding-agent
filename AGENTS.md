@@ -54,9 +54,20 @@ Route the latest request using **Workflow Selection Rules**, invoke the matching
 
 For every other workflow, when it names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
 
-Immediately after spawning any subagent, compare its reported runtime model and reasoning effort with `model` and `model_reasoning_effort` in the applicable `.codex/agents/<subagent>.toml` config. Treat missing runtime metadata as a failed match. If either value is missing or differs, interrupt the subagent immediately, do not use its output or continue the workflow, and report the subagent name plus the expected and observed values to the user. Do not retry or override the configured runtime in the same workflow run.
-
 The main agent routes work, relays artifacts, enforces approval gates, runs broader final verification, and handles Small-tier work not assigned by a workflow.
+
+### Subagent Runtime Verification
+
+After spawning a subagent, compare its observed runtime model and reasoning effort with `model` and `model_reasoning_effort` in `.codex/agents/<subagent>.toml`.
+
+Require every subagent response to begin with:
+
+- `Runtime model: <model>`
+- `Reasoning effort: <effort>`
+
+Report the expected and observed values in the first progress update. Treat missing values as `unknown` and a failed match. On any mismatch, interrupt the subagent, discard its output, stop the workflow, and report the discrepancy. Do not retry or override the configuration.
+
+
 
 ### Standard Artifacts
 
