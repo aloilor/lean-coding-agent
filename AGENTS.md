@@ -54,6 +54,8 @@ Route the latest request using **Workflow Selection Rules**, invoke the matching
 
 For every other workflow, when it names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
 
+Immediately after spawning any subagent, compare its reported runtime model and reasoning effort with `model` and `model_reasoning_effort` in the applicable `.codex/agents/<subagent>.toml` config. Treat missing runtime metadata as a failed match. If either value is missing or differs, interrupt the subagent immediately, do not use its output or continue the workflow, and report the subagent name plus the expected and observed values to the user. Do not retry or override the configured runtime in the same workflow run.
+
 The main agent routes work, relays artifacts, enforces approval gates, runs broader final verification, and handles Small-tier work not assigned by a workflow.
 
 ### Standard Artifacts
@@ -77,7 +79,7 @@ Use these fixed paths rather than inventing alternatives. Light workflows create
 - **Medium** — multiple connected changes where independent planning or review materially improves confidence, but architectural risk remains limited. A plan may replace a full specification.
 - **Full** — complex product behavior, material API contracts, persistence, auth, security, privacy, cross-module architecture, or broad user-facing workflows. Use the complete workflow.
 
-Start with the lowest tier that covers the risk and escalate if scope grows. File count is only a signal; risk, ambiguity, and blast radius decide whether a feature or refactor qualifies as light. Bug fixes always require user approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
+Start with the lowest tier that covers the risk and escalate if scope grows, except that an active `workflow-light-refactor` must not escalate automatically. If a light refactor crosses its boundary, stop and request user direction without switching workflows. File count is only a signal; risk, ambiguity, and blast radius decide whether a feature or refactor qualifies as light. Bug fixes always require user approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
 
 ### Shared Stop Conditions
 

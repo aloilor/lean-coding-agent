@@ -84,7 +84,7 @@ flowchart TD
 
 ### Refactor Workflow
 
-Clear, small, localized, low-risk refactors use [workflow-light-refactor](skills/workflow-light-refactor): the main agent defines the preservation boundary, confirms a green baseline, refactors in small green steps, verifies, and self-reviews without coordination artifacts. Broader or higher-risk refactors use the delegated workflow below.
+Clear, small, localized, low-risk refactors use [workflow-light-refactor](skills/workflow-light-refactor): the main agent defines the preservation boundary, confirms a green baseline, refactors in small green steps, verifies, and self-reviews without coordination artifacts. Once started, the light workflow does not escalate automatically; it stops for user direction if the work crosses its boundary. Refactors routed as broader or higher-risk from the outset use the delegated workflow below.
 
 A refactor writes no new failing behavior test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered. Delegated refactors record a behavior-preserving exemption instead of red-green-refactor evidence.
 
