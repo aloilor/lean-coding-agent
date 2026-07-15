@@ -1,6 +1,10 @@
 # Quality Pipeline (PHP / Laravel)
 
-This template provides one reviewer-owned, full-repository quality gate. After inventorying a review diff, the code reviewer runs `sh scripts/quality-gate`, reads the fresh manifest and reports, and then performs semantic review. The gate is local workflow evidence: it does not install a git hook or a hosted CI workflow.
+> **Deferred TODO:** The quality-gate assets are retained for future evaluation, but current
+> agent workflows do not run, configure, or consume them. The material below documents the
+> preserved experimental design and must not be treated as an active review requirement.
+
+This template includes an experimental full-repository quality gate. It remains a local utility and does not install a git hook or a hosted CI workflow.
 
 The gate attempts these Composer scripts in order and continues after failures:
 
@@ -105,9 +109,12 @@ Every run removes and recreates `.quality-reports/`. Add this directory to `.git
 
 `.quality-reports/manifest.json` contains schema version `1`, a UTC generation time, and one entry per check with its `pass`, `fail`, or `skipped` status, report paths, and numeric exit code (`null` when skipped). PHPStan, Deptrac, and Composer audit produce structured JSON primary reports; style, tests, and duplication use reviewer-readable text. Tool stderr never shares a structured report.
 
-The gate exits `2` if any executed check fails and `0` otherwise. If Composer is unavailable, or an individual script is absent, affected checks are `skipped` and the manifest is still written. Exit `0` therefore does not by itself mean the worktree is verified: every skip or missing report is missing verification that the reviewer must surface. An evidence-generation failure exits `2` and is never reported as clean.
+The gate exits `2` if any executed check fails and `0` otherwise. If Composer is unavailable, or an individual script is absent, affected checks are `skipped` and the manifest is still written. Exit `0` therefore does not by itself mean the worktree is verified: a future consumer must treat every skip or missing report as missing verification. An evidence-generation failure exits `2` and is never reported as clean.
 
-## Reviewer flow and scope
+## Planned reviewer flow and scope (TODO)
+
+The flow in this section is a future integration proposal. It is not part of the current
+reviewer or development workflows.
 
 The full-repository gate deliberately sees more code than the implementer changed. That gives the reviewer enough context to detect regressions in callers, dependencies, and architecture relationships, but it does not broaden the approved repair scope. Only change-caused findings and findings explicitly targeted by the request, specification, bug investigation, refactor brief, or implementation plan are actionable.
 

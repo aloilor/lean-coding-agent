@@ -8,8 +8,6 @@ Purpose: make verification expectations explicit.
 - Distinguish unit, integration, end-to-end, lint, typecheck, and smoke checks when visible.
 - Document fixture and test-data conventions only when evidence exists.
 - Include what to run for common change types.
-- When `quality:test` exists, identify the authoritative full-suite command it wraps; do not assume a framework default over project evidence. For Laravel projects, that command runs through Laravel Sail (`sail artisan test`) so tests execute inside the application container; document the Sail-prefixed form.
-- Distinguish test execution from style, static analysis, duplication, architecture, and dependency-audit checks in the reviewer-owned gate.
 
 ## Template
 
@@ -44,7 +42,6 @@ Purpose: make verification expectations explicit.
 ## Verification Expectations
 
 - Which checks to run for docs, frontend, API, database, or shared logic changes.
-- How `quality:test` maps to the project's test layers and which non-test checks are supplied by `scripts/quality-gate`.
 
 ## Open Questions
 

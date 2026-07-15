@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
-# Run explicitly by the code reviewer after diff inventory and before semantic review.
-# This local full-repository gate is reviewer-owned; it does not install commit hooks or CI.
+# TODO: deferred experimental utility; current agent workflows do not invoke it.
+# It remains available for future local evaluation and does not install commit hooks or CI.
 
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$ROOT" || exit 2

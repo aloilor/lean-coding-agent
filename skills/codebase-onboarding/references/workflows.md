@@ -8,7 +8,6 @@ Purpose: preserve executable project workflows.
 - Prefer commands from package files, Makefiles, CI, or existing docs.
 - Include verification steps when the repo provides them.
 - Keep deployment and release sections evidence-backed.
-- When a reviewer-owned quality gate exists, document its exact command, stable script contracts, configuration files, ownership, and the latest operational status of every check. Mark skips and pending policy decisions explicitly.
 
 ## Template
 
@@ -35,12 +34,6 @@ Purpose: preserve executable project workflows.
 ## Review And Commit
 
 - Branch, PR, commit, or review rules from repo docs.
-
-## Reviewer-Owned Quality Gate
-
-| Check | Command | Configuration | Status | Evidence / Pending Decision |
-| --- | --- | --- | --- | --- |
-| Example | `...` | `...` | operational-pass / operational-fail / skipped / pending-approval | `...` |
 
 ## Release / Deployment
 

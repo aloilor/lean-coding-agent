@@ -1,5 +1,9 @@
 # Determinism-in-the-Loop Pipeline
 
+> **Deferred TODO:** The full-repository quality-gate integration described below is not
+> active in current agent workflows. The implementation and design notes remain in the
+> repository for later evaluation.
+
 A stack-agnostic model for keeping AI-written code out of the "code slop" trap: rising duplication and falling refactoring as generated code accumulates. The core idea: LLMs catch their own slop poorly but fix it well **once something points at it**, so pair the model with deterministic, mechanical checks that do the pointing.
 
 ## Three layers
@@ -16,18 +20,18 @@ Determinism raises the floor cheaply and objectively; it never reaches the ceili
 
 Placement follows a single property: **is the check meaningful on one file, or does it need the whole graph?**
 
-- **Review tier.** After inventorying the diff, the reviewer runs one local full-repository gate containing style, static analysis and complexity, tests, duplication, architecture, and dependency audit. Findings become inputs to semantic review and blocking findings return through the review-fix loop.
-- **CI-class analyses (whole-repo, ratcheted).** Duplication, architecture / dependency direction, dead code, and security need the whole graph. They remain CI-class analyses even when the reviewer-owned local gate executes them against the exact worktree under review; scoping them to touched files destroys what they measure.
+- **Proposed review tier (deferred).** A future reviewer integration may run one local full-repository gate containing style, static analysis and complexity, tests, duplication, architecture, and dependency audit. Current workflows do not run this gate.
+- **CI-class analyses (whole-repo, ratcheted).** Duplication, architecture / dependency direction, dead code, and security need the whole graph. They remain CI-class analyses if a future local gate executes them against the exact worktree under review; scoping them to touched files destroys what they measure.
 
 ### The ratchet
 
 You cannot hard-fail a check against an existing messy repo — every file trips it on day one. The ratchet fixes this: record the current metric as a baseline, grandfather existing debt, and block only **regressions**. New code may not make duplication / complexity / type errors worse; existing debt can only trend down. Whole-repo static analysis is only deployable in ratcheted form.
 
-The shared `code-reviewer` instruction owns the exact ratcheted complexity acceptance policy and applies it to the fresh gate artifact during review.
+The ratcheted complexity policy and reviewer integration remain future design work.
 
-## Placement: reviewer runs, implementer fixes returned findings
+## Deferred placement proposal
 
-Static-analysis findings are deterministic and already-true; they do not need to be rediscovered through semantic judgment. The reviewer owns one fresh, explicit gate execution for the exact worktree under review:
+Static-analysis findings are deterministic and already-true; they do not need to be rediscovered through semantic judgment. If this TODO is resumed, the proposed ownership is one fresh, explicit gate execution for the exact worktree under review:
 
 ```
 implementer ── implement + run behavior verification ──► handoff
@@ -42,7 +46,7 @@ reviewer ── inventory diff, then run full deterministic gate ──► fresh
       • returns blocking gate findings to the implementer for the next pass
 ```
 
-The deterministic gate is the reviewer's **instrument panel**, not its **assignment**. Running it after inventorying the diff makes that instrument panel independent and current. The reviewer reads the fresh manifest, treats skips or missing reports as missing verification, blocks on test failures, and returns other blocking findings through the normal review-fix loop.
+In the deferred design, the deterministic gate is the reviewer's **instrument panel**, not its **assignment**. None of these responsibilities apply to current workflows.
 
 **Inspection breadth is not fix scope.** Whole-project analysis and semantic review may inspect untouched callers, dependencies, and neighboring code to determine whether the implementation caused a regression. That broader inspection does not authorize cleanup. The reviewer returns change-caused findings in touched files, plus unresolved explicitly in-scope target findings named by the task, specification, bug investigation, refactor brief, or implementation plan, for the implementer to fix. New findings that ripple into *untouched* files are flagged as review findings but not assigned as implementation scope without approval. Pre-existing unrelated findings are the baseline's job, not the change's.
 
@@ -54,13 +58,13 @@ Enforcement can sit at three layers. The distinction that matters: a hook in one
 
 | Layer | Mechanism | Covers | Role |
 |-------|-----------|--------|------|
-| Agent workflow | shared `code-reviewer` instruction, installed to both `.claude/agents/` and `.codex/agents/` | reviewers | runs the gate once per review pass and uses fresh findings |
+| Agent workflow (deferred) | future reviewer integration | reviewers | would run the gate once per review pass and use fresh findings |
 | Commit gate | git `pre-commit` running the gate | Claude Code + Codex + **humans** | a hard, human-covering stop |
 | Hosted CI | CI service running the same project scripts for each pushed commit | every pushed worktree | independent remote enforcement |
 
-The reviewer calls `scripts/quality-gate` directly. A git `pre-commit` can call the same script when hard enforcement for humans and other tools is wanted, but it is not provisioned by this baseline.
+No current workflow calls `scripts/quality-gate`. A future reviewer integration or git `pre-commit` could call the same script, but neither is provisioned by this baseline.
 
-**Reviewer-only vs. hard gate is a deliberate choice.** The PHP/Laravel reference implementation ships with reviewer-only execution and no PostToolUse or git hooks. Adding a git `pre-commit` changes that ownership model by upgrading the script to a hard, human-covering gate.
+**A future reviewer-only vs. hard-gate choice must be deliberate.** The PHP/Laravel reference assets ship without active workflow integration, PostToolUse hooks, or git hooks. Adding reviewer execution or a git `pre-commit` would activate a new ownership and enforcement model.
 
 ## The honest ceiling
 
@@ -68,4 +72,4 @@ This pipeline catches **structural** slop — too complex, duplicated, tangled, 
 
 ## Concrete implementation
 
-See `templates/php-laravel/` in the coding-agent baseline and its `docs/quality-pipeline.md` for a worked PHP/Laravel instance: Pint, PHPStan/Larastan with cognitive complexity, tests, jscpd, Deptrac, and Composer audit, run explicitly by the code reviewer with committed ratchets where needed.
+See `templates/php-laravel/` in the coding-agent baseline and its `docs/quality-pipeline.md` for the retained experimental PHP/Laravel implementation: Pint, PHPStan/Larastan with cognitive complexity, tests, jscpd, Deptrac, and Composer audit with committed ratchets where needed.

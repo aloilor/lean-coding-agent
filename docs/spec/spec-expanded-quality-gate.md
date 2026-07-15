@@ -2,7 +2,11 @@
 
 ## Status
 
-Approved for implementation on 2026-07-11.
+Deferred/TODO as of 2026-07-15. The implementation is retained for future evaluation,
+but no current workflow or reviewer instruction invokes or consumes it.
+
+The requirements below describe the preserved experimental design. They are not active
+workflow requirements until the TODO is explicitly resumed.
 
 ## Summary
 

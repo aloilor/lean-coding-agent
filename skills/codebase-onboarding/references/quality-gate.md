@@ -1,6 +1,11 @@
-# Laravel Quality-Gate Activation
+# Laravel Quality-Gate Activation (Deferred TODO)
 
-Purpose: turn the provisioned reviewer-owned Laravel gate into project-specific, executable verification without inventing architecture or silently accepting debt.
+This reference is retained for future work. Current onboarding and development workflows
+must not activate, run, configure, or consume the quality gate unless a user explicitly
+asks to resume this TODO.
+
+Preserved future purpose: turn the provisioned Laravel gate into project-specific,
+executable verification without inventing architecture or silently accepting debt.
 
 Use this reference only when both conditions hold:
 
