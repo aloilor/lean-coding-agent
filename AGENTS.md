@@ -104,3 +104,11 @@ When several rows match, choose the most specific outcome the user requested.
 | Answer directly or make a small documentation or mechanical change | Normal Small-tier execution | Do the smallest useful thing. |
 
 These rules succeed when diffs stay focused, avoid needless complexity, and are verified without hiding ambiguity.
+
+### Subagent Routing
+
+Use this table for subagents routed directly by the main agent. Subagents named by a workflow are routed only through that workflow.
+
+| User request | Subagent | Boundary |
+| --- | --- | --- |
+| Stage changes, propose a commit message, or create a commit | `committer` | Route only when the user explicitly requests the operation. Spawn with `fork_turns="none"`. |
