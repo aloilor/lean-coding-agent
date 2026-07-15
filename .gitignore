@@ -1,11 +1,9 @@
 .agents/tasks/
 .codex/tasks/
-.claude/tasks/
 .agents/code-reviews/
 .agents/refactor-briefs/
 .agents/implementation-plans/
 .agents/implementation-reports/
-.claude/settings.local.json
 AGENTS.local.md
 CLAUDE.local.md
 __pycache__/

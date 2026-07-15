@@ -1,4 +1,0 @@
-interface:
-  display_name: "Initialize Project Agent"
-  short_description: "Bootstrap a project repo and fill agent context"
-  default_prompt: "Use $initialize-project-agent to bootstrap a project repo with AGENTS.md, agent-context, shared lessons, repo-local shared skills, and a codebase-onboarding pass."

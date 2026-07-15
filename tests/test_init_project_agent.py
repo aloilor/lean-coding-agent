@@ -54,7 +54,10 @@ class InitializationIntegrationTest(unittest.TestCase):
         return source_text + separator + INIT_PROJECT_AGENT.baseline_guard_block(filename)
 
     def seed_project_owned_and_legacy_files(self) -> None:
-        (self.repo / ".gitignore").write_text("existing/\nAGENTS.local.md\n", encoding="utf-8")
+        (self.repo / ".gitignore").write_text(
+            "existing/\nAGENTS.local.md\n.claude/tasks/\n",
+            encoding="utf-8",
+        )
         (self.repo / "AGENTS.local.md").write_text("private agents notes\n", encoding="utf-8")
 
         (self.repo / "agent-context").mkdir()
@@ -75,6 +78,15 @@ class InitializationIntegrationTest(unittest.TestCase):
             unmanaged_skill.mkdir()
             (unmanaged_skill / "keep.txt").write_text("keep", encoding="utf-8")
 
+        legacy_claude_skill = self.repo / ".claude" / "skills" / "removed-skill"
+        legacy_claude_skill.mkdir(parents=True, exist_ok=True)
+        (legacy_claude_skill / "stale.txt").write_text("stale", encoding="utf-8")
+        legacy_claude_agent = self.repo / ".claude" / "agents" / "planner.md"
+        legacy_claude_agent.parent.mkdir(parents=True)
+        legacy_claude_agent.write_text("managed legacy agent\n", encoding="utf-8")
+        unrelated_claude_file = self.repo / ".claude" / "project-owned.txt"
+        unrelated_claude_file.write_text("keep\n", encoding="utf-8")
+
         lessons_index = self.repo / ".agents" / "lessons" / "LESSONS.md"
         lessons_index.parent.mkdir(parents=True)
         lessons_index.write_text("# Project lessons\n", encoding="utf-8")
@@ -91,11 +103,14 @@ class InitializationIntegrationTest(unittest.TestCase):
         incidents_readme.parent.mkdir(parents=True)
         incidents_readme.write_text("# Project incidents\n", encoding="utf-8")
 
-        legacy_dir = self.repo / INIT_PROJECT_AGENT.LEGACY_AGENT_CONTEXT_DIRNAME
+        legacy_dir = self.repo / "anget-context"
         legacy_clone = legacy_dir / "awesome-codex-skills"
         legacy_clone.mkdir(parents=True)
         (legacy_clone / "old.txt").write_text("old", encoding="utf-8")
-        (legacy_dir / INIT_PROJECT_AGENT.LEGACY_CONFIG_NAME).write_text("{}", encoding="utf-8")
+        (legacy_dir / "awesome-codex-skills-subset.json").write_text(
+            "{}",
+            encoding="utf-8",
+        )
 
     def assert_external_install_commands(self, calls: list[object]) -> None:
         expected_commands = [
@@ -158,10 +173,10 @@ class InitializationIntegrationTest(unittest.TestCase):
             ".agents/implementation-reports/",
             ".agents/tasks/",
             ".codex/tasks/",
-            ".claude/tasks/",
         ]
         for expected_line in expected_ignore_lines:
             self.assertEqual(1, gitignore_lines.count(expected_line), expected_line)
+        self.assertEqual(1, gitignore_lines.count(".claude/tasks/"))
 
         self.assertEqual(
             "# Existing project context\n",
@@ -220,20 +235,31 @@ class InitializationIntegrationTest(unittest.TestCase):
             (target_overrides / "project-skill.md").read_text(encoding="utf-8"),
         )
 
-        for source_agent in (REPO_ROOT / "agents").glob("*.md"):
+        for source_agent in (REPO_ROOT / ".codex" / "agents").glob("*.toml"):
+            codex_agent_path = self.repo / ".codex" / "agents" / source_agent.name
             self.assertEqual(
                 source_agent.read_bytes(),
-                (self.repo / ".claude" / "agents" / source_agent.name).read_bytes(),
-            )
-            codex_agent_path = self.repo / ".codex" / "agents" / source_agent.with_suffix(
-                ".toml"
-            ).name
-            self.assertEqual(
-                INIT_PROJECT_AGENT.codex_agent_content(source_agent),
-                codex_agent_path.read_text(encoding="utf-8"),
+                codex_agent_path.read_bytes(),
             )
             codex_agent = tomllib.loads(codex_agent_path.read_text(encoding="utf-8"))
+            self.assertEqual(source_agent.stem, codex_agent["name"])
+            self.assertIn("description", codex_agent)
             self.assertIn("developer_instructions", codex_agent)
+
+        self.assertEqual(
+            "managed legacy agent\n",
+            (self.repo / ".claude" / "agents" / "planner.md").read_text(encoding="utf-8"),
+        )
+        self.assertEqual(
+            "stale",
+            (self.repo / ".claude" / "skills" / "removed-skill" / "stale.txt").read_text(
+                encoding="utf-8"
+            ),
+        )
+        self.assertEqual(
+            "keep\n",
+            (self.repo / ".claude" / "project-owned.txt").read_text(encoding="utf-8"),
+        )
 
         for install in installs:
             source_skill = REPO_ROOT / "skills" / install["source"]
@@ -242,30 +268,38 @@ class InitializationIntegrationTest(unittest.TestCase):
                 self.assertEqual(file_contents(source_skill), file_contents(target_skill))
 
         for skills_dir in INIT_PROJECT_AGENT.MANAGED_SKILLS_DIRS:
-            self.assertFalse((self.repo / skills_dir / "removed-skill").exists())
+            self.assertEqual(
+                "stale",
+                (self.repo / skills_dir / "removed-skill" / "stale.txt").read_text(
+                    encoding="utf-8"
+                ),
+            )
             self.assertEqual(
                 "keep",
                 (self.repo / skills_dir / "project-skill" / "keep.txt").read_text(
                     encoding="utf-8"
                 ),
             )
-        self.assertFalse(
-            (self.repo / INIT_PROJECT_AGENT.LEGACY_AGENT_CONTEXT_DIRNAME).exists()
+        self.assertEqual(
+            "old",
+            (self.repo / "anget-context" / "awesome-codex-skills" / "old.txt").read_text(
+                encoding="utf-8"
+            ),
         )
         self.assertFalse((self.repo / INIT_PROJECT_AGENT.QUALITY_GATE_SCRIPT_SUBPATH).exists())
         self.assert_external_install_commands(calls)
 
     def test_rerun_refreshes_managed_files_and_preserves_project_owned_files(self) -> None:
         self.run_initializer()
-        source_agent = next((REPO_ROOT / "agents").glob("*.md"))
+        self.assertFalse((self.repo / ".claude").exists())
+        source_agent = next((REPO_ROOT / ".codex" / "agents").glob("*.toml"))
         install = INIT_PROJECT_AGENT.discover_shared_skills(REPO_ROOT / "skills")[0]
         source_skill = REPO_ROOT / "skills" / install["source"]
         source_skill_file = next(path for path in source_skill.rglob("*") if path.is_file())
 
         managed_files = [
             self.repo / "AGENTS.md",
-            self.repo / ".claude" / "agents" / source_agent.name,
-            self.repo / ".codex" / "agents" / source_agent.with_suffix(".toml").name,
+            self.repo / ".codex" / "agents" / source_agent.name,
         ]
         for skills_dir in INIT_PROJECT_AGENT.MANAGED_SKILLS_DIRS:
             managed_files.append(
@@ -294,13 +328,7 @@ class InitializationIntegrationTest(unittest.TestCase):
         )
         self.assertEqual(
             source_agent.read_bytes(),
-            (self.repo / ".claude" / "agents" / source_agent.name).read_bytes(),
-        )
-        self.assertEqual(
-            INIT_PROJECT_AGENT.codex_agent_content(source_agent),
-            (self.repo / ".codex" / "agents" / source_agent.with_suffix(".toml").name).read_text(
-                encoding="utf-8"
-            ),
+            (self.repo / ".codex" / "agents" / source_agent.name).read_bytes(),
         )
         for skills_dir in INIT_PROJECT_AGENT.MANAGED_SKILLS_DIRS:
             target_skill = self.repo / skills_dir / install["installed_as"]
@@ -315,6 +343,16 @@ class InitializationIntegrationTest(unittest.TestCase):
         ]:
             self.assertEqual(1, gitignore_lines.count(managed_line), managed_line)
         self.assert_external_install_commands(calls)
+
+    def test_upstream_skills_are_installed_for_codex_only(self) -> None:
+        command = INIT_PROJECT_AGENT.upstream_skills_install_command(
+            "https://example.test/skills",
+            ["example-skill"],
+        )
+
+        agent_index = command.index("--agent")
+        self.assertEqual(["codex"], command[agent_index + 1 : agent_index + 2])
+        self.assertEqual("--copy", command[agent_index + 2])
 
 
 class PackageManagerDetectionTest(unittest.TestCase):
@@ -410,7 +448,7 @@ class LaravelDetectionTest(unittest.TestCase):
             self.assertTrue(INIT_PROJECT_AGENT.detect_php_laravel(repo))
 
 
-class RemoveLegacyQualityGateHooksTest(unittest.TestCase):
+class LaravelQualityGateProvisioningTest(unittest.TestCase):
     def setUp(self) -> None:
         self.temp_dir = tempfile.TemporaryDirectory()
         self.repo = Path(self.temp_dir.name)
@@ -424,97 +462,7 @@ class RemoveLegacyQualityGateHooksTest(unittest.TestCase):
         path.write_text(json.dumps(config), encoding="utf-8")
         return path
 
-    def test_removes_config_containing_only_legacy_hook(self) -> None:
-        path = self.write_config(
-            ".claude/settings.json",
-            {
-                "hooks": {
-                    "PostToolUse": [
-                        {
-                            "matcher": "Edit|Write",
-                            "hooks": [
-                                {
-                                    "type": "command",
-                                    "command": 'sh "$(git rev-parse --show-toplevel)/scripts/quality-gate"',
-                                }
-                            ],
-                        }
-                    ]
-                }
-            },
-        )
-
-        updated = INIT_PROJECT_AGENT.remove_legacy_quality_gate_hooks(self.repo)
-
-        self.assertEqual([path], updated)
-        self.assertFalse(path.exists())
-
-    def test_preserves_unrelated_hooks_and_configuration(self) -> None:
-        path = self.write_config(
-            ".codex/hooks.json",
-            {
-                "theme": "dark",
-                "hooks": {
-                    "PostToolUse": [
-                        {
-                            "matcher": "Edit|Write|apply_patch",
-                            "hooks": [
-                                {"type": "command", "command": "scripts/quality-gate"},
-                                {"type": "command", "command": "scripts/other-check"},
-                            ],
-                        }
-                    ],
-                    "SessionStart": [{"type": "command", "command": "scripts/setup"}],
-                },
-            },
-        )
-
-        updated = INIT_PROJECT_AGENT.remove_legacy_quality_gate_hooks(self.repo)
-
-        self.assertEqual([path], updated)
-        config = json.loads(path.read_text(encoding="utf-8"))
-        self.assertEqual("dark", config["theme"])
-        self.assertEqual(
-            [{"type": "command", "command": "scripts/other-check"}],
-            config["hooks"]["PostToolUse"][0]["hooks"],
-        )
-        self.assertEqual(
-            [{"type": "command", "command": "scripts/setup"}],
-            config["hooks"]["SessionStart"],
-        )
-
-    def test_leaves_unrelated_config_unchanged(self) -> None:
-        path = self.write_config(
-            ".claude/settings.json",
-            {
-                "hooks": {
-                    "PostToolUse": [
-                        {
-                            "matcher": "Edit",
-                            "hooks": [{"type": "command", "command": "scripts/other-check"}],
-                        }
-                    ]
-                }
-            },
-        )
-        original = path.read_text(encoding="utf-8")
-
-        updated = INIT_PROJECT_AGENT.remove_legacy_quality_gate_hooks(self.repo)
-
-        self.assertEqual([], updated)
-        self.assertEqual(original, path.read_text(encoding="utf-8"))
-
-    def test_leaves_invalid_json_unchanged(self) -> None:
-        path = self.repo / ".codex" / "hooks.json"
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("{invalid", encoding="utf-8")
-
-        updated = INIT_PROJECT_AGENT.remove_legacy_quality_gate_hooks(self.repo)
-
-        self.assertEqual([], updated)
-        self.assertEqual("{invalid", path.read_text(encoding="utf-8"))
-
-    def test_laravel_provisioning_removes_hook_without_reinstalling_it(self) -> None:
+    def test_laravel_provisioning_leaves_legacy_hook_untouched(self) -> None:
         (self.repo / "artisan").touch()
         hook_path = self.write_config(
             ".codex/hooks.json",
@@ -539,15 +487,13 @@ class RemoveLegacyQualityGateHooksTest(unittest.TestCase):
 
         self.assertIsNotNone(result)
         assert result is not None
-        self.assertEqual([hook_path], result["removed_hook_paths"])
-        self.assertFalse(hook_path.exists())
+        self.assertTrue(hook_path.exists())
         self.assertTrue((self.repo / "scripts" / "quality-gate").exists())
         self.assertTrue((self.repo / "docs" / "quality-pipeline.md").exists())
         self.assertTrue((self.repo / "phpstan.neon.dist").exists())
         self.assertTrue((self.repo / "phpstan-baseline.neon").exists())
         self.assertIn("deptrac/deptrac", result["require_command"])
         self.assertEqual("npm install --save-dev jscpd", result["jscpd_install_command"])
-        self.assertFalse((self.repo / ".claude" / "settings.json").exists())
 
     def test_laravel_provisioning_preserves_existing_assets_and_uses_detected_node_tool(self) -> None:
         (self.repo / "artisan").touch()
@@ -573,7 +519,6 @@ class RemoveLegacyQualityGateHooksTest(unittest.TestCase):
     def test_laravel_setup_output_names_both_required_toolchains(self) -> None:
         setup = {
             "copied_paths": [],
-            "removed_hook_paths": [],
             "require_command": "composer require --dev deptrac/deptrac",
             "jscpd_install_command": "yarn add --dev jscpd",
         }

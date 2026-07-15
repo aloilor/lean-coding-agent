@@ -1,10 +1,10 @@
 # coding-agent-baseline
 
-This repository is the shared base I want to reuse across all of my projects.
+This repository is the Codex-only shared base I want to reuse across all of my projects.
 
 It contains the general agent guidance that should apply everywhere, regardless of stack, folder structure, or project type. The goal is to keep one central set of broad rules and standards that I can reference from each individual project.
 
-The shared baseline stays in `AGENTS.md` and `CLAUDE.md`. This repo bootstraps both files into each project as exact copies of the shared defaults.
+The active Codex baseline lives in `AGENTS.md`. The initializer also retains `CLAUDE.md` and `CLAUDE.local.md` in each project for future compatibility, but it does not install or configure Claude Code.
 
 Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, extended by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery and approved Laravel quality-gate activation live in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
@@ -33,7 +33,7 @@ This setup keeps the global guidance consistent while still allowing every proje
 
 ## Workflows
 
-The baseline is organized around a few repeatable workflows that keep context, planning, implementation, and review connected across agents and tools. The same flow works whether the work happens in Codex, Claude Code, or a mix of both, because the durable handoff artifacts live in the project repo.
+The baseline is organized around a few repeatable Codex workflows that keep context, planning, implementation, and review connected through durable artifacts in the project repo.
 
 ### Project Setup Cycle
 
@@ -198,7 +198,7 @@ Installed skills (including marketplace skills) are overwritten when they update
 - `skills/skill-overrides/INDEX.md` lists each baseline override with a one-line summary
 - target repos consume those overrides from `.agents/skill-overrides/INDEX.md`
 
-The baseline rule in `AGENTS.md` tells agents to check `INDEX.md` before running a skill and, when the skill is listed, to read and apply the matching `<skill-name>.md` override as taking precedence over the skill's default behavior. This works for both Claude Code and Codex because both read `AGENTS.md`.
+The baseline rule in `AGENTS.md` tells Codex to check `INDEX.md` before running a skill and, when the skill is listed, to read and apply the matching `<skill-name>.md` override as taking precedence over the skill's default behavior.
 
 Overrides are for adjusting guidance the agent should follow (for example, where a skill saves its output or how strictly a workflow should run). They are shared with the team, unlike the private `AGENTS.local.md` / `CLAUDE.local.md` files.
 
@@ -217,8 +217,7 @@ The skill will:
 - create `AGENTS.local.md` and `CLAUDE.local.md` when they do not already exist
 - add the local files to the target repo's `.gitignore`
 - add project-local task note folders to the target repo's `.gitignore`
-- refresh Claude Code subagent files in `.claude/agents/` from this repo's `agents/` sources
-- regenerate Codex custom agent files in `.codex/agents/` from this repo's `agents/` sources
+- copy Codex custom agent files into `.codex/agents/` from this repo's native TOML sources under `.codex/agents/`
 - create `agent-context/` in the target repo
 - copy missing baseline project-context starter files from this repo's `agent-context/`
 - create `agent-context/README.md` when it does not already exist
@@ -226,14 +225,16 @@ The skill will:
 - create `.agents/lessons/LESSONS.md` when it does not already exist
 - copy baseline skill overrides from `skills/skill-overrides/` into `.agents/skill-overrides/`
 - add `.agents/code-reviews/`, `.agents/refactor-briefs/`, `.agents/implementation-plans/`, and `.agents/implementation-reports/` to the target repo's `.gitignore` for shared local handoff reports
-- add `.agents/tasks/`, `.codex/tasks/`, and `.claude/tasks/` to the target repo's `.gitignore` for local task notes
-- copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/` and `.claude/skills/`
-- install or refresh upstream skills with `npx skills add`
+- add `.agents/tasks/` and `.codex/tasks/` to the target repo's `.gitignore` for local task notes
+- copy every installable skill from this repo's `skills/` folder into the target repo's `.agents/skills/`
+- install or refresh upstream skills for Codex with `npx skills add`
 - install `agent-browser` as a dev dependency and run `agent-browser install`
 - write `agent-context/skills-installed.json` so the setup can be rerun cleanly
 - write `skills-lock.json` for upstream skill installs
 - run `$codebase-onboarding` in the target repo so `agent-context/` contains structured, evidence-backed project documentation, including `agent-context/skills.md`
 - for a provisioned Laravel gate, have onboarding inventory all six checks, propose project-specific configuration for approval, activate approved tooling, run the gate, and record operational, failing, skipped, or approval-pending status
+
+The initializer does not delete legacy Claude Code files or ignore entries from projects initialized by older baseline versions. Remove those artifacts manually if they are no longer wanted.
 
 ## Sync An Existing Project
 
@@ -283,11 +284,11 @@ The bootstrap installs or refreshes these upstream skills on every run:
 The equivalent manual commands are:
 
 ```bash
-npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex claude-code --copy -y
-npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser --agent codex claude-code --copy -y
-npx skills add https://github.com/mattpocock/skills --skill handoff tdd --agent codex claude-code --copy -y
-npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex claude-code --copy -y
-npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification prd refactor sql-code-review sql-optimization --agent codex claude-code --copy -y
+npx skills add https://github.com/vercel-labs/skills --skill find-skills --agent codex --copy -y
+npx skills add https://github.com/vercel-labs/agent-browser --skill agent-browser --agent codex --copy -y
+npx skills add https://github.com/mattpocock/skills --skill handoff tdd --agent codex --copy -y
+npx skills add https://github.com/wshobson/agents --skill changelog-automation --agent codex --copy -y
+npx skills add https://github.com/github/awesome-copilot --skill create-readme create-specification prd refactor sql-code-review sql-optimization --agent codex --copy -y
 ```
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
@@ -296,28 +297,22 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 ## Shared Subagents
 
-Shared subagent source files live in [agents](agents). On every run, the bootstrap refreshes all Claude Code subagents under `.claude/agents/*.md` and regenerates all Codex custom agents under `.codex/agents/*.toml` from those sources. Treat the tool-specific files as managed outputs; customize the shared source files instead.
+Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's native TOML schema. On every run, the bootstrap copies them directly into target projects under `.codex/agents/*.toml`. Customize the files in this baseline; target-repo copies are managed outputs.
 
-The planning subagent in [agents/planner.md](agents/planner.md) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `docs/spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
+The planning subagent in [.codex/agents/planner.toml](.codex/agents/planner.toml) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `docs/spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
 
-The bug workflow owns tiering and routing. Small bugs receive a conversational diagnosis; Medium and Full bugs use [agents/bug-diagnostician.md](agents/bug-diagnostician.md), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Every tier presents the diagnosis, proposed repair, and verification plan for explicit user approval before implementation.
+The bug workflow owns tiering and routing. Small bugs receive a conversational diagnosis; Medium and Full bugs use [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Every tier presents the diagnosis, proposed repair, and verification plan for explicit user approval before implementation.
 
 Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 
-The implementation subagent in [agents/implementer.md](agents/implementer.md) executes approved specifications, refactor briefs, implementation plans, and bug investigations through the `tdd` red-green-refactor loop and relevant skills. In the bug workflow, Full work gets an implementation report, Medium work gets a concise handoff at the same standard path, and Small work is handled directly after approval without a report. Review findings remain scoped inputs for the next repair pass.
+The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved specifications, refactor briefs, implementation plans, and bug investigations through the `tdd` red-green-refactor loop and relevant skills. In the bug workflow, Full work gets an implementation report, Medium work gets a concise handoff at the same standard path, and Small work is handled directly after approval without a report. Review findings remain scoped inputs for the next repair pass.
 
-The code review subagent in [agents/code-reviewer.md](agents/code-reviewer.md) reviews workflow-required changes against their applicable handoffs, applies the relevant engineering, testing, refactor, security, and database guidance, and returns `APPROVE`, `WARNING`, or `BLOCK`. It inspects surrounding callers and whole-repository quality-gate evidence when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation. In the bug workflow it saves concise Medium or complete Full review passes at the standard path and finalizes their incidents on approval; Small bugs do not route through review.
+The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) reviews workflow-required changes against their applicable handoffs, applies the relevant engineering, testing, refactor, security, and database guidance, and returns `APPROVE`, `WARNING`, or `BLOCK`. It inspects surrounding callers and whole-repository quality-gate evidence when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation. In the bug workflow it saves concise Medium or complete Full review passes at the standard path and finalizes their incidents on approval; Small bugs do not route through review.
 
-The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>` plus Claude Code copies under `.claude/skills/<skill>`. The bootstrap leaves those paths as-is and does not mirror Codex skills into `.codex/skills`.
+The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>`. The bootstrap does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
 
-Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex and mirrored into [.claude/skills](.claude/skills) for Claude Code. Keep this local set intentionally small: [git-conventional-commit](.agents/skills/git-conventional-commit), [initialize-project-agent](.agents/skills/initialize-project-agent), and [sync-project-agent](.agents/skills/sync-project-agent). Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
-
-Why both skill folders:
-
-- Codex looks for repo-local skills under `.agents/skills/`
-- Claude Code looks for repo-local skills under `.claude/skills/`
-- the shared `SKILL.md` format works for both, so this repo keeps the same repo-only skills in each tool's expected location
+Repo-only skills for maintaining this shared repo are kept in [.agents/skills](.agents/skills) for Codex. Keep this local set intentionally small: [git-conventional-commit](.agents/skills/git-conventional-commit), [initialize-project-agent](.agents/skills/initialize-project-agent), and [sync-project-agent](.agents/skills/sync-project-agent). Do not place repo-only skills in `skills/`, because everything installable there is copied into new project repos.
 
 ## Sync Updated Shared Skills
 
@@ -333,4 +328,4 @@ To sync only one shared skill:
 python scripts/sync_skills.py git-conventional-commit
 ```
 
-The sync script only updates matching `.agents/skills/<skill>/` and `.claude/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.
+The sync script only updates matching `.agents/skills/<skill>/` directories that already exist. It does not install missing shared skills into every sibling repo automatically.

@@ -16,40 +16,19 @@ REPO_ROOT = SCRIPT_PATH.parent.parent
 SHARED_SKILLS_ROOT = REPO_ROOT / "skills"
 MANAGED_SKILLS_DIRS = [
     Path(".agents") / "skills",
-    Path(".claude") / "skills",
 ]
 MANIFEST_NAME = "skills-installed.json"
-LEGACY_MANIFEST_NAMES = [
-    "awesome-codex-skills-installed.json",
-]
-LEGACY_CONFIG_NAME = "awesome-codex-skills-subset.json"
 AGENT_CONTEXT_DIRNAME = "agent-context"
 AGENT_CONTEXT_README_NAME = "README.md"
 DOCS_DIRNAME = "docs"
 INCIDENTS_DIRNAME = "incidents"
 INCIDENTS_README_NAME = "README.md"
-SHARED_AGENTS_DIRNAME = "agents"
-CLAUDE_AGENTS_DIR = Path(".claude") / "agents"
 CODEX_AGENTS_DIR = Path(".codex") / "agents"
-# Codex custom agents pin a model and reasoning effort, while Claude Code selects
-# by model tier. By default the Codex model and effort are derived from the shared
-# subagent's Claude `model:` frontmatter so a single source drives both harnesses.
-# A subagent whose Codex routing must diverge from that tier (e.g. a different Codex
-# model, or a higher effort than its Claude tier implies) sets `codex_model:` and/or
-# `codex_reasoning_effort:` in its frontmatter to override the derived defaults.
-CODEX_AGENT_MODEL = "gpt-5.6-sol"
-CLAUDE_MODEL_TO_CODEX_EFFORT = {
-    "opus": "high",
-    "sonnet": "medium",
-    "haiku": "low",
-}
 AGENTS_DIRNAME = ".agents"
 LESSONS_DIRNAME = "lessons"
 LESSONS_INDEX_NAME = "LESSONS.md"
 SKILL_OVERRIDES_DIRNAME = "skill-overrides"
 SKILL_OVERRIDES_INDEX_NAME = "INDEX.md"
-LEGACY_AGENT_CONTEXT_DIRNAME = "anget-context"
-LEGACY_CLONE_DIR = Path(LEGACY_AGENT_CONTEXT_DIRNAME) / "awesome-codex-skills"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
 LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
 SHARED_AGENT_IGNORE_LINES = [
@@ -60,11 +39,10 @@ SHARED_AGENT_IGNORE_LINES = [
     ".agents/implementation-reports/",
     ".agents/tasks/",
     ".codex/tasks/",
-    ".claude/tasks/",
 ]
 AGENT_BROWSER_PACKAGE = "agent-browser@latest"
 AGENT_BROWSER_COMMAND = "agent-browser"
-UPSTREAM_SKILL_AGENTS = ["codex", "claude-code"]
+UPSTREAM_SKILL_AGENTS = ["codex"]
 UPSTREAM_SKILL_GROUPS = [
     {
         "source": "https://github.com/vercel-labs/skills",
@@ -111,11 +89,6 @@ AGENT_BROWSER_BROWSER_INSTALL_COMMANDS = {
 }
 LARAVEL_TEMPLATE_SUBPATH = Path("templates") / "php-laravel"
 QUALITY_GATE_SCRIPT_SUBPATH = Path("scripts") / "quality-gate"
-LEGACY_QUALITY_GATE_HOOK_CONFIG_PATHS = [
-    Path(".claude") / "settings.json",
-    Path(".codex") / "hooks.json",
-]
-QUALITY_GATE_COMMAND_MARKER = "scripts/quality-gate"
 LARAVEL_QUALITY_REQUIRE_COMMAND = (
     "composer require --dev larastan/larastan:^3.0 "
     "tomasvotruba/cognitive-complexity phpstan/extension-installer laravel/pint "
@@ -128,8 +101,7 @@ def parse_args() -> argparse.Namespace:
         description=(
             "Initialize a project repo with this shared agent baseline, creates "
             "private local files, agent-context, shared lessons, and installs this repo's "
-            "shared skills into the target repo's .agents/skills and .claude/skills "
-            "directories."
+            "shared skills into the target repo's .agents/skills directory for Codex."
         )
     )
     parser.add_argument(
@@ -264,76 +236,6 @@ def make_executable(path: Path) -> None:
     path.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
 
-def remove_legacy_quality_gate_hooks(target_repo: Path) -> list[Path]:
-    updated_paths: list[Path] = []
-
-    for relative_path in LEGACY_QUALITY_GATE_HOOK_CONFIG_PATHS:
-        config_path = target_repo / relative_path
-        if not config_path.exists():
-            continue
-
-        try:
-            config = json.loads(config_path.read_text(encoding="utf-8-sig"))
-        except json.JSONDecodeError:
-            continue
-
-        if not isinstance(config, dict):
-            continue
-
-        hooks = config.get("hooks")
-        if not isinstance(hooks, dict):
-            continue
-
-        post_tool_use = hooks.get("PostToolUse")
-        if not isinstance(post_tool_use, list):
-            continue
-
-        retained_entries: list[object] = []
-        changed = False
-        for entry in post_tool_use:
-            if not isinstance(entry, dict) or not isinstance(entry.get("hooks"), list):
-                retained_entries.append(entry)
-                continue
-
-            retained_commands = [
-                hook
-                for hook in entry["hooks"]
-                if not (
-                    isinstance(hook, dict)
-                    and isinstance(hook.get("command"), str)
-                    and QUALITY_GATE_COMMAND_MARKER in hook["command"].replace("\\", "/")
-                )
-            ]
-            if len(retained_commands) == len(entry["hooks"]):
-                retained_entries.append(entry)
-                continue
-
-            changed = True
-            if retained_commands:
-                retained_entry = dict(entry)
-                retained_entry["hooks"] = retained_commands
-                retained_entries.append(retained_entry)
-
-        if not changed:
-            continue
-
-        if retained_entries:
-            hooks["PostToolUse"] = retained_entries
-        else:
-            hooks.pop("PostToolUse", None)
-
-        if not hooks:
-            config.pop("hooks", None)
-
-        if config:
-            config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
-        else:
-            config_path.unlink()
-        updated_paths.append(config_path)
-
-    return updated_paths
-
-
 def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) -> dict | None:
     if not detect_php_laravel(target_repo):
         return None
@@ -342,7 +244,6 @@ def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) ->
     if not source_dir.exists():
         return None
 
-    removed_hook_paths = remove_legacy_quality_gate_hooks(target_repo)
     copied_paths: list[Path] = []
     for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
         relative_path = source_path.relative_to(source_dir)
@@ -367,7 +268,6 @@ def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) ->
 
     return {
         "copied_paths": copied_paths,
-        "removed_hook_paths": removed_hook_paths,
         "require_command": LARAVEL_QUALITY_REQUIRE_COMMAND,
         "jscpd_install_command": jscpd_install_command,
     }
@@ -375,10 +275,6 @@ def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) ->
 
 def print_laravel_quality_gate_setup(setup: dict) -> None:
     print("PHP/Laravel quality gate provisioned:")
-    if setup["removed_hook_paths"]:
-        print("- removed legacy quality-gate hooks from:")
-        for hook_path in setup["removed_hook_paths"]:
-            print(f"  - {hook_path}")
     if setup["copied_paths"]:
         for gate_path in setup["copied_paths"]:
             print(f"- {gate_path}")
@@ -389,102 +285,22 @@ def print_laravel_quality_gate_setup(setup: dict) -> None:
     print("- then add composer scripts per docs/quality-pipeline.md")
 
 
-def parse_agent_source(source_path: Path) -> tuple[dict[str, str], str]:
-    text = source_path.read_text(encoding="utf-8-sig")
-    lines = text.splitlines()
-
-    if not lines or lines[0].strip() != "---":
-        raise SystemExit(f"Agent file is missing frontmatter: {source_path}")
-
-    closing_index = next(
-        (index for index, line in enumerate(lines[1:], start=1) if line.strip() == "---"),
-        None,
-    )
-    if closing_index is None:
-        raise SystemExit(f"Agent file frontmatter is not closed: {source_path}")
-
-    metadata: dict[str, str] = {}
-    for line in lines[1:closing_index]:
-        key, separator, value = line.partition(":")
-        if not separator:
-            continue
-        metadata[key.strip()] = value.strip().strip("\"'")
-
-    body = "\n".join(lines[closing_index + 1 :]).lstrip("\n")
-    return metadata, body
-
-
-def toml_string(value: str) -> str:
-    return json.dumps(value)
-
-
-def toml_multiline_literal(value: str) -> str:
-    if "'''" in value:
-        return toml_string(value)
-    return "'''\n" + value.rstrip() + "\n'''"
-
-
-def codex_agent_content(source_path: Path) -> str:
-    metadata, body = parse_agent_source(source_path)
-    name = metadata.get("name")
-    description = metadata.get("description")
-
-    if not name:
-        raise SystemExit(f"Agent file frontmatter is missing name: {source_path}")
-    if not description:
-        raise SystemExit(f"Agent file frontmatter is missing description: {source_path}")
-    if not body:
-        raise SystemExit(f"Agent file is missing instructions: {source_path}")
-
-    model = metadata.get("codex_model") or CODEX_AGENT_MODEL
-
-    lines = [
-        f"name = {toml_string(name)}",
-        f"description = {toml_string(description)}",
-        f"model = {toml_string(model)}",
-    ]
-
-    reasoning_effort = metadata.get("codex_reasoning_effort") or CLAUDE_MODEL_TO_CODEX_EFFORT.get(
-        metadata.get("model", "")
-    )
-    if reasoning_effort is not None:
-        lines.append(f"model_reasoning_effort = {toml_string(reasoning_effort)}")
-
-    lines.append(f"developer_instructions = {toml_multiline_literal(body)}")
-    lines.append("")
-
-    return "\n".join(lines)
-
-
 def install_tool_agents(target_repo: Path, shared_repo_root: Path) -> dict[str, list[Path]]:
-    source_dir = shared_repo_root / SHARED_AGENTS_DIRNAME
-    installed_paths = {
-        "Claude Code": [],
-        "Codex": [],
-    }
+    source_dir = shared_repo_root / CODEX_AGENTS_DIR
+    installed_paths = {"Codex": []}
 
     if not source_dir.exists():
         return installed_paths
 
-    claude_target_dir = target_repo / CLAUDE_AGENTS_DIR
     codex_target_dir = target_repo / CODEX_AGENTS_DIR
 
-    if source_dir.resolve() != claude_target_dir.resolve():
-        for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
-            relative_path = source_path.relative_to(source_dir)
-            target_path = claude_target_dir / relative_path
-
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(source_path, target_path)
-            installed_paths["Claude Code"].append(target_path)
-
     if source_dir.resolve() != codex_target_dir.resolve():
-        for source_path in sorted(path for path in source_dir.rglob("*.md") if path.is_file()):
-            relative_path = source_path.relative_to(source_dir).with_suffix(".toml")
+        for source_path in sorted(path for path in source_dir.rglob("*.toml") if path.is_file()):
+            relative_path = source_path.relative_to(source_dir)
             target_path = codex_target_dir / relative_path
 
             target_path.parent.mkdir(parents=True, exist_ok=True)
-            target_path.write_text(codex_agent_content(source_path), encoding="utf-8")
+            shutil.copy2(source_path, target_path)
             installed_paths["Codex"].append(target_path)
 
     return installed_paths
@@ -804,16 +620,6 @@ def sync_baseline_skill_overrides(target_repo: Path, shared_repo_root: Path) -> 
     return copied_paths
 
 
-def load_manifest(manifest_path: Path) -> dict:
-    if not manifest_path.exists():
-        return {"skills": []}
-
-    try:
-        return json.loads(manifest_path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise SystemExit(f"Managed skills manifest is not valid JSON: {manifest_path}") from exc
-
-
 def discover_shared_skills(shared_skills_root: Path) -> list[dict]:
     installs: list[dict] = []
 
@@ -854,51 +660,14 @@ def safe_rmtree(path: Path, root: Path) -> None:
         shutil.rmtree(path, onexc=handle_remove_readonly)
 
 
-def load_managed_skill_names(manifest_paths: list[Path]) -> set[str]:
-    managed_names: set[str] = set()
-
-    for manifest_path in manifest_paths:
-        manifest = load_manifest(manifest_path)
-        for entry in manifest.get("skills", []):
-            if isinstance(entry, dict) and isinstance(entry.get("installed_as"), str):
-                managed_names.add(entry["installed_as"])
-
-    return managed_names
-
-
-def cleanup_legacy_bootstrap(target_repo: Path) -> None:
-    legacy_agent_context_dir = target_repo / LEGACY_AGENT_CONTEXT_DIRNAME
-    legacy_agent_context_dir.mkdir(parents=True, exist_ok=True)
-
-    legacy_clone_dir = target_repo / LEGACY_CLONE_DIR
-    if legacy_clone_dir.exists():
-        safe_rmtree(legacy_clone_dir, legacy_agent_context_dir)
-
-    for legacy_name in [LEGACY_CONFIG_NAME, *LEGACY_MANIFEST_NAMES]:
-        legacy_path = legacy_agent_context_dir / legacy_name
-        if legacy_path.exists():
-            legacy_path.unlink()
-
-    if legacy_agent_context_dir.exists() and not any(legacy_agent_context_dir.iterdir()):
-        legacy_agent_context_dir.rmdir()
-
-
 def sync_skills(
     target_repo: Path,
     installs: list[dict],
     manifest_path: Path,
-    legacy_manifest_paths: list[Path],
 ) -> list[Path]:
     skills_roots = [target_repo / relative_dir for relative_dir in MANAGED_SKILLS_DIRS]
     for skills_root in skills_roots:
         skills_root.mkdir(parents=True, exist_ok=True)
-
-    previous_names = load_managed_skill_names([manifest_path, *legacy_manifest_paths])
-    current_names = {entry["installed_as"] for entry in installs}
-
-    for removed_name in sorted(previous_names - current_names):
-        for skills_root in skills_roots:
-            safe_rmtree(skills_root / removed_name, skills_root)
 
     for install in installs:
         source_dir = SHARED_SKILLS_ROOT / install["source"]
@@ -939,21 +708,12 @@ def main() -> int:
     skill_override_paths = sync_baseline_skill_overrides(target_repo, REPO_ROOT)
     skill_overrides_index_path = target_repo / AGENTS_DIRNAME / SKILL_OVERRIDES_DIRNAME / SKILL_OVERRIDES_INDEX_NAME
     manifest_path = agent_context_dir / MANIFEST_NAME
-    legacy_manifest_paths = [
-        agent_context_dir / legacy_name for legacy_name in LEGACY_MANIFEST_NAMES
-    ]
-    legacy_manifest_paths.extend(
-        target_repo / LEGACY_AGENT_CONTEXT_DIRNAME / legacy_name
-        for legacy_name in LEGACY_MANIFEST_NAMES
-    )
-
     baseline_paths = copy_baseline_files(target_repo, REPO_ROOT)
     local_paths = ensure_local_files(target_repo)
     gitignore_path = ensure_local_gitignore(target_repo)
     installs = discover_shared_skills(SHARED_SKILLS_ROOT)
-    skills_roots = sync_skills(target_repo, installs, manifest_path, legacy_manifest_paths)
+    skills_roots = sync_skills(target_repo, installs, manifest_path)
     upstream_skills_install = install_upstream_skills(target_repo)
-    cleanup_legacy_bootstrap(target_repo)
 
     print(f"Initialized project repo: {target_repo}")
     print("Copied baseline files:")

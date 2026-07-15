@@ -6,4 +6,4 @@ I updated a shared skill in `skills/` without also making sure the same maintain
 
 ## Rule
 
-Whenever a skill in `skills/` is updated, sync that skill into every maintained matching `.agents/skills/<skill>` and `.claude/skills/<skill>` directory in this repo and sibling project repos under `../`.
+Whenever a skill in `skills/` is updated, sync that skill into every maintained matching `.agents/skills/<skill>` directory in this repo and sibling project repos under `../`.

@@ -66,8 +66,8 @@ Gather raw signals about the project without reading every file. Run these check
       pytest.ini, jest.config.*, vitest.config.*
 
 7. Project skill inventory
-   -> .agents/skills/*/SKILL.md, .claude/skills/*/SKILL.md,
-      .codex/skills/*/SKILL.md, skills/*/SKILL.md
+   -> .agents/skills/*/SKILL.md, .codex/skills/*/SKILL.md,
+      skills/*/SKILL.md
 
 ```
 

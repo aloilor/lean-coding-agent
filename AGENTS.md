@@ -8,6 +8,7 @@
 - **Settled Practice** — prefer standards, proven patterns, and established libraries when they fit; explain material deviations without cargo-cult citations.
 - **Verification** — define success in checkable terms and loop until the relevant checks pass or a stop condition applies.
 - **Explicit Omissions** — close every task with a brief `Did Not Do` note. State `No meaningful omissions` when none exist.
+- **No Initializer Cleanup For Removals** — when removing something from this baseline, stop generating or copying it; do not add deletion or migration cleanup to the project initializer. Leave existing initialized-project artifacts untouched and document manual cleanup when relevant.
 
 Before non-trivial implementation:
 

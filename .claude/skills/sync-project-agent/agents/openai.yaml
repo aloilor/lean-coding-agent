@@ -1,4 +1,0 @@
-interface:
-  display_name: "Sync Project Agent"
-  short_description: "Refresh a project from this shared baseline"
-  default_prompt: "Use $sync-project-agent to refresh an initialized project repo from the latest shared agent baseline."

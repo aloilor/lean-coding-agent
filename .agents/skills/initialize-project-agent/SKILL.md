@@ -1,6 +1,6 @@
 ---
 name: initialize-project-agent
-description: Initialize a new project repo so it uses this shared agents baseline and has populated project context. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and `CLAUDE.md`, local-private files, `agent-context`, shared `.agents/lessons`, shared subagents for Claude Code and Codex, copied installable skills from this repo's `skills/` folder into the target repo's `.agents/skills` and `.claude/skills`, and a follow-up `codebase-onboarding` pass.
+description: Initialize a new project repo with this Codex-only agents baseline and populated project context. Use when Codex needs to bootstrap a project with copied `AGENTS.md` and retained `CLAUDE.md`, local-private files, `agent-context`, shared `.agents/lessons`, Codex custom agents, copied installable skills under `.agents/skills`, and a follow-up `codebase-onboarding` pass.
 ---
 
 # Initialize Project Agent
@@ -16,7 +16,7 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
    - `AGENTS.md` copied exactly from this repo's `AGENTS.md`
    - `CLAUDE.md` copied exactly from this repo's `CLAUDE.md`
    - `AGENTS.local.md` for local-private agent notes
-   - `CLAUDE.local.md` for local-private Claude notes
+   - `CLAUDE.local.md` retained for local-private compatibility notes
    - `.gitignore` entries for local files, local task folders, and shared local handoff reports
    - `agent-context/`
    - baseline project-context starter files copied from this repo's `agent-context/`
@@ -25,11 +25,11 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
    - `.agents/lessons/LESSONS.md` as a shared agent lessons index
    - `.agents/skill-overrides/`
    - `.agents/skill-overrides/INDEX.md` as a shared skill-overrides index
-   - `.claude/agents/` with Claude Code subagent files
    - `.codex/agents/` with Codex custom agent files
    - `agent-context/skills-installed.json`
    - for PHP/Laravel targets: `phpstan.neon.dist`, `phpstan-baseline.neon`, `scripts/quality-gate` (executable), and `docs/quality-pipeline.md` (reviewer-only execution; no edit or git hooks)
-   - `.agents/skills/` and `.claude/skills/` with the copied skill folders from this repo's `skills/`
+   - `.agents/skills/` with the copied skill folders from this repo's `skills/`
+   - no newly generated `.claude/agents/` or `.claude/skills/` content
    - `agent-context/` docs created or refreshed by `codebase-onboarding`, including `agent-context/skills.md`
    - for an applicable Laravel gate: an onboarding report that distinguishes operational, failing, skipped, and approval-pending checks without silently accepting baselines or architecture policy
 5. Tell the user which skills were installed, which `agent-context/` docs were created or updated, and the Laravel quality-gate activation outcome when applicable.
@@ -47,9 +47,7 @@ Use this skill as the setup entry point for new projects. Do not ask the user to
   - It creates `agent-context/README.md` only when it does not already exist.
   - It creates `.agents/lessons/LESSONS.md` only when it does not already exist.
   - It creates `.agents/skill-overrides/INDEX.md` only when it does not already exist.
-  - It refreshes Claude Code subagent files in `.claude/agents/` from this repo's `agents/` source on every run.
-  - It regenerates Codex custom agent TOML files in `.codex/agents/` from the shared subagent Markdown on every run.
+  - It copies native Codex custom agent TOML files from this repo's `.codex/agents/` directory into the target's `.codex/agents/` on every run.
   - It recopies the current repo-local shared skills into the target repo.
-  - It removes previously managed installed skills that are no longer present in `skills/`.
-  - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. The code reviewer owns execution and may inspect whole-repository evidence, but only change-caused or explicitly approved in-scope findings become implementation work; unrelated pre-existing debt stays out of scope. The initializer removes legacy quality-gate PostToolUse hooks and installs no edit or git hooks.
-- The bootstrap script also cleans up legacy external-skill bootstrap artifacts if an older target repo still has them.
+  - It leaves legacy files from older baseline versions untouched; removed baseline surfaces require optional manual cleanup.
+  - It provisions the PHP/Laravel quality gate (templates + executable `scripts/quality-gate`) only for Laravel targets, copying files only when absent. The code reviewer owns execution and may inspect whole-repository evidence, but only change-caused or explicitly approved in-scope findings become implementation work; unrelated pre-existing debt stays out of scope. The initializer installs no edit or git hooks and leaves existing hook configuration untouched.

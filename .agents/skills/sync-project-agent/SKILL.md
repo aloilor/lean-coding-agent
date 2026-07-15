@@ -1,6 +1,6 @@
 ---
 name: sync-project-agent
-description: Refresh an existing initialized project repo from this shared agents baseline. Use when Codex needs to propagate the latest baseline files, shared agents, installable skills, skill overrides, ignore rules, upstream skill installs, browser tooling, and other initializer-managed updates into a project that was previously bootstrapped by this repo, while preserving project-owned context and private local files.
+description: Refresh an existing initialized project repo from this Codex-only agents baseline. Use when Codex needs to propagate the latest baseline files, Codex agents, installable skills, skill overrides, ignore rules, upstream skill installs, browser tooling, and other initializer-managed updates while preserving project-owned context and private local files.
 ---
 
 # Sync Project Agent
@@ -25,6 +25,7 @@ Use the existing initializer as the single synchronization engine. Run this skil
 ## Ownership Rules
 
 - Refresh initializer-managed baseline files, generated agent files, shared skills, shared skill overrides, ignore rules, manifests, and tool installations according to `scripts/init_project_agent.py`.
+- Leave legacy files from older baseline versions untouched; removed baseline surfaces require optional manual cleanup.
 - Preserve project-owned `agent-context/` content, project lessons, incident indexes, and local-private files whenever the initializer treats them as create-if-missing or merge-only.
 - Treat the initializer as authoritative. Do not add a second copy or deletion algorithm to this skill.
 - Never claim that every file in the baseline repo is mirrored. Only content owned by the initializer's contract is synchronized.

@@ -59,7 +59,7 @@ Enforcement can sit at three layers. The distinction that matters: a hook in one
 | Layer | Mechanism | Covers | Role |
 |-------|-----------|--------|------|
 | Agent workflow (deferred) | future reviewer integration | reviewers | would run the gate once per review pass and use fresh findings |
-| Commit gate | git `pre-commit` running the gate | Claude Code + Codex + **humans** | a hard, human-covering stop |
+| Commit gate | git `pre-commit` running the gate | Codex + **humans** | a hard, human-covering stop |
 | Hosted CI | CI service running the same project scripts for each pushed commit | every pushed worktree | independent remote enforcement |
 
 No current workflow calls `scripts/quality-gate`. A future reviewer integration or git `pre-commit` could call the same script, but neither is provisioned by this baseline.

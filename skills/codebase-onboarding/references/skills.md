@@ -32,7 +32,7 @@ Create this file during onboarding so future agents can quickly decide which pro
 
 - Read each discovered `SKILL.md` frontmatter before writing its row.
 - Use the skill `description` as the primary source for "Use when"; read the body only when the description is too vague.
-- Deduplicate mirrored copies with the same skill name. Prefer `.agents/skills/<skill>/SKILL.md` as the source path when present; otherwise use `skills/<skill>/SKILL.md`, then `.claude/skills/<skill>/SKILL.md`, then `.codex/skills/<skill>/SKILL.md`.
+- Deduplicate mirrored copies with the same skill name. Prefer `.agents/skills/<skill>/SKILL.md` as the source path when present; otherwise use `skills/<skill>/SKILL.md`, then `.codex/skills/<skill>/SKILL.md`.
 - Include workflow-to-skill mappings only when project guidance explicitly names the workflow or skill.
 - Do not invent missing skills. If `AGENTS.md` references a skill that is unavailable, list it under "Missing Or Unclear Skills".
 - Keep rows concise. The skills index should help an agent choose a skill, not duplicate the skill instructions.
