@@ -9,8 +9,8 @@ Run this workflow only from the main agent. Do not spawn workflow subagents or c
 
 ## Workflow
 
-1. **Plan with `$grill-with-docs`.** Inspect the code and project documentation before asking questions. Resolve material uncertainties and agree on behavior, scenarios, non-goals, implementation approach, and verification. Summarize the resulting implementation plan concisely without creating a specification or coordination artifact.
-2. **Implement test-first.** Apply the coding skills `$engineering-standards` and `$tdd`. Drive each behavior through RED, GREEN, and REFACTOR; apply any resolved `$grill-with-docs` documentation updates; and keep the diff limited to the agreed plan.
+1. **Plan with `$grill-with-docs`.** Inspect the code and project documentation before asking questions. Resolve material uncertainties and agree on behavior, scenarios, non-goals, implementation approach, and verification. Apply any resolved `$grill-with-docs` documentation updates during this planning step, then summarize the resulting implementation plan concisely without creating a specification or coordination artifact.
+2. **Implement test-first.** Apply the coding skills `$engineering-standards` and `$tdd`. Drive each behavior through RED, GREEN, and REFACTOR, and keep the diff limited to the agreed plan and documentation state established during planning.
 3. **Verify.** Run the focused tests after each behavior, then the relevant broader tests. Inspect the final diff for accidental or unrelated changes.
 4. **Self-review.** Review the accepted plan, changed files, tests, and verification evidence for correctness, security, SOLID, DRY, YAGNI, KISS, and code smells. Fix every in-scope finding through the same TDD loop, rerun affected checks, and repeat until clean or a shared stop condition applies.
 
