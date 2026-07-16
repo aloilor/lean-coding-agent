@@ -1,6 +1,6 @@
 ---
 name: workflow-light-refactor
-description: Main-agent workflow for a clear, small, localized, low-risk refactor that preserves externally observable behavior and does not justify delegated planning, implementation, and review. Use for narrow restructuring, extraction, renaming, cleanup, or simplification with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact.
+description: Main-agent workflow for a clear, small, localized, low-risk refactor. Preserve externally observable behavior; use for narrow restructuring, extraction, renaming, cleanup, or simplification with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact.
 ---
 
 # Light Refactor Workflow

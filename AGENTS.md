@@ -8,7 +8,6 @@
 - **Settled Practice** — prefer standards, proven patterns, and established libraries when they fit; explain material deviations without cargo-cult citations.
 - **Verification** — define success in checkable terms and loop until the relevant checks pass or a stop condition applies.
 - **Explicit Omissions** — close every task with a brief `Did Not Do` note. State `No meaningful omissions` when none exist.
-- **No Initializer Cleanup For Removals** — when removing something from this baseline, stop generating or copying it; do not add deletion or migration cleanup to the project initializer. Leave existing initialized-project artifacts untouched and document manual cleanup when relevant.
 
 Before non-trivial implementation:
 
@@ -46,15 +45,15 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Workflows
 
-Route the latest request using **Workflow Selection Rules**, invoke the matching `workflow-*` skill, and orchestrate its steps. Light workflows are executed entirely by the main agent; the shared subagent and artifact rules apply to the delegated workflows.
+Light workflows are executed entirely by the main agent; delegated workflows use their named subagents and artifacts.
 
 ### Always Spawn The Named Subagents
 
-`workflow-light-feature-development` and `workflow-light-refactor` are main-agent-only: do not spawn workflow subagents for them. The main agent plans with `grill-with-docs`, implements, verifies, and self-reviews as directed by the applicable skill.
+`workflow-light-feature-development` and `workflow-light-refactor` are main-agent-only: do not spawn workflow subagents for them. The main agent plans with `grill-with-docs`, implements, verifies, and self-reviews as directed by the applicable skill. `workflow-light-bug-fixing` is also main-agent-only and uses direct diagnosis, approval, TDD, verification, and self-review without `grill-with-docs`.
 
 For every other workflow, when it names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
 
-The main agent routes work, relays artifacts, enforces approval gates, runs broader final verification, and handles Small-tier work not assigned by a workflow.
+The main agent relays artifacts, enforces approval gates, runs broader final verification, and handles requests that are not assigned to a workflow.
 
 ### Subagent Runtime Verification
 
@@ -84,13 +83,14 @@ Use these fixed paths rather than inventing alternatives. Light workflows create
 
 ### Workflow Tiering
 
-- **Small** — direct question, one-liner, documentation edit, or narrow mechanical change. Use no workflow skill, subagents, or coordination artifacts.
-- **Light feature** — a clear, small, localized, low-risk feature or change request with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. Use `workflow-light-feature-development`; the main agent performs the complete workflow without coordination artifacts.
-- **Light refactor** — a clear, small, localized, low-risk behavior-preserving restructure with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. Use `workflow-light-refactor`; the main agent performs the complete workflow without coordination artifacts.
+- **Small** — direct question, one-liner, documentation edit, or narrow mechanical change. Small non-bug work uses no workflow skill, subagents, or coordination artifacts.
+- **Light feature** — a clear, small, localized, low-risk feature or change request with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. The main agent performs the complete workflow without coordination artifacts.
+- **Light refactor** — a clear, small, localized, low-risk behavior-preserving restructure with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. The main agent performs the complete workflow without coordination artifacts.
+- **Light bug** — a clearly understood Small-tier bug, failing test, runtime error, or regression with one localized root cause, focused reproduction, and no material architecture, public-contract, persistence, auth, security, privacy, data, production-like, user-facing, or cross-module impact. The main agent diagnoses, obtains explicit approval, repairs, verifies, and self-reviews without coordination artifacts.
 - **Medium** — multiple connected changes where independent planning or review materially improves confidence, but architectural risk remains limited. A plan may replace a full specification.
 - **Full** — complex product behavior, material API contracts, persistence, auth, security, privacy, cross-module architecture, or broad user-facing workflows. Use the complete workflow.
 
-Start with the lowest tier that covers the risk and escalate if scope grows, except that an active `workflow-light-refactor` must not escalate automatically. If a light refactor crosses its boundary, stop and request user direction without switching workflows. File count is only a signal; risk, ambiguity, and blast radius decide whether a feature or refactor qualifies as light. Bug fixes always require user approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
+These tiers describe boundaries; they do not route requests automatically. If a light workflow crosses its boundary, stop and request direction without escalating or switching workflows. File count is only a signal; risk, ambiguity, and blast radius decide whether a feature, refactor, or bug fix qualifies as light. Bug fixes always require approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
 
 ### Shared Stop Conditions
 
@@ -102,23 +102,6 @@ Stop and report the failing check, actual error, attempts, and best hypothesis w
 - Success would require weakening a test, a broad rewrite, or a new dependency.
 
 Never silently expand scope or force a green result.
-
-### Workflow Selection Rules
-
-When several rows match, choose the most specific outcome the user requested.
-
-| User request | Workflow | Boundary |
-| --- | --- | --- |
-| Define or update requirements, acceptance criteria, contracts, or a feature specification | `workflow-feature-specification` | Deliver specification and plan, not production code. |
-| Build or add a clear, small, low-risk feature or change request that meets every Light feature criterion | `workflow-light-feature-development` | The main agent plans with `grill-with-docs`, implements with TDD, verifies, and self-reviews. |
-| Build, add, implement, or change externally observable behavior that does not qualify as a Light feature | `workflow-feature-development` | Use delegated planning, implementation, and review for complex feature work. |
-| Refactor, restructure, extract, rename, or simplify while preserving behavior and meeting every Light refactor criterion | `workflow-light-refactor` | The main agent plans, establishes a green baseline, refactors in green steps, verifies, and self-reviews. |
-| Refactor, restructure, extract, rename, or simplify while preserving behavior when the change does not qualify as a Light refactor | `workflow-refactor` | Use delegated planning, implementation, and review; use feature development if behavior also changes. |
-| Review, audit, or assess risk without edits | `workflow-review` | Report findings only. |
-| Fix a bug, regression, failing test, CI failure, or runtime error | `workflow-bug-fixing` | Diagnose and obtain approval before repair. |
-| Answer directly or make a small documentation or mechanical change | Normal Small-tier execution | Do the smallest useful thing. |
-
-These rules succeed when diffs stay focused, avoid needless complexity, and are verified without hiding ambiguity.
 
 ### Subagent Routing
 

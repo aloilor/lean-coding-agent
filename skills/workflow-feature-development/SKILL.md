@@ -1,11 +1,11 @@
 ---
 name: workflow-feature-development
-description: Delegated orchestration workflow for complex features that add or change externally observable product behavior. Spawns planner, implementer, and code-reviewer subagents through specification, test-first implementation, and review-fix loops. Invoke from the main agent when the request does not qualify for workflow-light-feature-development because it is architecture-sensitive, cross-module, security- or persistence-related, public-contract work, materially ambiguous, or otherwise high-risk.
+description: Delegated orchestration workflow for complex features that add or change externally observable product behavior. Spawns planner, implementer, and code-reviewer subagents through specification, test-first implementation, and review-fix loops.
 ---
 
 # Feature Development Workflow
 
-Use for complex externally observable behavior changes that do not qualify for `workflow-light-feature-development`.
+Use for complex externally observable behavior changes.
 
 Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, **Workflow Tiering**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
 

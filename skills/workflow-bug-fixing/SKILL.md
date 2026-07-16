@@ -1,11 +1,11 @@
 ---
 name: workflow-bug-fixing
-description: Orchestration workflow for a reported bug, failing test, CI failure, runtime error, or regression. Owns bug tiering, diagnosis routing, the mandatory approval gate, implementation, review, and tier-appropriate artifacts.
+description: Orchestration workflow for a bug, failing test, CI failure, runtime error, or regression. Owns bug tiering, diagnosis, the mandatory approval gate, implementation, review, and tier-appropriate artifacts.
 ---
 
 # Bug Fixing Workflow
 
-Use when the user reports a bug, failing test, CI failure, runtime error, or regression.
+Use for a bug, failing test, CI failure, runtime error, or regression.
 
 Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, **Workflow Tiering**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
 
@@ -22,4 +22,4 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 - **Medium:** durable incident plus concise implementation and review summaries at the standard paths.
 - **Full:** durable incident, implementation report, verification evidence, and review passes at all standard paths.
 
-Use `workflow-feature-development` only when the repair expands into feature-level behavior or contract work.
+If the repair expands into feature-level behavior or contract work, stop and request user direction; do not switch workflows automatically.

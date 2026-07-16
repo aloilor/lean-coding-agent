@@ -52,16 +52,16 @@ flowchart LR
 
 ### Feature Development Workflow
 
-Clear, small, low-risk features and change requests use [workflow-light-feature-development](skills/workflow-light-feature-development): the main agent plans with `grill-with-docs`, implements through the `tdd` red-green-refactor loop, verifies, and self-reviews without coordination artifacts. Complex features use the delegated workflow below; the implementer records TDD evidence and the reviewer checks it alongside semantic and deterministic quality evidence.
+The [workflow-light-feature-development](skills/workflow-light-feature-development) skill handles clear, small, low-risk features and change requests: the main agent plans with `grill-with-docs`, implements through the `tdd` red-green-refactor loop, verifies, and self-reviews without coordination artifacts. The delegated workflow handles broader work; the implementer records TDD evidence and the reviewer checks it alongside semantic and deterministic quality evidence.
 
 ```mermaid
 flowchart TD
-    A[Feature request] --> B{Qualifies as light?}
-    B -->|Yes| C[Main agent: grill-with-docs and concise plan]
+    A[Feature workflow] --> B{Selected workflow}
+    B -->|Light feature| C[Main agent: grill-with-docs and concise plan]
     C --> D[Main agent: TDD implementation]
     D --> E[Verification and self-review]
     E --> O[Done]
-    B -->|No| Q[Planner]
+    B -->|Delegated feature| Q[Planner]
     Q --> R[grill-with-docs, then create-specification]
     R --> S[Implementation plan]
     S --> T[User approval]
@@ -75,7 +75,7 @@ flowchart TD
     K -->|No| L[Implementation report with TDD evidence]
     L --> M[Code reviewer]
     M --> N{Review result}
-    N -->|APPROVE| O[Done]
+    N -->|APPROVE| O
     N -->|BLOCK| F
     N -->|WARNING| P{Tied to spec, bug, security, or test gap?}
     P -->|Yes| F
@@ -84,19 +84,19 @@ flowchart TD
 
 ### Refactor Workflow
 
-Clear, small, localized, low-risk refactors use [workflow-light-refactor](skills/workflow-light-refactor): the main agent defines the preservation boundary, confirms a green baseline, refactors in small green steps, verifies, and self-reviews without coordination artifacts. Once started, the light workflow does not escalate automatically; it stops for user direction if the work crosses its boundary. Refactors routed as broader or higher-risk from the outset use the delegated workflow below.
+The [workflow-light-refactor](skills/workflow-light-refactor) skill handles clear, small, localized, low-risk behavior-preserving refactors: the main agent defines the preservation boundary, confirms a green baseline, refactors in small green steps, verifies, and self-reviews without coordination artifacts. The delegated workflow handles broader work.
 
 A refactor writes no new failing behavior test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered. Delegated refactors record a behavior-preserving exemption instead of red-green-refactor evidence.
 
 ```mermaid
 flowchart TD
-    A[Refactor request] --> B{Qualifies as light?}
-    B -->|Yes| C[Main agent: grill-with-docs and concise plan]
+    A[Refactor workflow] --> B{Selected workflow}
+    B -->|Light refactor| C[Main agent: grill-with-docs and concise plan]
     C --> D[Confirm green baseline and characterization coverage]
     D --> E[Refactor in small green steps]
     E --> N[Verification and self-review]
     N --> O[Done]
-    B -->|No| P[Planner]
+    B -->|Delegated refactor| P[Planner]
     P --> Q[grill-with-docs, then refactor brief: behavior to preserve, scope, verification]
     Q --> R[Implementation plan]
     R --> S[User approval]
@@ -118,28 +118,28 @@ flowchart TD
 
 ### Bug Workflow
 
-Every bug is diagnosed and shown to the user with its proposed repair and verification plan before implementation. Small bugs use a conversational diagnosis and approval; Medium and Full bugs use the diagnostician and a durable incident report finalized during review.
+The [workflow-light-bug-fixing](skills/workflow-light-bug-fixing) skill handles a clearly understood, localized Small-tier bug: the main agent diagnoses directly from code, tests, and project context, obtains explicit approval, repairs through the `tdd` red-green-refactor loop, verifies, and self-reviews without coordination artifacts. The broader bug workflow handles higher-risk bugs. Every bug is diagnosed and shown with its proposed repair and verification plan before implementation.
 
 ```mermaid
 flowchart TD
-    A[Bug report] --> B{Small tier?}
-    B -->|Yes| C[Main-agent diagnosis and proposed repair]
-    B -->|No| D[Bug diagnostician and draft incident]
-    C --> E[User approval]
-    D --> E
-    E --> F{Small tier?}
-    F -->|Yes| G[Main-agent repair]
-    F -->|No| H[Implementer]
-    G --> I[Focused verification and done]
-    H --> J[RED, root-cause fix, verification]
-    J --> K[Implementation handoff]
-    K --> L[Code reviewer]
-    L --> M{Review result}
-    M -->|APPROVE| N[Finalize incident report]
-    M -->|BLOCK| H
-    M -->|WARNING| O{Tied to the fix, security, or a test gap?}
-    O -->|Yes| H
-    O -->|No| N
+    A[Bug workflow] --> B{Selected workflow}
+    B -->|Light bug| C[Main agent: direct diagnosis]
+    C --> D[User approval]
+    D --> E[Main-agent TDD repair]
+    E --> F[Focused verification and self-review]
+    F --> N[Done]
+    B -->|Broader bug| I[Bug diagnostician and draft incident]
+    I --> J[User approval]
+    J --> M[Implementer]
+    M --> P[RED, root-cause fix, verification]
+    P --> Q[Implementation handoff]
+    Q --> R[Code reviewer]
+    R --> S{Review result}
+    S -->|APPROVE| T[Finalize incident report]
+    S -->|BLOCK| M
+    S -->|WARNING| U{Tied to the fix, security, or a test gap?}
+    U -->|Yes| M
+    U -->|No| T
 ```
 
 Workflow artifacts are intentionally split by durability:
@@ -309,7 +309,7 @@ Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's
 
 The planning subagent in [.codex/agents/planner.toml](.codex/agents/planner.toml) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `docs/spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
 
-The bug workflow owns tiering and routing. Small bugs receive a conversational diagnosis; Medium and Full bugs use [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Every tier presents the diagnosis, proposed repair, and verification plan for explicit user approval before implementation.
+The bug workflow owns tiering and diagnosis. Small bugs receive a conversational diagnosis; Medium and Full bugs use [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Every tier presents the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
 
 Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 

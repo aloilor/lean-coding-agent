@@ -196,6 +196,7 @@ class InitializationIntegrationTest(unittest.TestCase):
         for expected_workflow in (
             "workflow-light-feature-development",
             "workflow-light-refactor",
+            "workflow-light-bug-fixing",
         ):
             with self.subTest(expected_workflow=expected_workflow):
                 self.assertIn(expected_workflow, installed_skill_names)

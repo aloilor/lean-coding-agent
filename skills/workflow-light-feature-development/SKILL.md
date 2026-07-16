@@ -1,11 +1,11 @@
 ---
 name: workflow-light-feature-development
-description: Main-agent workflow for a clear, small, low-risk feature or change request that does not justify delegated planning, implementation, and review. Use grill-with-docs to agree the approach, then have the main agent implement with TDD, verify, and self-review without subagents or coordination artifacts.
+description: Main-agent workflow for a clear, small, low-risk feature or change request. Use grill-with-docs to agree the approach, then have the main agent implement with TDD, verify, and self-review without subagents or coordination artifacts.
 ---
 
 # Light Feature Development Workflow
 
-Run this workflow only from the main agent. Do not spawn workflow subagents or create specifications, implementation reports, or review-pass artifacts.
+Run this workflow only from the main agent. Do not spawn workflow subagents or create specifications, implementation reports, or review-pass artifacts. If the work crosses the light-feature boundary, stop and request user direction; do not escalate or switch workflows automatically.
 
 ## Workflow
 
