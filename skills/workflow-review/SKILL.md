@@ -1,13 +1,11 @@
 ---
 name: workflow-review
-description: Orchestration workflow for a code review, audit, or risk assessment when the deliverable is findings, not edits. Spawns the code-reviewer subagent and reports findings by severity without entering a fix loop.
+description: Orchestration workflow for code reviews, audits, or risk assessments.
 ---
 
 # Review Workflow
 
-Use for a code review, audit, or risk assessment without asking for edits.
-
-Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, **Workflow Tiering**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
+Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
 
 ## Steps
 

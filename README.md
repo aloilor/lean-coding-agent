@@ -52,15 +52,21 @@ flowchart LR
 
 ### Feature Development Workflow
 
-The [workflow-light-feature-development](skills/workflow-light-feature-development) skill handles clear, small, low-risk features and change requests: the main agent plans with `grill-with-docs`, implements through the `tdd` red-green-refactor loop, verifies, and self-reviews without coordination artifacts. The delegated workflow handles broader work; the implementer records TDD evidence and the reviewer checks it alongside semantic and deterministic quality evidence.
+All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution.
+
+The [workflow-light-feature-development](skills/workflow-light-feature-development) skill handles clear, small, low-risk features and change requests: the main agent enters plan mode, grills the approach with `grill-with-docs`, and obtains approval before handing the bounded plan to the Luna/high implementer and reviewer. The light path keeps handoffs conversational and artifact-free; the delegated workflow handles broader work and records durable planning, implementation, and review artifacts.
 
 ```mermaid
 flowchart TD
     A[Feature workflow] --> B{Selected workflow}
-    B -->|Light feature| C[Main agent: grill-with-docs and concise plan]
-    C --> D[Main agent: TDD implementation]
-    D --> E[Verification and self-review]
-    E --> O[Done]
+    B -->|Light feature| C[Main agent: plan mode and grill-with-docs]
+    C --> D[User approval]
+    D --> E[Luna/high implementer]
+    E --> F[Luna/high code reviewer]
+    F --> G{Review result}
+    G -->|BLOCK| E
+    G -->|APPROVE or WARNING| H[Main-agent closeout and verification]
+    H --> O[Done]
     B -->|Delegated feature| Q[Planner]
     Q --> R[grill-with-docs, then create-specification]
     R --> S[Implementation plan]
@@ -84,18 +90,21 @@ flowchart TD
 
 ### Refactor Workflow
 
-The [workflow-light-refactor](skills/workflow-light-refactor) skill handles clear, small, localized, low-risk behavior-preserving refactors: the main agent defines the preservation boundary, confirms a green baseline, refactors in small green steps, verifies, and self-reviews without coordination artifacts. The delegated workflow handles broader work.
+The [workflow-light-refactor](skills/workflow-light-refactor) skill handles clear, small, localized, low-risk behavior-preserving refactors: the main agent enters plan mode, grills the preservation boundary with `grill-with-docs`, and obtains approval before handing the bounded plan to the Luna/high implementer and reviewer. The light path keeps handoffs conversational and artifact-free; the delegated workflow handles broader work.
 
 A refactor writes no new failing behavior test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered. Delegated refactors record a behavior-preserving exemption instead of red-green-refactor evidence.
 
 ```mermaid
 flowchart TD
     A[Refactor workflow] --> B{Selected workflow}
-    B -->|Light refactor| C[Main agent: grill-with-docs and concise plan]
-    C --> D[Confirm green baseline and characterization coverage]
-    D --> E[Refactor in small green steps]
-    E --> N[Verification and self-review]
-    N --> O[Done]
+    B -->|Light refactor| C[Main agent: plan mode and grill-with-docs]
+    C --> D[User approval]
+    D --> E[Luna/high implementer: green refactor steps]
+    E --> F[Luna/high code reviewer]
+    F --> G{Review result}
+    G -->|BLOCK| E
+    G -->|APPROVE or WARNING| H[Main-agent closeout and verification]
+    H --> O[Done]
     B -->|Delegated refactor| P[Planner]
     P --> Q[grill-with-docs, then refactor brief: behavior to preserve, scope, verification]
     Q --> R[Implementation plan]
@@ -118,16 +127,19 @@ flowchart TD
 
 ### Bug Workflow
 
-The [workflow-light-bug-fixing](skills/workflow-light-bug-fixing) skill handles a clearly understood, localized Small-tier bug: the main agent diagnoses directly from code, tests, and project context, obtains explicit approval, repairs through the `tdd` red-green-refactor loop, verifies, and self-reviews without coordination artifacts. The broader bug workflow handles higher-risk bugs. Every bug is diagnosed and shown with its proposed repair and verification plan before implementation.
+The [workflow-light-bug-fixing](skills/workflow-light-bug-fixing) skill handles a clearly understood, localized, low-risk bug: the main agent enters plan mode, grills the diagnosis and repair with `grill-with-docs`, and obtains explicit approval before handing the repair to the Luna/high implementer and reviewer. The light path keeps handoffs conversational and artifact-free. The broader bug workflow handles work that needs durable investigation and review artifacts; every bug is diagnosed and shown with its proposed repair and verification plan before implementation.
 
 ```mermaid
 flowchart TD
     A[Bug workflow] --> B{Selected workflow}
-    B -->|Light bug| C[Main agent: direct diagnosis]
+    B -->|Light bug| C[Main agent: plan mode, diagnosis, and grill-with-docs]
     C --> D[User approval]
-    D --> E[Main-agent TDD repair]
-    E --> F[Focused verification and self-review]
-    F --> N[Done]
+    D --> E[Luna/high implementer: TDD repair]
+    E --> F[Luna/high code reviewer]
+    F --> G{Review result}
+    G -->|BLOCK| E
+    G -->|APPROVE or WARNING| H[Main-agent closeout and verification]
+    H --> N[Done]
     B -->|Broader bug| I[Bug diagnostician and draft incident]
     I --> J[User approval]
     J --> M[Implementer]
@@ -309,13 +321,13 @@ Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's
 
 The planning subagent in [.codex/agents/planner.toml](.codex/agents/planner.toml) adapts the upstream planner pattern to this repo's requirements workflow: `grill-with-docs` first, then either `create-specification` for feature work or a behavior-preserving refactor brief for refactor work. It saves specifications under `docs/spec/`, refactor briefs under `.agents/refactor-briefs/`, and implementation plans under `.agents/implementation-plans/`.
 
-The bug workflow owns tiering and diagnosis. Small bugs receive a conversational diagnosis; Medium and Full bugs use [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Every tier presents the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
+The explicitly invoked light bug workflow uses a conversational main-agent diagnosis. The explicitly invoked broader bug workflow uses [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Both workflows present the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
 
 Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 
-The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved specifications, refactor briefs, implementation plans, and bug investigations through the `tdd` red-green-refactor loop and relevant skills. In the bug workflow, Full work gets an implementation report, Medium work gets a concise handoff at the same standard path, and Small work is handled directly after approval without a report. Review findings remain scoped inputs for the next repair pass.
+The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved specifications, refactor briefs, implementation plans, and bug investigations through the `tdd` red-green-refactor loop and relevant skills. Light workflows pass a conversational main-agent plan and handoff; broader workflows use the standard durable reports. Review findings remain scoped inputs for the next repair pass.
 
-The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) reviews workflow-required changes against their applicable handoffs, applies the relevant engineering, testing, refactor, security, and database guidance, and returns `APPROVE`, `WARNING`, or `BLOCK`. It inspects surrounding callers and whole-repository quality-gate evidence when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation. In the bug workflow it saves concise Medium or complete Full review passes at the standard path and finalizes their incidents on approval; Small bugs do not route through review.
+The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on Luna/high and reviews light and delegated workflow changes against their applicable handoffs, applying the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`. Light workflows use conversational verdicts; delegated workflows save the standard review artifacts. It inspects surrounding callers and whole-repository quality-gate evidence when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>`. The bootstrap does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).

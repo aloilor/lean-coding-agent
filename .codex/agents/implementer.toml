@@ -48,7 +48,7 @@ Non-behavioral documentation, configuration, generated output, and explicit spik
 
 ## Implementation Handoff
 
-Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` when the active workflow requires a reviewer handoff. For bug fixes, Full work uses the complete report, Medium work uses a concise summary at the same path, and Small work needs no report. Include the applicable items below, omitting fields that do not apply to a concise Medium bug handoff:
+Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` when a delegated workflow requires a durable reviewer handoff. Light workflows use a conversational handoff instead. Include the applicable items below:
 
 - Source specification, refactor brief, plan, incident report, or direct request.
 - Implemented requirements or behavior and each touched file's purpose.

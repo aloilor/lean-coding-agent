@@ -45,11 +45,13 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Workflows
 
-Light workflows are executed entirely by the main agent; delegated workflows use their named subagents and artifacts.
+Workflow skills are opt-in only. Invoke a `workflow-*` skill only when the user explicitly names or calls that workflow in the current request. Never infer, recommend-and-start, or automatically invoke a workflow from the request type, size, risk, complexity, or a skill-description match. When no workflow is explicitly called, handle the request through normal direct execution appropriate to its scope and risk.
+
+Light workflows use the main agent as planner and use the named implementation and review subagents; delegated workflows additionally spawn their planner and use the standard artifacts.
 
 ### Always Spawn The Named Subagents
 
-`workflow-light-feature-development` and `workflow-light-refactor` are main-agent-only: do not spawn workflow subagents for them. The main agent plans with `grill-with-docs`, implements, verifies, and self-reviews as directed by the applicable skill. `workflow-light-bug-fixing` is also main-agent-only and uses direct diagnosis, approval, TDD, verification, and self-review without `grill-with-docs`.
+For `workflow-light-feature-development`, `workflow-light-refactor`, and `workflow-light-bug-fixing`, the main agent must enter plan mode, run `$grill-with-docs`, and act as the planner; it must not spawn `planner` or `bug-diagnostician`. After approval, it must spawn `implementer` and `code-reviewer`, which perform the Luna/high implementation and independent review loops described by the applicable skill.
 
 For every other workflow, when it names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
 
@@ -70,7 +72,7 @@ Report the expected and observed values in the first progress update. Treat miss
 
 ### Standard Artifacts
 
-Use these fixed paths rather than inventing alternatives. Light workflows create no coordination artifacts; delegated workflows use the applicable artifacts below.
+Use these fixed paths rather than inventing alternatives. Light workflows keep concise plans and handoffs conversational and create no durable coordination artifacts; delegated workflows use the applicable artifacts below.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |
@@ -80,17 +82,6 @@ Use these fixed paths rather than inventing alternatives. Light workflows create
 | Implementation report | `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` | implementer |
 | Code review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` | code-reviewer |
 | Incident report (with Investigation section) | `docs/incidents/incident_YYYYMMDD_<name>.md` | diagnostician drafts; code-reviewer finalizes |
-
-### Workflow Tiering
-
-- **Small** — direct question, one-liner, documentation edit, or narrow mechanical change. Small non-bug work uses no workflow skill, subagents, or coordination artifacts.
-- **Light feature** — a clear, small, localized, low-risk feature or change request with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. The main agent performs the complete workflow without coordination artifacts.
-- **Light refactor** — a clear, small, localized, low-risk behavior-preserving restructure with focused verification and no material architecture, public-contract, persistence, auth, security, privacy, or cross-module impact. The main agent performs the complete workflow without coordination artifacts.
-- **Light bug** — a clearly understood Small-tier bug, failing test, runtime error, or regression with one localized root cause, focused reproduction, and no material architecture, public-contract, persistence, auth, security, privacy, data, production-like, user-facing, or cross-module impact. The main agent diagnoses, obtains explicit approval, repairs, verifies, and self-reviews without coordination artifacts.
-- **Medium** — multiple connected changes where independent planning or review materially improves confidence, but architectural risk remains limited. A plan may replace a full specification.
-- **Full** — complex product behavior, material API contracts, persistence, auth, security, privacy, cross-module architecture, or broad user-facing workflows. Use the complete workflow.
-
-These tiers describe boundaries; they do not route requests automatically. If a light workflow crosses its boundary, stop and request direction without escalating or switching workflows. File count is only a signal; risk, ambiguity, and blast radius decide whether a feature, refactor, or bug fix qualifies as light. Bug fixes always require approval: Small is conversational; Medium adds an incident plus concise implementation and review artifacts; Full uses the complete artifact set and gate evidence.
 
 ### Shared Stop Conditions
 
@@ -102,11 +93,3 @@ Stop and report the failing check, actual error, attempts, and best hypothesis w
 - Success would require weakening a test, a broad rewrite, or a new dependency.
 
 Never silently expand scope or force a green result.
-
-### Subagent Routing
-
-Use this table for subagents routed directly by the main agent. Subagents named by a workflow are routed only through that workflow.
-
-| User request | Subagent | Boundary |
-| --- | --- | --- |
-| Create a commit, or otherwise commit the current changes | `committer` | Always route requests to commit through this subagent. Spawn with `fork_turns="none"`. |

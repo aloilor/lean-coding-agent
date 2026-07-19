@@ -1,4 +1,4 @@
 interface:
   display_name: "Light Feature Development"
   short_description: "Plan and build a small feature end to end"
-  default_prompt: "Use $workflow-light-feature-development to plan, implement, verify, and review this small feature."
+  default_prompt: "Use $workflow-light-feature-development to plan in plan mode with grill-with-docs, obtain approval, hand off to implementer and code-reviewer, and verify this small feature."

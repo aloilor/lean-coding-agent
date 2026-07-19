@@ -1,25 +1,17 @@
 ---
 name: workflow-bug-fixing
-description: Orchestration workflow for a bug, failing test, CI failure, runtime error, or regression. Owns bug tiering, diagnosis, the mandatory approval gate, implementation, review, and tier-appropriate artifacts.
+description: Orchestration workflow for bugs, failing tests, CI failures, runtime errors, or regressions. Coordinates diagnosis, approval, implementation, review, and tier-appropriate artifacts.
 ---
 
 # Bug Fixing Workflow
 
-Use for a bug, failing test, CI failure, runtime error, or regression.
-
-Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, **Workflow Tiering**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
+Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
 
 ## Steps
 
-1. Classify the bug using `AGENTS.md` tiering. The main agent diagnoses Small bugs in conversation. For Medium or Full bugs—and whenever the failure is ambiguous, recurring, CI-related, production-like, cross-module, security/privacy-sensitive, data-affecting, or user-facing—`bug-diagnostician` investigates and drafts the incident report.
-2. Show the user the symptom, evidence or likely root cause, proposed fix direction, and verification plan. Wait for explicit approval before any implementation, regardless of tier.
-3. After approval, the main agent handles Small repairs; Medium and Full repairs go to `implementer`. Apply `tdd` plus `engineering-standards`: reproduce the bug with an existing failing test or a focused regression test and observe RED; make the smallest root-cause fix; then refactor only while green. If automated reproduction is impractical, document why and record the strongest substitute evidence. Run broader verification.
-4. Medium and Full changes go to `code-reviewer`, which reviews the incident evidence, implementation handoff, verification, and affected code. The reviewer may inspect untouched code to establish impact, but only change-caused or explicitly approved in-scope findings become implementation work; ripple findings require scope approval and unrelated pre-existing debt stays out of scope. On `APPROVE`, the reviewer finalizes the incident report from the confirmed root cause, fix, and verification evidence and trims Investigation to a durable summary.
-
-## Artifacts By Tier
-
-- **Small:** conversational diagnosis, proposed repair, verification plan, and user approval; no durable incident, implementation report, or review pass.
-- **Medium:** durable incident plus concise implementation and review summaries at the standard paths.
-- **Full:** durable incident, implementation report, verification evidence, and review passes at all standard paths.
+1. `bug-diagnostician` investigates the failure and drafts the incident report.
+2. Show the user the symptom, evidence or likely root cause, proposed fix direction, and verification plan. Wait for explicit approval before any implementation.
+3. After approval, `implementer` applies `tdd` plus `engineering-standards`: reproduce the bug with an existing failing test or a focused regression test and observe RED; make the smallest root-cause fix; then refactor only while green. If automated reproduction is impractical, document why and record the strongest substitute evidence. Run broader verification and create the standard implementation report.
+4. `code-reviewer` reviews the incident evidence, implementation report, verification, and affected code. The reviewer may inspect untouched code to establish impact, but only change-caused or explicitly approved in-scope findings become implementation work; ripple findings require scope approval and unrelated pre-existing debt stays out of scope. On `APPROVE`, the reviewer finalizes the incident report from the confirmed root cause, fix, and verification evidence and trims Investigation to a durable summary.
 
 If the repair expands into feature-level behavior or contract work, stop and request user direction; do not switch workflows automatically.

@@ -1,13 +1,11 @@
 ---
 name: workflow-refactor
-description: Orchestration workflow for behavior-preserving restructuring — refactor, restructure, clean up, extract, rename, or simplify code with no intended behavior change. Spawns planner (refactor brief), then implementer, then code-reviewer subagents.
+description: Orchestration workflow for behavior-preserving restructuring.
 ---
 
 # Refactor Workflow
 
-Use for changing internal structure without intended behavior changes.
-
-Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, **Workflow Tiering**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
+Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
 
 ## Steps
 
