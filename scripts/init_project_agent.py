@@ -700,7 +700,10 @@ def main() -> int:
     copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
     installed_tool_agent_paths = install_tool_agents(target_repo, REPO_ROOT)
     agent_browser_install = install_agent_browser(target_repo)
-    laravel_quality_gate = provision_laravel_quality_gate(target_repo, REPO_ROOT)
+    # Deferred until the Laravel quality-gate policy is explicitly reactivated.
+    # Keep the provisioning call here, commented out, so the implementation and
+    # templates remain available without copying them during routine syncs.
+    # laravel_quality_gate = provision_laravel_quality_gate(target_repo, REPO_ROOT)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     incidents_readme_path = ensure_incidents_readme(target_repo, REPO_ROOT)
     lessons_index_path = ensure_lessons_index(target_repo)
@@ -733,8 +736,8 @@ def main() -> int:
         for agent_path in agent_paths:
             print(f"- {agent_path}")
     print(f"Agent Browser dependency: {agent_browser_install}")
-    if laravel_quality_gate is not None:
-        print_laravel_quality_gate_setup(laravel_quality_gate)
+    # if laravel_quality_gate is not None:
+    #     print_laravel_quality_gate_setup(laravel_quality_gate)
     print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")

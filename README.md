@@ -185,7 +185,7 @@ A failed executed check is blocking according to the reviewer policy. A skipped 
 
 ### PHP/Laravel Implementation
 
-For Laravel targets, the initializer provisions `scripts/quality-gate`. The code reviewer runs one command after inventorying each review pass:
+For Laravel targets, the quality-gate implementation and templates remain in this baseline, but automatic provisioning during initialization or sync is currently deferred. When explicitly activated, the code reviewer runs one command after inventorying each review pass:
 
 ```sh
 sh scripts/quality-gate

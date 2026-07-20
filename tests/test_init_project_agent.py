@@ -293,6 +293,20 @@ class InitializationIntegrationTest(unittest.TestCase):
         self.assertFalse((self.repo / INIT_PROJECT_AGENT.QUALITY_GATE_SCRIPT_SUBPATH).exists())
         self.assert_external_install_commands(calls)
 
+    def test_does_not_provision_deferred_laravel_quality_gate_assets(self) -> None:
+        (self.repo / "artisan").touch()
+
+        self.run_initializer()
+
+        for relative_path in (
+            "scripts/quality-gate",
+            "docs/quality-pipeline.md",
+            "phpstan.neon.dist",
+            "phpstan-baseline.neon",
+        ):
+            with self.subTest(relative_path=relative_path):
+                self.assertFalse((self.repo / relative_path).exists())
+
     def test_rerun_refreshes_managed_files_and_preserves_project_owned_files(self) -> None:
         self.run_initializer()
         self.assertFalse((self.repo / ".claude").exists())
