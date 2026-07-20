@@ -9,7 +9,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 
 ## Inputs And Skills
 
-- For light workflows, read the main-agent plan, conversational implementer handoff, touched files, tests, and verification evidence; standard durable artifacts are not required. For delegated workflows, read the applicable specification or refactor brief, plan, implementation report, and bug incident investigation. Standard locations are `docs/spec/`, `.agents/refactor-briefs/`, `.agents/implementation-plans/`, `.agents/implementation-reports/`, and `docs/incidents/`.
+- For light workflows, read the approved plan from `.agents/plans/`, conversational implementer handoff, touched files, tests, and verification evidence. For delegated workflows, read the approved plan, implementation report, and applicable bug incident investigation. Other standard locations are `.agents/implementation-reports/` and `docs/incidents/`.
 - For standalone audits, use the requested scope and available repository evidence. Missing workflow-required inputs are `BLOCK`; inputs irrelevant to that workflow are not required.
 - Use `$engineering-standards` for every review. Add `$refactor` and `$tdd` for refactors, `$sql-code-review` for database correctness or access control, and `$sql-optimization` for material database performance work.
 - Read project rules and conventions before applying generic guidance.
@@ -21,7 +21,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 3. Read full changed files plus relevant callers, imports, types, tests, schemas, and framework guards. Never review an isolated snippet.
 4. Check the areas below, then report findings first in descending severity. A clean review with zero findings is expected when warranted.
 
-Inspection breadth does not expand repair scope. Read surrounding and untouched code when necessary to prove the change's impact, but make findings actionable only when they are caused by the reviewed change or explicitly included by the approved request, specification, bug investigation, refactor brief, or implementation plan. Surface ripple findings in untouched code without assigning repair work until scope is approved. Do not turn unrelated pre-existing debt into implementation work.
+Inspection breadth does not expand repair scope. Read surrounding and untouched code when necessary to prove the change's impact, but make findings actionable only when they are caused by the reviewed change or explicitly included by the approved request, approved plan, or bug investigation. Surface ripple findings in untouched code without assigning repair work until scope is approved. Do not turn unrelated pre-existing debt into implementation work.
 
 ## Evidence Gate
 
@@ -103,7 +103,7 @@ Before the verdict, include a `Review Coverage` section. Mark each detailed audi
 - Design principles and code smells
 
 - `APPROVE`: no remaining finding should be fixed before handoff.
-- `WARNING`: non-blocking findings remain; state whether each is tied to the specification, a likely bug, security/privacy, or a meaningful test gap.
+- `WARNING`: non-blocking findings remain; state whether each is tied to the approved plan, a likely bug, security/privacy, or a meaningful test gap.
 - `BLOCK`: critical correctness/security risk, required contract mismatch, missing required input or verification, invalid test-first evidence, behavior drift, stale required refactor documentation, or unresolved in-scope complexity.
 
 Do not withhold `APPROVE` to appear rigorous. Save each workflow-required pass as `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`, incrementing `N`; light workflows return a conversational verdict without a durable review artifact. On `BLOCK`, return only concrete findings for the implementer and review the updated handoff and touched files in the next pass. The workflow decides whether warnings return for fixes.

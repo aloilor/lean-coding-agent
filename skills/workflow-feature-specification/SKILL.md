@@ -11,6 +11,6 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 
 ## Steps
 
-1. `planner` creates the specification, implementation plan, and any standards-aware notes.
+1. The main agent enters Plan mode, runs `$grill-with-docs`, consolidates the resolved requirements, contracts, acceptance criteria, non-goals, decisions, risks, verification, and necessary standards-aware implementation notes into `.agents/plans/plan_YYYYMMDD_<name>.md`, then obtains explicit user approval.
 
 Add deep implementation details, OOP classes, internal interfaces, or module designs only when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.

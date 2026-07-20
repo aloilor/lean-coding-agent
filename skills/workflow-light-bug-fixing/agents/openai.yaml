@@ -1,4 +1,4 @@
 interface:
   display_name: "Light Bug Fixing"
   short_description: "Diagnose and repair a small localized bug"
-  default_prompt: "Use $workflow-light-bug-fixing to plan and diagnose with plan mode and grill-with-docs, obtain approval, hand off to implementer and code-reviewer, and verify this small bug."
+  default_prompt: "Use $workflow-light-bug-fixing to plan and diagnose in Plan mode with grill-with-docs, save the concise plan under .agents/plans, obtain approval, hand off to implementer and code-reviewer, and verify this small bug."

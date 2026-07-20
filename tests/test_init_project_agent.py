@@ -81,7 +81,7 @@ class InitializationIntegrationTest(unittest.TestCase):
         legacy_claude_skill = self.repo / ".claude" / "skills" / "removed-skill"
         legacy_claude_skill.mkdir(parents=True, exist_ok=True)
         (legacy_claude_skill / "stale.txt").write_text("stale", encoding="utf-8")
-        legacy_claude_agent = self.repo / ".claude" / "agents" / "planner.md"
+        legacy_claude_agent = self.repo / ".claude" / "agents" / "deprecated-agent.md"
         legacy_claude_agent.parent.mkdir(parents=True)
         legacy_claude_agent.write_text("managed legacy agent\n", encoding="utf-8")
         unrelated_claude_file = self.repo / ".claude" / "project-owned.txt"
@@ -168,8 +168,7 @@ class InitializationIntegrationTest(unittest.TestCase):
             "CLAUDE.local.md",
             ".quality-reports/",
             ".agents/code-reviews/",
-            ".agents/refactor-briefs/",
-            ".agents/implementation-plans/",
+            ".agents/plans/",
             ".agents/implementation-reports/",
             ".agents/tasks/",
             ".codex/tasks/",
@@ -249,10 +248,11 @@ class InitializationIntegrationTest(unittest.TestCase):
             self.assertEqual(source_agent.stem, codex_agent["name"])
             self.assertIn("description", codex_agent)
             self.assertIn("developer_instructions", codex_agent)
-
         self.assertEqual(
             "managed legacy agent\n",
-            (self.repo / ".claude" / "agents" / "planner.md").read_text(encoding="utf-8"),
+            (self.repo / ".claude" / "agents" / "deprecated-agent.md").read_text(
+                encoding="utf-8"
+            ),
         )
         self.assertEqual(
             "stale",

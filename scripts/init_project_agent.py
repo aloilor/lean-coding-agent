@@ -34,8 +34,7 @@ LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
 SHARED_AGENT_IGNORE_LINES = [
     ".quality-reports/",
     ".agents/code-reviews/",
-    ".agents/refactor-briefs/",
-    ".agents/implementation-plans/",
+    ".agents/plans/",
     ".agents/implementation-reports/",
     ".agents/tasks/",
     ".codex/tasks/",

@@ -1,6 +1,7 @@
 .agents/tasks/
 .codex/tasks/
 .agents/code-reviews/
+.agents/plans/
 .agents/refactor-briefs/
 .agents/implementation-plans/
 .agents/implementation-reports/

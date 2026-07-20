@@ -116,7 +116,7 @@ The gate exits `2` if any executed check fails and `0` otherwise. If Composer is
 The flow in this section is a future integration proposal. It is not part of the current
 reviewer or development workflows.
 
-The full-repository gate deliberately sees more code than the implementer changed. That gives the reviewer enough context to detect regressions in callers, dependencies, and architecture relationships, but it does not broaden the approved repair scope. Only change-caused findings and findings explicitly targeted by the request, specification, bug investigation, refactor brief, or implementation plan are actionable.
+The full-repository gate deliberately sees more code than the implementer changed. That gives the reviewer enough context to detect regressions in callers, dependencies, and architecture relationships, but it does not broaden the approved repair scope. Only change-caused findings and findings explicitly targeted by the request, approved plan, or bug investigation are actionable.
 
 The reviewer:
 

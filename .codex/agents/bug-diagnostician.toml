@@ -31,6 +31,6 @@ Stop and surface a blocker instead of guessing when:
 
 - Evidence is too weak to identify a likely root cause.
 - Reproduction requires unsafe production access, destructive commands, or secrets.
-- Repair requires a specification change, product decision, migration strategy, or broader architectural choice.
+- Repair requires changing an approved plan, making a product decision, defining a migration strategy, or choosing a broader architecture.
 - Multiple plausible root causes remain and implementation would be blind.
 '''

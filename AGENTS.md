@@ -47,38 +47,21 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 Workflow skills are opt-in only. Invoke a `workflow-*` skill only when the user explicitly names or calls that workflow in the current request. Never infer, recommend-and-start, or automatically invoke a workflow from the request type, size, risk, complexity, or a skill-description match. When no workflow is explicitly called, handle the request through normal direct execution appropriate to its scope and risk.
 
-Light workflows use the main agent as planner and use the named implementation and review subagents; delegated workflows additionally spawn their planner and use the standard artifacts.
-
 ### Always Spawn The Named Subagents
 
-For `workflow-light-feature-development`, `workflow-light-refactor`, and `workflow-light-bug-fixing`, the main agent must enter plan mode, run `$grill-with-docs`, and act as the planner; it must not spawn `planner` or `bug-diagnostician`. After approval, it must spawn `implementer` and `code-reviewer`, which perform the Luna/high implementation and independent review loops described by the applicable skill.
+For every feature or refactor workflow, and for light bug fixing, the main agent must enter Plan mode, run `$grill-with-docs`, and own the planning work. It must save the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep light-workflow plans concise and proportional to their bounded scope.
 
-For every other workflow, when it names `planner`, `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work.
+When a workflow names `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work. Light bug fixing remains main-agent diagnosed and must not spawn `bug-diagnostician`.
 
-The main agent relays artifacts, enforces approval gates, runs broader final verification, and handles requests that are not assigned to a workflow.
-
-### Subagent Runtime Verification
-
-After spawning a subagent, compare its observed runtime model and reasoning effort with `model` and `model_reasoning_effort` in `.codex/agents/<subagent>.toml`.
-
-Require every subagent response to begin with:
-
-- `Runtime model: <model>`
-- `Reasoning effort: <effort>`
-
-Report the expected and observed values in the first progress update. Treat missing values as `unknown` and a failed match. On any mismatch, interrupt the subagent, discard its output, stop the workflow, and report the discrepancy. Do not retry or override the configuration.
-
-
+The main agent relays plans and handoffs, enforces approval gates, runs broader final verification, and handles requests that are not assigned to a workflow.
 
 ### Standard Artifacts
 
-Use these fixed paths rather than inventing alternatives. Light workflows keep concise plans and handoffs conversational and create no durable coordination artifacts; delegated workflows use the applicable artifacts below.
+Use these fixed paths rather than inventing alternatives. Every light workflow and every delegated feature, specification, or refactor workflow uses one approved plan. The main agent runs `$grill-with-docs`, records the applicable resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification, then obtains explicit approval before implementation. Light workflows keep implementation and review handoffs conversational unless their skills say otherwise.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |
-| Specification | `docs/spec/spec-<name>.md` | planner |
-| Implementation plan | `.agents/implementation-plans/implementation-plan_YYYYMMDD_<name>.md` | planner |
-| Refactor brief | `.agents/refactor-briefs/refactor-brief_YYYYMMDD_<name>.md` | planner |
+| Approved plan | `.agents/plans/plan_YYYYMMDD_<name>.md` | main agent |
 | Implementation report | `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` | implementer |
 | Code review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` | code-reviewer |
 | Incident report (with Investigation section) | `docs/incidents/incident_YYYYMMDD_<name>.md` | diagnostician drafts; code-reviewer finalizes |
@@ -88,7 +71,7 @@ Use these fixed paths rather than inventing alternatives. Light workflows keep c
 Stop and report the failing check, actual error, attempts, and best hypothesis when:
 
 - The same finding or failure remains after 3 informed fix attempts, or about 5 genuinely different attempts for an undiagnosed test failure.
-- A fix requires changing the approved specification or expanding scope.
+- A fix requires changing the approved plan or expanding scope.
 - Verification fails for an unknown reason.
 - Success would require weakening a test, a broad rewrite, or a new dependency.
 
