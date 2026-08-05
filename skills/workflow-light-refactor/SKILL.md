@@ -5,7 +5,7 @@ description: Light workflow for a clear, small, localized, low-risk behavior-pre
 
 # Light Refactor Workflow
 
-The main agent owns planning: enter Plan mode, run `$grill-with-docs`, and save one concise plan at `.agents/plans/plan_YYYYMMDD_<name>.md`. After explicit approval, spawn `implementer` and `code-reviewer`; both use the Luna model with high reasoning effort. Keep implementation and review handoffs conversational, and do not escalate to another workflow after it starts. If the work crosses the light-refactor boundary, requires a behavior change, or reveals a defect that needs repair, stop and request user direction without switching workflows automatically.
+The main agent owns planning: enter Plan mode, run `$grill-with-docs`, and save one concise plan at `.agents/plans/plan_YYYYMMDD_<name>.md`. After explicit approval, spawn `implementer` and `code-reviewer`; the implementer uses high reasoning effort and the reviewer uses extra-high reasoning effort on the Luna model. Keep implementation and review handoffs conversational, and do not escalate to another workflow after it starts. If the work crosses the light-refactor boundary, requires a behavior change, or reveals a defect that needs repair, stop and request user direction without switching workflows automatically.
 
 ## Workflow
 

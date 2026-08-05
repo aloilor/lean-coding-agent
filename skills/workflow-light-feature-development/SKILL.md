@@ -5,7 +5,7 @@ description: Light workflow for a clear, small, low-risk feature or change reque
 
 # Light Feature Development Workflow
 
-The main agent owns planning: enter Plan mode, run `$grill-with-docs`, and save one concise plan at `.agents/plans/plan_YYYYMMDD_<name>.md`. After explicit approval, spawn `implementer` and `code-reviewer`; both use the Luna model with high reasoning effort. Keep implementation and review handoffs conversational. If the work crosses the light-feature boundary, stop and request user direction; do not escalate or switch workflows automatically.
+The main agent owns planning: enter Plan mode, run `$grill-with-docs`, and save one concise plan at `.agents/plans/plan_YYYYMMDD_<name>.md`. After explicit approval, spawn `implementer` and `code-reviewer`; the implementer uses high reasoning effort and the reviewer uses extra-high reasoning effort on the Luna model. Keep implementation and review handoffs conversational. If the work crosses the light-feature boundary, stop and request user direction; do not escalate or switch workflows automatically.
 
 ## Workflow
 

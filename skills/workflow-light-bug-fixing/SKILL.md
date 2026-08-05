@@ -5,7 +5,7 @@ description: Light workflow for a clearly understood, localized, low-risk bug.
 
 # Light Bug Fixing Workflow
 
-The main agent owns diagnosis and planning: enter Plan mode, run `$grill-with-docs`, save one concise plan at `.agents/plans/plan_YYYYMMDD_<name>.md`, and do not spawn `bug-diagnostician`. After explicit approval, spawn `implementer` and `code-reviewer`; both use the Luna model with high reasoning effort. Keep implementation and review handoffs conversational. If the bug is not clearly understood, localized, and low risk, stop and request user direction without escalating or switching workflows automatically.
+The main agent owns diagnosis and planning: enter Plan mode, run `$grill-with-docs`, save one concise plan at `.agents/plans/plan_YYYYMMDD_<name>.md`, and do not spawn `bug-diagnostician`. After explicit approval, spawn `implementer` and `code-reviewer`; the implementer uses high reasoning effort and the reviewer uses extra-high reasoning effort on the Luna model. Keep implementation and review handoffs conversational. If the bug is not clearly understood, localized, and low risk, stop and request user direction without escalating or switching workflows automatically.
 
 ## Workflow
 
