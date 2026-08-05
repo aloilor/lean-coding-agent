@@ -1,0 +1,4 @@
+interface:
+  display_name: "Refactor"
+  short_description: "Safely restructure code from local to cross-cutting"
+  default_prompt: "Use $workflow-refactor to classify the refactor, plan it in Plan mode with grill-with-docs, obtain approval, hand off to implementer and code-reviewer, and verify preserved behavior."

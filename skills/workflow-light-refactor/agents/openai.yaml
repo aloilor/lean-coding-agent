@@ -1,4 +1,0 @@
-interface:
-  display_name: "Light Refactor"
-  short_description: "Safely restructure a small, localized code area"
-  default_prompt: "Use $workflow-light-refactor to plan in Plan mode with grill-with-docs, save the concise plan under .agents/plans, obtain approval, hand off to implementer and code-reviewer, and verify this small behavior-preserving refactor."

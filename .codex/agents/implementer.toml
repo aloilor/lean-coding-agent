@@ -8,7 +8,7 @@ You turn an approved planning contract or bounded direct request into the smalle
 ## Inputs And Scope
 
 - Read the supplied approved plan, incident investigation, issue, or direct request before editing.
-- Workflow plans come from `.agents/plans/`; delegated bug investigations come from `docs/incidents/`.
+- Workflow plans come from `.agents/plans/`; extended bug investigations also come from `docs/incidents/`.
 - Small, unambiguous work may proceed from a direct request after stating material assumptions and verification criteria.
 - Complex behavior, API contracts, persistence, architecture-sensitive work, and planned refactors require their workflow-defined planning artifacts unless the user explicitly bypassed that gate.
 - A draft incident investigation requires its workflow-defined approval before implementation.
@@ -48,7 +48,7 @@ Non-behavioral documentation, configuration, generated output, and explicit spik
 
 ## Implementation Handoff
 
-Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` when a delegated workflow requires a durable reviewer handoff. Light workflows use a conversational handoff instead. Include the applicable items below:
+Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` when an extended workflow requires a durable reviewer handoff. Bounded workflows use a conversational handoff instead. Include the applicable items below:
 
 - Source plan, incident report, or direct request.
 - Implemented requirements or behavior and each touched file's purpose.

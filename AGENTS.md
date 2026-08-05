@@ -49,15 +49,15 @@ Workflow skills are opt-in only. Invoke a `workflow-*` skill only when the user 
 
 ### Always Spawn The Named Subagents
 
-For every feature or refactor workflow, and for light bug fixing, the main agent must enter Plan mode, run `$grill-with-docs`, and own the planning work. It must save the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep light-workflow plans concise and proportional to their bounded scope.
+For every feature, refactor, and bug-fixing workflow, the main agent must enter Plan mode, run `$grill-with-docs`, classify the work as bounded or extended, and own the planning work. It must save the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep bounded plans concise and make extended plans proportional to their impact.
 
-When a workflow names `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work. Light bug fixing remains main-agent diagnosed and must not spawn `bug-diagnostician`.
+When the selected execution profile requires `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work. Bounded bug fixing remains main-agent diagnosed; extended bug fixing requires `bug-diagnostician` for the durable incident investigation.
 
 The main agent relays plans and handoffs, enforces approval gates, runs broader final verification, and handles requests that are not assigned to a workflow.
 
 ### Standard Artifacts
 
-Use these fixed paths rather than inventing alternatives. Every light workflow and every delegated feature, specification, or refactor workflow uses one approved plan. The main agent runs `$grill-with-docs`, records the applicable resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification, then obtains explicit approval before implementation. Light workflows keep implementation and review handoffs conversational unless their skills say otherwise.
+Use these fixed paths rather than inventing alternatives. Every feature, refactor, bug-fixing, and specification workflow uses one approved plan. The main agent runs `$grill-with-docs`, records the applicable resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification, then obtains explicit approval before implementation. Bounded workflows keep implementation and review handoffs conversational; extended workflows use the applicable durable reports below.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |

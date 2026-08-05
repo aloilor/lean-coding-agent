@@ -1,0 +1,4 @@
+interface:
+  display_name: "Bug Fixing"
+  short_description: "Diagnose and repair bugs from bounded to extended"
+  default_prompt: "Use $workflow-bug-fixing to classify and diagnose the bug, plan the repair in Plan mode with grill-with-docs, obtain approval, hand off to implementer and code-reviewer, and verify the fix."
