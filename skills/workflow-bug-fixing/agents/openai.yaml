@@ -1,4 +1,4 @@
 interface:
   display_name: "Bug Fixing"
   short_description: "Diagnose and repair bugs from bounded to extended"
-  default_prompt: "Use $workflow-bug-fixing to classify and diagnose the bug, plan the repair in Plan mode with grill-with-docs, obtain approval, hand off to implementer and code-reviewer, and verify the fix."
+  default_prompt: "Use $workflow-bug-fixing. You MUST enter Plan mode and run $grill-with-docs before diagnosis, classification, plan writing, approval, repair, or handoff. Do not proceed if the grill has not run. Then obtain approval, hand off to implementer and code-reviewer, and verify the fix."

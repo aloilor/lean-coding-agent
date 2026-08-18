@@ -52,7 +52,7 @@ flowchart LR
 
 ### Feature Development Workflow
 
-All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution.
+All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution. **Once a planning workflow (`workflow-feature-development`, `workflow-refactor`, `workflow-bug-fixing`, or `workflow-feature-specification`) is explicitly invoked, running `$grill-with-docs` is mandatory: it must run in Plan mode before classification, plan writing, approval, or implementation. A planning workflow must not proceed if the grill has not run. `workflow-review` is review-only and does not use this planning gate.**
 
 The [workflow-feature-development](skills/workflow-feature-development) skill handles feature and change requests from bounded low-risk work through complex externally observable behavior. The approved plan classifies the work: bounded changes use concise plans and conversational handoffs; extended changes add durable implementation and review artifacts plus broader verification.
 
@@ -285,7 +285,7 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's native TOML schema. On every run, the bootstrap copies them directly into target projects under `.codex/agents/*.toml`. Customize the files in this baseline; target-repo copies are managed outputs.
 
-The main agent owns feature and refactor planning plus bounded-bug diagnosis and repair planning in Plan mode. It runs `grill-with-docs`, consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review in both bounded and extended profiles.
+The main agent owns feature and refactor planning plus bounded-bug diagnosis and repair planning in Plan mode. **It must run `grill-with-docs` before doing any classification or writing the plan.** It then consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review in both bounded and extended profiles.
 
 The explicitly invoked bounded bug profile saves the main-agent diagnosis and repair plan under `.agents/plans/`. The extended bug profile uses the Luna/extra-high [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Both profiles present the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
 
