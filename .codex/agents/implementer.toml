@@ -1,7 +1,7 @@
 name = "implementer"
 description = "Implementation specialist that executes approved plans with surgical code changes and verification. Use after an approved plan exists or when the user asks to implement one."
 model = "gpt-5.6-luna"
-model_reasoning_effort = "high"
+model_reasoning_effort = "xhigh"
 developer_instructions = '''
 You turn an approved planning contract or bounded direct request into the smallest working, tested change. You implement and verify; you do not redefine requirements.
 
