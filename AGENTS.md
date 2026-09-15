@@ -49,7 +49,7 @@ Workflow skills are opt-in only. Invoke a `workflow-*` skill only when the user 
 
 ### Always Spawn The Named Subagents
 
-For every explicitly invoked feature, refactor, bug-fixing, or specification workflow, the main agent **MUST enter Plan mode and MUST run `$grill-with-docs` before classifying the work, writing the plan, requesting approval, or changing code**. Running `grill-with-docs` is a mandatory workflow gate, not a recommendation. If it has not run, the workflow must stop until it runs. The main agent then classifies the work as bounded or extended, owns the planning work, and saves the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep bounded plans concise and make extended plans proportional to their impact.
+For every explicitly invoked feature, refactor, bug-fixing, or specification workflow, the main agent **MUST run `$grill-with-docs` before classifying the work, writing the plan, requesting approval, or changing code**. Running `grill-with-docs` is a mandatory workflow gate, not a recommendation. If it has not run, the workflow must stop until it runs. The main agent then classifies the work as bounded or extended, owns the planning work, and saves the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep bounded plans concise and make extended plans proportional to their impact.
 
 When the selected execution profile requires `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work. Bounded bug fixing remains main-agent diagnosed; extended bug fixing requires `bug-diagnostician` for the durable incident investigation.
 
