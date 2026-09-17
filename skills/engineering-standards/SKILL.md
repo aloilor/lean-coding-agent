@@ -5,7 +5,7 @@ description: Apply this skill to every task that writes, generates, changes, fix
 
 # Engineering Standards
 
-Apply this semantic quality gate to every code change, proportionate to scope and risk. Use it with the applicable workflow and repository checks; never substitute prose review for deterministic evidence.
+Apply this semantic quality baseline to every code change, proportionate to scope and risk. Use it with the applicable workflow and repository checks; never substitute prose review for deterministic evidence.
 
 ## Precedence And Scope
 
@@ -33,7 +33,7 @@ Apply this semantic quality gate to every code change, proportionate to scope an
 ## Completion Gate
 
 - Require both semantic review and deterministic evidence; neither replaces the other.
-- Do not complete work with an unresolved in-scope correctness, security, data-integrity, compatibility, contract, or required quality-gate failure.
+- Do not complete work with an unresolved in-scope correctness, security, data-integrity, compatibility, contract, or required verification failure.
 - For review findings, cite the concrete code, trigger, risk, and smallest responsible correction. Do not report taste, raw size, or a smell label as a defect.
 
 ## Companion Skills

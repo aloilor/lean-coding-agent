@@ -32,7 +32,6 @@ SKILL_OVERRIDES_INDEX_NAME = "INDEX.md"
 BASELINE_FILENAMES = ["AGENTS.md", "CLAUDE.md"]
 LOCAL_FILENAMES = ["AGENTS.local.md", "CLAUDE.local.md"]
 SHARED_AGENT_IGNORE_LINES = [
-    ".quality-reports/",
     ".agents/code-reviews/",
     ".agents/plans/",
     ".agents/implementation-reports/",
@@ -86,13 +85,6 @@ AGENT_BROWSER_BROWSER_INSTALL_COMMANDS = {
     "yarn": ["yarn", "run", AGENT_BROWSER_COMMAND, "install"],
     "bun": ["bun", "run", AGENT_BROWSER_COMMAND, "install"],
 }
-LARAVEL_TEMPLATE_SUBPATH = Path("templates") / "php-laravel"
-QUALITY_GATE_SCRIPT_SUBPATH = Path("scripts") / "quality-gate"
-LARAVEL_QUALITY_REQUIRE_COMMAND = (
-    "composer require --dev larastan/larastan:^3.0 "
-    "tomasvotruba/cognitive-complexity phpstan/extension-installer laravel/pint "
-    "deptrac/deptrac"
-)
 
 
 def parse_args() -> argparse.Namespace:
@@ -211,77 +203,6 @@ def ensure_local_gitignore(target_repo: Path) -> Path:
         gitignore_path.write_text(existing + prefix + addition, encoding="utf-8")
 
     return gitignore_path
-
-
-def detect_php_laravel(target_repo: Path) -> bool:
-    if (target_repo / "artisan").exists():
-        return True
-
-    composer_json_path = target_repo / "composer.json"
-    if not composer_json_path.exists():
-        return False
-
-    try:
-        composer_json = json.loads(composer_json_path.read_text(encoding="utf-8-sig"))
-    except json.JSONDecodeError:
-        return False
-
-    require = composer_json.get("require", {})
-    return isinstance(require, dict) and "laravel/framework" in require
-
-
-def make_executable(path: Path) -> None:
-    current_mode = path.stat().st_mode
-    path.chmod(current_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
-
-
-def provision_laravel_quality_gate(target_repo: Path, shared_repo_root: Path) -> dict | None:
-    if not detect_php_laravel(target_repo):
-        return None
-
-    source_dir = shared_repo_root / LARAVEL_TEMPLATE_SUBPATH
-    if not source_dir.exists():
-        return None
-
-    copied_paths: list[Path] = []
-    for source_path in sorted(path for path in source_dir.rglob("*") if path.is_file()):
-        relative_path = source_path.relative_to(source_dir)
-        target_path = target_repo / relative_path
-        if target_path.exists():
-            continue
-
-        target_path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source_path, target_path)
-        copied_paths.append(target_path)
-
-    gate_script = target_repo / QUALITY_GATE_SCRIPT_SUBPATH
-    if gate_script.is_file():
-        make_executable(gate_script)
-
-    package_json_path = target_repo / "package.json"
-    package_json = load_package_json(package_json_path) if package_json_path.exists() else {}
-    package_manager = detect_package_manager(target_repo, package_json)
-    jscpd_install_command = " ".join(
-        [*DEV_DEPENDENCY_INSTALL_COMMANDS[package_manager], "jscpd"]
-    )
-
-    return {
-        "copied_paths": copied_paths,
-        "require_command": LARAVEL_QUALITY_REQUIRE_COMMAND,
-        "jscpd_install_command": jscpd_install_command,
-    }
-
-
-def print_laravel_quality_gate_setup(setup: dict) -> None:
-    print("PHP/Laravel quality gate provisioned:")
-    if setup["copied_paths"]:
-        for gate_path in setup["copied_paths"]:
-            print(f"- {gate_path}")
-    else:
-        print("- templates already present")
-    print(f"- install Composer development tools: {setup['require_command']}")
-    print(f"- install project-local jscpd: {setup['jscpd_install_command']}")
-    print("- then add composer scripts per docs/quality-pipeline.md")
 
 
 def install_tool_agents(target_repo: Path, shared_repo_root: Path) -> dict[str, list[Path]]:
@@ -700,10 +621,6 @@ def main() -> int:
     copied_context_paths = copy_agent_context_baseline(target_repo, REPO_ROOT)
     installed_tool_agent_paths = install_tool_agents(target_repo, REPO_ROOT)
     agent_browser_install = install_agent_browser(target_repo)
-    # Deferred until the Laravel quality-gate policy is explicitly reactivated.
-    # Keep the provisioning call here, commented out, so the implementation and
-    # templates remain available without copying them during routine syncs.
-    # laravel_quality_gate = provision_laravel_quality_gate(target_repo, REPO_ROOT)
     agent_context_readme_path = ensure_agent_context_readme(agent_context_dir)
     incidents_readme_path = ensure_incidents_readme(target_repo, REPO_ROOT)
     lessons_index_path = ensure_lessons_index(target_repo)
@@ -736,8 +653,6 @@ def main() -> int:
         for agent_path in agent_paths:
             print(f"- {agent_path}")
     print(f"Agent Browser dependency: {agent_browser_install}")
-    # if laravel_quality_gate is not None:
-    #     print_laravel_quality_gate_setup(laravel_quality_gate)
     print(f"Ensured incident reports file: {incidents_readme_path}")
     print(f"Upstream skills: {upstream_skills_install}")
     print(f"Ensured shared lessons index: {lessons_index_path}")

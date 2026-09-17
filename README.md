@@ -6,7 +6,7 @@ It contains the general agent guidance that should apply everywhere, regardless 
 
 The active Codex baseline lives in `AGENTS.md`. The initializer also retains `CLAUDE.md` and `CLAUDE.local.md` in each project for future compatibility, but it does not install or configure Claude Code.
 
-Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, extended by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery and approved Laravel quality-gate activation live in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
+Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, extended by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery lives in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
@@ -128,54 +128,6 @@ Workflow artifacts are intentionally split by durability:
 - `.agents/implementation-reports/` and `.agents/code-reviews/` keep local implementation handoffs and review passes
 - `.agents/lessons/LESSONS.md` keeps reusable lessons learned from previous work
 
-## Reviewer-Owned Quality And Complexity Gate
-
-### Stack-Agnostic Model
-
-The complexity gate is the static-analysis component of a broader deterministic quality gate. The gate gives the code reviewer fresh mechanical evidence for the exact worktree under review; it complements semantic review rather than replacing it.
-
-The workflow is:
-
-1. The implementer completes the approved change, runs behavior-focused verification, and hands off the touched files and results.
-2. The code reviewer inventories the diff, then runs the repository's single quality-gate command before semantic review.
-3. The gate runs every configured check, continues after individual failures, and replaces prior evidence with a fresh manifest and reports.
-4. The reviewer audits baseline, threshold, ruleset, ignore, and dependency-policy changes before consuming the findings. Suppressing a new finding instead of fixing it is blocking unless the approved scope justifies it.
-5. Mechanical findings guide the reviewer toward complexity, duplication, architecture, dead-code, type, security, and test failures. The reviewer then spends semantic-review effort on correctness, contracts, naming, abstractions, and code smells that tools cannot reliably decide.
-6. Blocking findings return through the normal review-fix loop; a clean gate does not remove the need for semantic approval.
-
-Gate evidence has three scope rules:
-
-- Inspection breadth does not expand repair scope. The reviewer may inspect untouched callers and whole-repository relationships to establish impact.
-- Only findings caused by the reviewed change or explicitly targeted by the approved request, approved plan, or bug investigation become implementation work.
-- Ripple findings in untouched code are surfaced without assignment until scope is approved. Unrelated pre-existing debt remains governed by its committed ratchet.
-
-A failed executed check is blocking according to the reviewer policy. A skipped check or missing report is missing verification, never evidence that the worktree is clean. The abstract model and ratchet rationale are documented in [Determinism-in-the-Loop Pipeline](docs/determinism-in-the-loop-pipeline.md).
-
-### PHP/Laravel Implementation
-
-For Laravel targets, the quality-gate implementation and templates remain in this baseline, but automatic provisioning during initialization or sync is currently deferred. When explicitly activated, the code reviewer runs one command after inventorying each review pass:
-
-```sh
-sh scripts/quality-gate
-```
-
-The gate attempts all six Composer contracts in order:
-
-| Check | Composer script | Reference tool | Evidence |
-| --- | --- | --- | --- |
-| Formatting | `quality:style` | Laravel Pint | text report and stderr log |
-| Static analysis and cognitive complexity | `quality:static` | PHPStan/Larastan with cognitive-complexity | JSON report and stderr log |
-| Behavior | `quality:test` | Laravel test runner via Sail (`sail artisan test`) | text report and stderr log |
-| Duplication | `quality:duplication` | `jscpd` | text report and stderr log |
-| Architecture boundaries | `quality:architecture` | Deptrac with project-authored rules | JSON report and stderr log |
-| Dependency security | `quality:audit` | Composer audit | JSON report and stderr log |
-
-Every run recreates `.quality-reports/` and writes `.quality-reports/manifest.json` with a `pass`, `fail`, or `skipped` status, exit code, primary report path, and stderr path for each check. The gate exits `2` when an executed check fails and `0` otherwise, but the reviewer must still read the manifest because exit `0` can include skipped checks.
-
-PHPStan, duplication, and architecture debt are ratcheted through committed project configuration. The gate itself never generates or relaxes baselines, invents project architecture, edits package manifests, or installs hooks. After discovery, `codebase-onboarding` may propose project-specific dependencies, script wiring, thresholds, architecture rules, and baselines; it applies them only after explicit approval and records skipped or pending checks honestly. The gate remains a local reviewer-owned execution point; hosted CI may call the same project scripts independently but is not provisioned by this baseline.
-
-Installation commands, Composer script examples, artifact paths, ratchet setup, and reviewer handling are documented in the [PHP/Laravel Quality Pipeline](templates/php-laravel/docs/quality-pipeline.md).
-
 ## Skill Overrides
 
 Installed skills (including marketplace skills) are overwritten when they update, so editing a skill directly to change its behavior for one project does not survive. This baseline keeps shared override sources in [skills/skill-overrides](skills/skill-overrides), and the bootstrap copies them into each target repo's `.agents/skill-overrides/` directory:
@@ -279,7 +231,7 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 `grill-with-docs` is installed from this repo's [skills/grill-with-docs](skills/grill-with-docs) instead of upstream so it can use `agent-context/` as the documentation source and treat `agent-context/domain.md` as the local replacement for upstream `CONTEXT.md`.
 
-`codebase-onboarding` is installed from this repo's [skills/codebase-onboarding](skills/codebase-onboarding) instead of upstream so it fills `agent-context/` with structured, evidence-backed project documentation and activates provisioned Laravel quality tooling through an evidence-backed approval boundary.
+`codebase-onboarding` is installed from this repo's [skills/codebase-onboarding](skills/codebase-onboarding) instead of upstream so it fills `agent-context/` with structured, evidence-backed project documentation.
 
 ## Shared Subagents
 
@@ -293,7 +245,7 @@ Incident reports are durable project documents. Keep them under [docs/incidents]
 
 The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved plans and bug investigations through the `tdd` red-green-refactor loop and relevant skills. Bounded profiles use the durable plan with conversational implementation and review handoffs; extended profiles also use standard implementation and review reports. Review findings remain scoped inputs for the next repair pass.
 
-The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on Luna/extra-high and reviews bounded and extended workflow changes against their applicable handoffs, applying the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`. Bounded profiles use conversational verdicts; extended profiles save the standard review artifacts. It inspects surrounding callers and whole-repository quality-gate evidence when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
+The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on Luna/extra-high and reviews bounded and extended workflow changes against their applicable handoffs, applying the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`. Bounded profiles use conversational verdicts; extended profiles save the standard review artifacts. It inspects surrounding callers and repository context when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>`. The bootstrap does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).

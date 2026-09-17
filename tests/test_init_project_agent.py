@@ -166,7 +166,6 @@ class InitializationIntegrationTest(unittest.TestCase):
         expected_ignore_lines = [
             "AGENTS.local.md",
             "CLAUDE.local.md",
-            ".quality-reports/",
             ".agents/code-reviews/",
             ".agents/plans/",
             ".agents/implementation-reports/",
@@ -297,22 +296,7 @@ class InitializationIntegrationTest(unittest.TestCase):
                 encoding="utf-8"
             ),
         )
-        self.assertFalse((self.repo / INIT_PROJECT_AGENT.QUALITY_GATE_SCRIPT_SUBPATH).exists())
         self.assert_external_install_commands(calls)
-
-    def test_does_not_provision_deferred_laravel_quality_gate_assets(self) -> None:
-        (self.repo / "artisan").touch()
-
-        self.run_initializer()
-
-        for relative_path in (
-            "scripts/quality-gate",
-            "docs/quality-pipeline.md",
-            "phpstan.neon.dist",
-            "phpstan-baseline.neon",
-        ):
-            with self.subTest(relative_path=relative_path):
-                self.assertFalse((self.repo / relative_path).exists())
 
     def test_rerun_refreshes_managed_files_and_preserves_project_owned_files(self) -> None:
         self.run_initializer()
@@ -452,111 +436,6 @@ class PackageManagerDetectionTest(unittest.TestCase):
                     "Could not install agent-browser@latest with npm",
                 ):
                     INIT_PROJECT_AGENT.install_agent_browser(repo)
-
-
-class LaravelDetectionTest(unittest.TestCase):
-    def test_detects_artisan_or_laravel_framework_dependency(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            repo = Path(temp_dir)
-            self.assertFalse(INIT_PROJECT_AGENT.detect_php_laravel(repo))
-
-            (repo / "composer.json").write_text(
-                json.dumps({"require": {"laravel/framework": "^12.0"}}),
-                encoding="utf-8",
-            )
-            self.assertTrue(INIT_PROJECT_AGENT.detect_php_laravel(repo))
-
-            (repo / "composer.json").write_text("{invalid", encoding="utf-8")
-            self.assertFalse(INIT_PROJECT_AGENT.detect_php_laravel(repo))
-
-            (repo / "artisan").touch()
-            self.assertTrue(INIT_PROJECT_AGENT.detect_php_laravel(repo))
-
-
-class LaravelQualityGateProvisioningTest(unittest.TestCase):
-    def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.repo = Path(self.temp_dir.name)
-
-    def tearDown(self) -> None:
-        self.temp_dir.cleanup()
-
-    def write_config(self, relative_path: str, config: object) -> Path:
-        path = self.repo / relative_path
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(config), encoding="utf-8")
-        return path
-
-    def test_laravel_provisioning_leaves_legacy_hook_untouched(self) -> None:
-        (self.repo / "artisan").touch()
-        hook_path = self.write_config(
-            ".codex/hooks.json",
-            {
-                "hooks": {
-                    "PostToolUse": [
-                        {
-                            "matcher": "apply_patch",
-                            "hooks": [
-                                {"type": "command", "command": "scripts/quality-gate"}
-                            ],
-                        }
-                    ]
-                }
-            },
-        )
-
-        result = INIT_PROJECT_AGENT.provision_laravel_quality_gate(
-            self.repo,
-            SCRIPT_PATH.parents[1],
-        )
-
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertTrue(hook_path.exists())
-        self.assertTrue((self.repo / "scripts" / "quality-gate").exists())
-        self.assertTrue((self.repo / "docs" / "quality-pipeline.md").exists())
-        self.assertTrue((self.repo / "phpstan.neon.dist").exists())
-        self.assertTrue((self.repo / "phpstan-baseline.neon").exists())
-        self.assertIn("deptrac/deptrac", result["require_command"])
-        self.assertEqual("npm install --save-dev jscpd", result["jscpd_install_command"])
-
-    def test_laravel_provisioning_preserves_existing_assets_and_uses_detected_node_tool(self) -> None:
-        (self.repo / "artisan").touch()
-        (self.repo / "package.json").write_text(
-            json.dumps({"packageManager": "pnpm@10.0.0"}),
-            encoding="utf-8",
-        )
-        existing_docs = self.repo / "docs" / "quality-pipeline.md"
-        existing_docs.parent.mkdir()
-        existing_docs.write_text("project-owned guidance\n", encoding="utf-8")
-
-        result = INIT_PROJECT_AGENT.provision_laravel_quality_gate(
-            self.repo,
-            SCRIPT_PATH.parents[1],
-        )
-
-        self.assertIsNotNone(result)
-        assert result is not None
-        self.assertEqual("project-owned guidance\n", existing_docs.read_text(encoding="utf-8"))
-        self.assertNotIn(existing_docs, result["copied_paths"])
-        self.assertEqual("pnpm add --save-dev jscpd", result["jscpd_install_command"])
-
-    def test_laravel_setup_output_names_both_required_toolchains(self) -> None:
-        setup = {
-            "copied_paths": [],
-            "require_command": "composer require --dev deptrac/deptrac",
-            "jscpd_install_command": "yarn add --dev jscpd",
-        }
-        output = io.StringIO()
-
-        with redirect_stdout(output):
-            INIT_PROJECT_AGENT.print_laravel_quality_gate_setup(setup)
-
-        self.assertIn(
-            "install Composer development tools: composer require --dev deptrac/deptrac",
-            output.getvalue(),
-        )
-        self.assertIn("install project-local jscpd: yarn add --dev jscpd", output.getvalue())
 
 
 if __name__ == "__main__":
