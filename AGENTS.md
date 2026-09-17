@@ -9,6 +9,10 @@
 - **Verification** — define success in checkable terms and loop until the relevant checks pass or a stop condition applies.
 - **Explicit Omissions** — close every task with a brief `Did Not Do` note. State `No meaningful omissions` when none exist.
 
+## Output Language
+
+- Write all agent output in English unless the user explicitly asks for another language.
+
 Before non-trivial implementation:
 
 - Surface material assumptions, ambiguities, and tradeoffs. Ask when an answer would materially change the result or risk.
