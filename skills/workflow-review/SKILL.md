@@ -9,8 +9,12 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 
 This is a review-only workflow. It does not enter Plan mode or run `$grill-with-docs`; the mandatory grill gate applies to the feature, refactor, bug-fixing, and feature-specification planning workflows.
 
+Every review run produces a durable pass artifact at `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`.
+
 ## Steps
 
-1. `code-reviewer` reviews the requested scope.
+1. `code-reviewer` reviews the requested scope and records the pass at `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`.
 2. Report findings first, ordered by severity, with file/line references when available.
 3. Do not make edits, run `implementer`, or enter a fix loop unless the user explicitly asks to fix the findings.
+
+In the final response, link the review artifact and state the verdict, coverage, residual risks, and omissions.

@@ -53,15 +53,15 @@ Workflow skills are opt-in only. Invoke a `workflow-*` skill only when the user 
 
 ### Always Spawn The Named Subagents
 
-For every explicitly invoked feature, refactor, bug-fixing, or specification workflow, the main agent **MUST run `$grill-with-docs` before classifying the work, writing the plan, requesting approval, or changing code**. Running `grill-with-docs` is a mandatory workflow gate, not a recommendation. If it has not run, the workflow must stop until it runs. The main agent then classifies the work as bounded or extended, owns the planning work, and saves the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep bounded plans concise and make extended plans proportional to their impact.
+For every explicitly invoked feature, refactor, bug-fixing, or specification workflow, the main agent **MUST run `$grill-with-docs` before writing the plan, requesting approval, or changing code**. Running `grill-with-docs` is a mandatory workflow gate, not a recommendation. If it has not run, the workflow must stop until it runs. The main agent owns the planning work and saves the plan at `.agents/plans/plan_YYYYMMDD_<name>.md` before requesting approval. Keep the plan proportional to the work and record the resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification.
 
-When the selected execution profile requires `implementer`, `code-reviewer`, or `bug-diagnostician`, the main agent must spawn that subagent and must not perform its assigned work. Bounded bug fixing remains main-agent diagnosed; extended bug fixing requires `bug-diagnostician` for the durable incident investigation.
+The main agent must spawn `implementer` and `code-reviewer` for every feature, refactor, and bug-fixing workflow, and must not perform their assigned work. Bug-fixing workflows also spawn `bug-diagnostician` for the incident investigation. Specification workflows produce their approved plan; review workflows produce a code-review artifact.
 
 The main agent relays plans and handoffs, enforces approval gates, runs broader final verification, and handles requests that are not assigned to a workflow.
 
 ### Standard Artifacts
 
-Use these fixed paths rather than inventing alternatives. Every feature, refactor, bug-fixing, and specification workflow uses one approved plan. The main agent **must run `$grill-with-docs` first** and record its resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification before obtaining explicit approval or starting implementation. Bounded workflows keep implementation and review handoffs conversational; extended workflows use the applicable durable reports below.
+Use these fixed paths rather than inventing alternatives. Every workflow produces the applicable durable artifacts below. Planning workflows use one approved plan. The main agent **must run `$grill-with-docs` first** and record its resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification before obtaining explicit approval or starting implementation. Implementers and reviewers update their durable handoffs on every workflow pass.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |

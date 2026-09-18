@@ -1,6 +1,6 @@
 # Incident Reports
 
-Store durable incident investigations for extended bug fixes in this folder. Bounded bugs use a concise diagnosis and approval plan instead of a durable incident file.
+Store the durable incident investigation for every bug-fixing workflow in this folder.
 
 Use `incident_YYYYMMDD_short_description.md`. The diagnostician drafts the Investigation section before implementation; the code reviewer confirms the final facts after repair and verification, trims Investigation to a durable summary, and finalizes Status, Root Cause, Fix, Verification, and Follow-ups.
 

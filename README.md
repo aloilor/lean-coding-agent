@@ -6,7 +6,7 @@ It contains the general agent guidance that should apply everywhere, regardless 
 
 The active Codex baseline lives in `AGENTS.md`. The initializer also retains `CLAUDE.md` and `CLAUDE.local.md` in each project for future compatibility, but it does not install or configure Claude Code.
 
-Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, extended by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery lives in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
+Reusable coding, design, refactoring, debugging, and review guidance lives in the installable `engineering-standards` skill. Testing guidance lives in the installable `tdd` skill, supplemented by this repo's shared `tdd` override. REST API contract guidance lives in the installable `rest-api-design` skill. Requirements review against project documentation lives in the customized `grill-with-docs` skill. Structured project-context discovery lives in the customized `codebase-onboarding` skill. Each project should keep its shared project-specific context in `agent-context/`, such as:
 
 - folder structure
 - tech stack
@@ -52,81 +52,75 @@ flowchart LR
 
 ### Feature Development Workflow
 
-All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution. **Once a planning workflow (`workflow-feature-development`, `workflow-refactor`, `workflow-bug-fixing`, or `workflow-feature-specification`) is explicitly invoked, running `$grill-with-docs` is mandatory: it must run in Plan mode before classification, plan writing, approval, or implementation. A planning workflow must not proceed if the grill has not run. `workflow-review` is review-only and does not use this planning gate.**
+All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution. **Once a planning workflow (`workflow-feature-development`, `workflow-refactor`, `workflow-bug-fixing`, or `workflow-feature-specification`) is explicitly invoked, running `$grill-with-docs` is mandatory: it must run in Plan mode before plan writing, approval, or implementation. A planning workflow must not proceed if the grill has not run. `workflow-review` is review-only and does not use this planning gate. Every workflow produces its applicable durable artifacts.**
 
-The [workflow-feature-development](skills/workflow-feature-development) skill handles feature and change requests from bounded low-risk work through complex externally observable behavior. The approved plan classifies the work: bounded changes use concise plans and conversational handoffs; extended changes add durable implementation and review artifacts plus broader verification.
+The [workflow-feature-development](skills/workflow-feature-development) skill handles feature and change requests from small changes through complex externally observable behavior. Every run produces an approved plan, an implementation report, and one or more review-pass artifacts, with verification proportional to impact.
 
 ```mermaid
 flowchart TD
-    A[Feature workflow] --> B[Plan mode, grill-with-docs, and profile classification]
+    A[Feature workflow] --> B[Plan mode and grill-with-docs]
     B --> C[Approved plan in .agents/plans]
     C --> D[User approval]
     D --> E[Implementer: RED, GREEN, REFACTOR]
-    E --> F{Execution profile}
-    F -->|Bounded| G[Conversational implementation handoff]
-    F -->|Extended| H[Implementation report and broader verification]
-    G --> I[Independent code review]
-    H --> I
-    I --> J{Review result}
-    J -->|BLOCK| E
-    J -->|APPROVE or WARNING| K[Main-agent closeout and verification]
-    K --> L[Done]
+    E --> F[Implementation report]
+    F --> G[Independent code review]
+    G --> H[Review pass artifact]
+    H --> I{Review result}
+    I -->|BLOCK| E
+    I -->|APPROVE or WARNING| J[Main-agent closeout and verification]
+    J --> K[Done]
 ```
 
 ### Refactor Workflow
 
-The [workflow-refactor](skills/workflow-refactor) skill handles behavior-preserving restructuring from bounded local cleanup through complex refactors. The approved plan classifies the work: bounded changes use concise plans and conversational handoffs; extended changes add durable implementation and review artifacts, documentation review, and broader verification.
+The [workflow-refactor](skills/workflow-refactor) skill handles behavior-preserving restructuring from local cleanup through complex refactors. Every run produces an approved plan, an implementation report, and one or more review-pass artifacts, with documentation and verification proportional to impact.
 
 A refactor writes no new failing behavior test: it preserves behavior against the existing suite — adding characterization tests to pin any behavior to preserve that is not yet covered. The implementer records the passing-baseline exemption and characterization evidence when applicable.
 
 ```mermaid
 flowchart TD
-    A[Refactor workflow] --> B[Plan mode, grill-with-docs, and profile classification]
+    A[Refactor workflow] --> B[Plan mode and grill-with-docs]
     B --> C[Approved behavior-preserving plan in .agents/plans]
     C --> D[User approval]
     D --> E[Baseline tests and green refactor steps]
-    E --> F{Execution profile}
-    F -->|Bounded| G[Conversational implementation handoff]
-    F -->|Extended| H[Implementation report, docs, and broader verification]
-    G --> I[Independent code review]
-    H --> I
-    I --> J{Review result}
-    J -->|BLOCK| E
-    J -->|APPROVE or WARNING| K[Main-agent closeout and verification]
-    K --> L[Done]
+    E --> F[Implementation report and docs]
+    F --> G[Independent code review]
+    G --> H[Review pass artifact]
+    H --> I{Review result}
+    I -->|BLOCK| E
+    I -->|APPROVE or WARNING| J[Main-agent closeout and verification]
+    J --> K[Done]
 ```
 
 ### Bug Workflow
 
-The [workflow-bug-fixing](skills/workflow-bug-fixing) skill handles bugs, failing tests, CI failures, runtime errors, and regressions from bounded repairs through extended investigations. Bounded bugs use a concise main-agent diagnosis and conversational handoffs; extended bugs add a `bug-diagnostician`, durable incident investigation, implementation and review artifacts, and broader verification. Every bug is diagnosed and shown with its proposed repair and verification plan before implementation.
+The [workflow-bug-fixing](skills/workflow-bug-fixing) skill handles bugs, failing tests, CI failures, runtime errors, and regressions from local repairs through consequential investigations. Every run produces an approved plan, a durable incident report, an implementation report, and one or more review-pass artifacts. Every bug is diagnosed and shown with its proposed repair and verification plan before implementation.
 
 ```mermaid
 flowchart TD
-    A[Bug workflow] --> B[Plan mode, grill-with-docs, diagnosis, and profile classification]
-    B --> C{Execution profile}
-    C -->|Bounded| D[Main-agent diagnosis in approved plan]
-    C -->|Extended| E[Bug diagnostician and draft incident]
-    D --> F[User approval]
-    E --> F
-    F --> G[Implementer: RED, root-cause fix, verification]
-    G --> H{Profile requires durable handoff?}
-    H -->|No| I[Conversational implementation handoff]
-    H -->|Yes| J[Implementation report and incident evidence]
-    I --> K[Independent code review]
-    J --> K
-    K --> L{Review result}
-    L -->|BLOCK| G
-    L -->|APPROVE or WARNING| M[Main-agent closeout and verification]
-    M --> N[Done]
+    A[Bug workflow] --> B[Plan mode and grill-with-docs]
+    B --> C[Bug diagnostician and draft incident]
+    C --> D[Approved plan in .agents/plans]
+    D --> E[User approval]
+    E --> F[Implementer: RED, root-cause fix, verification]
+    F --> G[Implementation report]
+    G --> H[Independent code review]
+    H --> I[Review pass and finalized incident artifacts]
+    I --> J{Review result}
+    J -->|BLOCK| F
+    J -->|APPROVE or WARNING| K[Main-agent closeout and verification]
+    K --> L[Done]
 ```
 
-Workflow artifacts are intentionally split by durability:
+Workflow artifacts are written to consistent locations:
 
 - `agent-context/` keeps shared project facts that should shape future work
 - `.agents/plans/` keeps the single approved planning contract for feature, refactor, bug-fixing, and specification workflows
-- `docs/incidents/` keeps durable bug investigations and final incident reports
-- `.agents/implementation-reports/` and `.agents/code-reviews/` keep local implementation handoffs and review passes
+- `docs/incidents/` keeps bug investigations and final incident reports
+- `.agents/implementation-reports/` and `.agents/code-reviews/` keep implementation handoffs and review passes for every applicable workflow
 - `.agents/lessons/LESSONS.md` keeps reusable lessons learned from previous work
+
+The [workflow-feature-specification](skills/workflow-feature-specification) workflow produces the approved plan as its durable specification artifact. The [workflow-review](skills/workflow-review) workflow produces a durable code-review pass without entering Plan mode.
 
 ## Skill Overrides
 
@@ -237,15 +231,15 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's native TOML schema. On every run, the bootstrap copies them directly into target projects under `.codex/agents/*.toml`. Customize the files in this baseline; target-repo copies are managed outputs.
 
-The main agent owns feature and refactor planning plus bounded-bug diagnosis and repair planning in Plan mode. **It must run `grill-with-docs` before doing any classification or writing the plan.** It then consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review in both bounded and extended profiles.
+The main agent owns feature, refactor, and bug-fixing planning in Plan mode. **It must run `grill-with-docs` before writing the plan.** It then consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review.
 
-The explicitly invoked bounded bug profile saves the main-agent diagnosis and repair plan under `.agents/plans/`. The extended bug profile uses the Luna/extra-high [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml), which investigates the assigned failure and drafts `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). Both profiles present the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
+Every bug-fixing workflow uses the Luna/extra-high [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml) to investigate the assigned failure and draft `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). The main agent consolidates the diagnosis into the approved plan and presents the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
 
 Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 
-The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved plans and bug investigations through the `tdd` red-green-refactor loop and relevant skills. Bounded profiles use the durable plan with conversational implementation and review handoffs; extended profiles also use standard implementation and review reports. Review findings remain scoped inputs for the next repair pass.
+The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved plans and bug investigations through the `tdd` red-green-refactor loop and relevant skills. Every feature, refactor, and bug-fixing workflow records its implementation handoff and verification in `.agents/implementation-reports/`. Review findings remain scoped inputs for the next repair pass.
 
-The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on Luna/extra-high and reviews bounded and extended workflow changes against their applicable handoffs, applying the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`. Bounded profiles use conversational verdicts; extended profiles save the standard review artifacts. It inspects surrounding callers and repository context when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
+The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on Luna/extra-high and reviews workflow changes against their applicable handoffs, including whether the code faithfully implements the originating issue, specification, approved plan, or feature plan. It applies the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`, and records every pass in `.agents/code-reviews/`. It inspects surrounding callers and repository context when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>`. The bootstrap does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).
