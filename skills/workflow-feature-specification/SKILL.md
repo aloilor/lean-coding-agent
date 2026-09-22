@@ -3,7 +3,7 @@ name: workflow-feature-specification
 description: Orchestration workflow for producing requirements, acceptance criteria, contracts, or a feature specification before implementation.
 ---
 
-# Feature Requirements And Specification Workflow
+# Feature Specification Workflow
 
 This is a requirements and contracts workflow, not a deep technical design or OOP class-design workflow.
 

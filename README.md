@@ -71,7 +71,7 @@ flowchart TD
     J --> K[Done]
 ```
 
-### Refactor Workflow
+### Code Refactoring Workflow
 
 The [workflow-refactor](skills/workflow-refactor) skill handles behavior-preserving restructuring from local cleanup through complex refactors. Every run produces an approved plan, an implementation report, and one or more review-pass artifacts, with documentation and verification proportional to impact.
 
@@ -92,7 +92,7 @@ flowchart TD
     J --> K[Done]
 ```
 
-### Bug Workflow
+### Bug Fixing Workflow
 
 The [workflow-bug-fixing](skills/workflow-bug-fixing) skill handles bugs, failing tests, CI failures, runtime errors, and regressions from local repairs through consequential investigations. Every run produces an approved plan, a durable incident report, an implementation report, and one or more review-pass artifacts. Every bug is diagnosed and shown with its proposed repair and verification plan before implementation.
 
@@ -120,7 +120,7 @@ Workflow artifacts are written to consistent locations:
 - `.agents/implementation-reports/` and `.agents/code-reviews/` keep implementation handoffs and review passes for every applicable workflow
 - `.agents/lessons/LESSONS.md` keeps reusable lessons learned from previous work
 
-The [workflow-feature-specification](skills/workflow-feature-specification) workflow produces the approved plan as its durable specification artifact. The [workflow-review](skills/workflow-review) workflow produces a durable code-review pass without entering Plan mode.
+The [Feature Specification Workflow](skills/workflow-feature-specification) produces the approved plan as its durable specification artifact. The [Code Review Workflow](skills/workflow-review) produces a durable code-review pass without entering Plan mode.
 
 ## Skill Overrides
 
@@ -233,13 +233,13 @@ Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's
 
 The main agent owns feature, refactor, and bug-fixing planning in Plan mode. **It must run `grill-with-docs` before writing the plan.** It then consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review.
 
-Every bug-fixing workflow uses the Luna/extra-high [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml) to investigate the assigned failure and draft `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). The main agent consolidates the diagnosis into the approved plan and presents the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
+Every bug-fixing workflow uses the GPT-6 Luna/extra-high [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml) to investigate the assigned failure and draft `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). The main agent consolidates the diagnosis into the approved plan and presents the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
 
 Incident reports are durable project documents. Keep them under [docs/incidents](docs/incidents), not under `.agents/`, so they can be reviewed and retained with the project history.
 
-The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) executes approved plans and bug investigations through the `tdd` red-green-refactor loop and relevant skills. Every feature, refactor, and bug-fixing workflow records its implementation handoff and verification in `.agents/implementation-reports/`. Review findings remain scoped inputs for the next repair pass.
+The implementation subagent in [.codex/agents/implementer.toml](.codex/agents/implementer.toml) runs on GPT-6 Luna/extra-high and executes approved plans and bug investigations through the `tdd` red-green-refactor loop and relevant skills. Every feature, refactor, and bug-fixing workflow records its implementation handoff and verification in `.agents/implementation-reports/`. Review findings remain scoped inputs for the next repair pass.
 
-The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on Luna/extra-high and reviews workflow changes against their applicable handoffs, including whether the code faithfully implements the originating issue, specification, approved plan, or feature plan. It applies the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`, and records every pass in `.agents/code-reviews/`. It inspects surrounding callers and repository context when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
+The code review subagent in [.codex/agents/code-reviewer.toml](.codex/agents/code-reviewer.toml) runs on GPT-6 Luna/extra-high and reviews workflow changes against their applicable handoffs, including whether the code faithfully implements the originating issue, specification, approved plan, or feature plan. It applies the relevant engineering, testing, refactor, security, and database guidance before returning `APPROVE`, `WARNING`, or `BLOCK`, and records every pass in `.agents/code-reviews/`. It inspects surrounding callers and repository context when needed to understand the change's impact, but that inspection breadth does not expand repair scope: only change-caused findings and findings explicitly included by the approved request or handoff are actionable. Ripple findings in untouched code are surfaced without assignment until scope is approved, and unrelated pre-existing debt remains outside the implementation.
 
 The Skills CLI writes the project lock file and installs Codex copies under `.agents/skills/<skill>`. The bootstrap does not mirror Codex skills into `.codex/skills`.
 To change which skills get installed into future projects, add or remove skill folders in [skills](skills).

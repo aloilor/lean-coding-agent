@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Specification Workflow"
+  short_description: "Define requirements and acceptance criteria"
+  default_prompt: "Use $workflow-feature-specification. Enter Plan mode and run $grill-with-docs first, then clarify requirements, contracts, and acceptance criteria and save the approved specification plan."

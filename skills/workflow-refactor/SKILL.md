@@ -3,7 +3,7 @@ name: workflow-refactor
 description: Workflow for behavior-preserving restructuring, from local cleanup through complex refactors.
 ---
 
-# Refactor Workflow
+# Code Refactoring Workflow
 
 Use this workflow for clear, small, localized refactors and complex behavior-preserving restructuring. The approved plan records the behavior and contracts to preserve, scope, risks, documentation impact, and verification needed for the work. Every run produces the standard durable plan, implementation report, and review pass artifacts.
 
