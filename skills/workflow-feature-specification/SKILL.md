@@ -13,7 +13,7 @@ Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` —
 
 ## Steps
 
-1. **Mandatory grill gate.** The main agent enters Plan mode and **MUST run `$grill-with-docs` first**. It must not consolidate requirements, write the plan, request approval, or proceed until the grill has run. It then consolidates the resolved requirements, contracts, acceptance criteria, non-goals, decisions, risks, verification, and necessary standards-aware implementation notes into `.agents/plans/plan_YYYYMMDD_<name>.md`, then obtains explicit user approval.
+1. **Mandatory grill gate.** The main agent **MUST run `$grill-with-docs` first**. It must not consolidate requirements, write the plan, request approval, or proceed until the grill has run. It then consolidates the resolved requirements, contracts, acceptance criteria, non-goals, decisions, risks, verification, and necessary standards-aware implementation notes into `.agents/plans/plan_YYYYMMDD_<name>.md`, then obtains explicit user approval.
 
 Add deep implementation details, OOP classes, internal interfaces, or module designs only when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 

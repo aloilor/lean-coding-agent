@@ -1,4 +1,4 @@
 interface:
   display_name: "Code Refactoring Workflow"
   short_description: "Safely restructure code from local to cross-cutting"
-  default_prompt: "Use $workflow-refactor. You MUST enter Plan mode and run $grill-with-docs before plan writing, approval, implementation, or handoff. Do not proceed if the grill has not run. Then obtain approval, hand off to implementer and code-reviewer, record the required artifacts, and verify preserved behavior."
+  default_prompt: "Use $workflow-refactor. Run $grill-with-docs before plan writing, approval, implementation, or handoff. Do not proceed if the grill has not run. Then obtain approval, hand off to implementer and code-reviewer, record the required artifacts, and verify preserved behavior."

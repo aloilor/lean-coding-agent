@@ -1,4 +1,4 @@
 interface:
   display_name: "Feature Development Workflow"
   short_description: "Plan and build feature changes from small to complex"
-  default_prompt: "Use $workflow-feature-development. You MUST enter Plan mode and run $grill-with-docs before plan writing, approval, implementation, or handoff. Do not proceed if the grill has not run. Then obtain approval, hand off to implementer and code-reviewer, record the required artifacts, and verify it."
+  default_prompt: "Use $workflow-feature-development. Run $grill-with-docs before plan writing, approval, implementation, or handoff. Do not proceed if the grill has not run. Then obtain approval, hand off to implementer and code-reviewer, record the required artifacts, and verify it."

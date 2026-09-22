@@ -61,7 +61,7 @@ The main agent relays plans and handoffs, enforces approval gates, runs broader 
 
 ### Standard Artifacts
 
-Use these fixed paths rather than inventing alternatives. Every workflow produces the applicable durable artifacts below. Planning workflows use one approved plan. The main agent **must run `$grill-with-docs` first** and record its resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification before obtaining explicit approval or starting implementation. Implementers and reviewers update their durable handoffs on every workflow pass.
+Use these fixed paths rather than inventing alternatives. Every workflow produces the applicable durable artifacts below. Planning workflows use one approved plan. The main agent **must run `$grill-with-docs` before drafting the plan**, and record its resolved requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification before obtaining explicit approval or starting implementation. Implementers and reviewers update their durable handoffs on every workflow pass.
 
 | Artifact | Path | Owner |
 | --- | --- | --- |

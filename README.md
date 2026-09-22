@@ -52,13 +52,13 @@ flowchart LR
 
 ### Feature Development Workflow
 
-All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution. **Once a planning workflow (`workflow-feature-development`, `workflow-refactor`, `workflow-bug-fixing`, or `workflow-feature-specification`) is explicitly invoked, running `$grill-with-docs` is mandatory: it must run in Plan mode before plan writing, approval, or implementation. A planning workflow must not proceed if the grill has not run. `workflow-review` is review-only and does not use this planning gate. Every workflow produces its applicable durable artifacts.**
+All `workflow-*` skills are strictly opt-in. Codex runs one only when the user explicitly names or calls it in the current request; task shape, size, risk, and complexity never trigger a workflow automatically. Requests that do not call a workflow use normal direct execution. **Once a planning workflow (`workflow-feature-development`, `workflow-refactor`, `workflow-bug-fixing`, or `workflow-feature-specification`) is explicitly invoked, running `$grill-with-docs` is mandatory before plan writing, approval, or implementation. A planning workflow must not proceed if the grill has not run. `workflow-review` is review-only and does not use this planning gate. Every workflow produces its applicable durable artifacts.**
 
 The [workflow-feature-development](skills/workflow-feature-development) skill handles feature and change requests from small changes through complex externally observable behavior. Every run produces an approved plan, an implementation report, and one or more review-pass artifacts, with verification proportional to impact.
 
 ```mermaid
 flowchart TD
-    A[Feature workflow] --> B[Plan mode and grill-with-docs]
+    A[Feature workflow] --> B[Run grill-with-docs]
     B --> C[Approved plan in .agents/plans]
     C --> D[User approval]
     D --> E[Implementer: RED, GREEN, REFACTOR]
@@ -79,7 +79,7 @@ A refactor writes no new failing behavior test: it preserves behavior against th
 
 ```mermaid
 flowchart TD
-    A[Refactor workflow] --> B[Plan mode and grill-with-docs]
+    A[Refactor workflow] --> B[Run grill-with-docs]
     B --> C[Approved behavior-preserving plan in .agents/plans]
     C --> D[User approval]
     D --> E[Baseline tests and green refactor steps]
@@ -98,7 +98,7 @@ The [workflow-bug-fixing](skills/workflow-bug-fixing) skill handles bugs, failin
 
 ```mermaid
 flowchart TD
-    A[Bug workflow] --> B[Plan mode and grill-with-docs]
+    A[Bug workflow] --> B[Run grill-with-docs]
     B --> C[Bug diagnostician and draft incident]
     C --> D[Approved plan in .agents/plans]
     D --> E[User approval]
@@ -120,7 +120,7 @@ Workflow artifacts are written to consistent locations:
 - `.agents/implementation-reports/` and `.agents/code-reviews/` keep implementation handoffs and review passes for every applicable workflow
 - `.agents/lessons/LESSONS.md` keeps reusable lessons learned from previous work
 
-The [Feature Specification Workflow](skills/workflow-feature-specification) produces the approved plan as its durable specification artifact. The [Code Review Workflow](skills/workflow-review) produces a durable code-review pass without entering Plan mode.
+The [Feature Specification Workflow](skills/workflow-feature-specification) produces the approved plan as its durable specification artifact. The [Code Review Workflow](skills/workflow-review) produces a durable code-review pass without creating a planning artifact.
 
 ## Skill Overrides
 
@@ -231,7 +231,7 @@ npx skills add https://github.com/github/awesome-copilot --skill create-readme c
 
 Shared Codex subagent files live in [.codex/agents](.codex/agents) using Codex's native TOML schema. On every run, the bootstrap copies them directly into target projects under `.codex/agents/*.toml`. Customize the files in this baseline; target-repo copies are managed outputs.
 
-The main agent owns feature, refactor, and bug-fixing planning in Plan mode. **It must run `grill-with-docs` before writing the plan.** It then consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review.
+The main agent owns feature, refactor, and bug-fixing planning. **It must run `grill-with-docs` before writing the plan.** It then consolidates the applicable requirements or diagnosis, boundaries, decisions, acceptance criteria, implementation or repair approach, and verification into one `.agents/plans/plan_YYYYMMDD_<name>.md`, and obtains explicit approval. That file is the sole planning source of truth for implementation and review.
 
 Every bug-fixing workflow uses the GPT-6 Luna/extra-high [.codex/agents/bug-diagnostician.toml](.codex/agents/bug-diagnostician.toml) to investigate the assigned failure and draft `docs/incidents/incident_YYYYMMDD_short_description.md` from the canonical [incident template](docs/incidents/README.md). The main agent consolidates the diagnosis into the approved plan and presents the diagnosis, proposed repair, and verification plan for explicit approval before implementation.
 
