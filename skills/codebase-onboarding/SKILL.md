@@ -227,7 +227,7 @@ Do not print a standalone onboarding guide unless the user explicitly asks for o
 
 ## Anti-Patterns to Avoid
 
-- Updating `CLAUDE.md` from this skill.
+- Updating `AGENTS.md` or `CLAUDE.md` from this skill.
 - Listing every dependency - highlight only the ones that shape how agents should work.
 - Describing obvious directory names - `src/` does not need an explanation unless this repo gives it a specific role.
 - Copying the README - `agent-context/` docs add structural insight the README lacks.
