@@ -7,7 +7,7 @@ description: Analyze an unfamiliar codebase and generate structured agent-contex
 
 Systematically analyze an unfamiliar codebase and produce structured `agent-context/` documentation. Designed for developers and agents joining a new project or refreshing project context in an existing repo.
 
-Do not create or update `CLAUDE.md` as part of this skill. Put durable shared project context in `agent-context/`.
+Do not create or update `AGENTS.md` or `CLAUDE.md` or as part of this skill. Put durable shared project context in `agent-context/`.
 
 ## When to Use
 
