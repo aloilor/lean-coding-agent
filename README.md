@@ -68,15 +68,17 @@ Make changes in this repository; do not edit the installed plugin cache.
 
 ### Change workflows
 
-These skills are invoked explicitly and guide a task from its requirements or diagnosis through implementation and review.
+Workflows are opt-in: name the matching skill in your request to start one. They provide a defined process and durable records for work that benefits from planning, diagnosis, or independent review.
 
-- [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) — resolve requirements and produce an approved specification plan.
-- [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) — plan and implement a behavior change.
-- [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) — investigate and repair a bug with a durable incident report.
-- [`workflow-refactor`](skills/workflow-refactor/SKILL.md) — restructure code while preserving behavior.
-- [`workflow-review`](skills/workflow-review/SKILL.md) — perform a review or risk assessment and record its findings.
+| Workflow | Use it for | Process and output |
+| --- | --- | --- |
+| [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) | Clarifying requirements and contracts before implementation. | Resolve requirements and acceptance criteria, then obtain approval for a specification plan in `.agents/plans/`. |
+| [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) | Changing externally observable behavior. | Clarify and plan the change, get approval, implement test-first, then run an independent review and verification. Produces a plan, implementation report, and review pass. |
+| [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) | Investigating and repairing a bug or regression. | Record the symptom and diagnosis, get approval for the repair, reproduce and fix test-first, then review and verify. Produces a plan, incident report in `docs/incidents/`, implementation report, and review pass. |
+| [`workflow-refactor`](skills/workflow-refactor/SKILL.md) | Restructuring code while preserving behavior. | Establish a baseline, get approval for a plan, make small behavior-preserving changes, then review and verify. Produces a plan, implementation report, and review pass. |
+| [`workflow-review`](skills/workflow-review/SKILL.md) | Reviewing code or assessing risk. | An independent review records findings in a review pass; it does not make fixes unless you ask for them. |
 
-Planning workflows keep an approved plan under `.agents/plans/`. Feature, refactor, and bug-fixing workflows also produce implementation reports and review passes; bug fixes include a durable report under `docs/incidents/`. Specification workflows produce the plan, and the review workflow produces a review pass.
+Planning workflows save approved plans under `.agents/plans/`. Implementation reports and review passes are saved under `.agents/implementation-reports/` and `.agents/code-reviews/` respectively. Bug-fixing workflows also keep a durable incident report under `docs/incidents/`.
 
 ### Engineering and Git
 
@@ -106,6 +108,36 @@ Setup also installs these skills from upstream repositories. Use this list to ch
 Overrides add project guidance to an installed skill without changing the skill itself. The setup copies bundled overrides into `.agents/skill-overrides/` and maintains an `INDEX.md` there that maps skill names to their override files. Before using a skill, Codex checks this index and reads the matching `<skill-name>.md` file when one is listed. The override extends the skill's instructions; if they conflict, the override takes precedence.
 
 For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md) applies the baseline's testing guidance whenever tests are planned, written, or reviewed. To add project-specific guidance for another skill, create a matching Markdown file in `.agents/skill-overrides/` and add a link for it to `INDEX.md`. Setup refreshes bundled override files while preserving project-owned entries in the index.
+
+## Workflow guide
+
+Workflow skills define a consistent process for specification, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
+
+The specification, feature-development, bug-fixing, and refactoring workflows begin with `$grill-with-docs`, which resolves the task against project terminology and documentation. They then produce an approved plan under `.agents/plans/`. Get approval for that plan before implementation or repair begins. The review workflow is review-only and does not use this planning gate.
+
+### Feature specification
+
+Use [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) when requirements, acceptance criteria, or contracts need to be settled before coding. After the documentation grill, consolidate the resolved requirements, boundaries, decisions, and verification expectations into a specification plan. Once approved, that plan is the handoff for a later implementation task; this workflow does not implement the feature.
+
+### Feature development
+
+Use [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) to change externally observable behavior. After the grill, inspect the relevant code and documentation and write a plan covering the behavior, scope, constraints, acceptance criteria, and verification. Wait for approval, then have the implementer work test-first and record the implementation and verification evidence. An independent reviewer checks the change against the plan. If the review blocks the change, address its concrete findings and repeat the relevant checks and review. Finish with focused verification, broader checks when the impact calls for them, and a final diff review.
+
+### Bug fixing
+
+Use [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) for bugs, regressions, failing tests, or runtime and CI failures. After the documentation grill, investigate the affected code, callers, tests, and project context. Record the symptom, evidence, likely cause, impact, and proposed repair in an incident report and plan. Get approval before changing production or test code. Then reproduce the problem and repair it test-first, followed by an independent review and relevant broader verification. The reviewer finalizes the incident report from the confirmed evidence. If the repair would expand into feature behavior or contract work, stop and ask for direction instead of switching workflows automatically.
+
+### Refactoring
+
+Use [`workflow-refactor`](skills/workflow-refactor/SKILL.md) to restructure code while preserving its behavior and contracts. After the grill and code inspection, document what must remain unchanged, the scope, risks, and verification in a plan. Get approval, establish the test baseline, and make small changes while keeping focused checks green. The implementer records the baseline and verification; an independent reviewer checks for behavior drift, scope creep, and missing documentation or tests. If the work reveals a behavior change, stop and ask for direction rather than continuing as a refactor.
+
+### Code review
+
+Use [`workflow-review`](skills/workflow-review/SKILL.md) for a review, audit, or risk assessment. The reviewer records findings in severity order in a review pass under `.agents/code-reviews/`. This workflow does not draft a plan, run the documentation grill, or make changes. Ask separately for fixes if you want findings addressed.
+
+### Workflow records
+
+Plans use `.agents/plans/plan_YYYYMMDD_<name>.md`. Implementations use `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md`, and each review pass uses `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`. Bug-fixing workflows also keep an incident report at `docs/incidents/incident_YYYYMMDD_<name>.md`. These records make the agreed scope, decisions, and verification evidence available for review and follow-up.
 
 ## Working on this repository
 
