@@ -1,4 +1,0 @@
-interface:
-  display_name: "Bug Fixing Workflow"
-  short_description: "Diagnose and repair bugs with durable evidence"
-  default_prompt: "Use $workflow-bug-fixing. Run $grill-with-docs before diagnosis, plan writing, approval, repair, or handoff. Do not proceed if the grill has not run. Then use bug-diagnostician, obtain approval, hand off to implementer and code-reviewer, record the required artifacts, and verify the fix."

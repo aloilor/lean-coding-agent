@@ -14,11 +14,11 @@ class PluginPackageContractTest(unittest.TestCase):
         cls.plugin_root = temporary_plugin(fixture)
         cls.addClassCleanup(fixture.doCleanups)
 
-    def test_portable_manifest_and_single_setup_skill_match_plugin_contract(self) -> None:
+    def test_portable_manifest_and_complete_skill_bundle_match_plugin_contract(self) -> None:
         manifest = json.loads((self.plugin_root / "plugin.json").read_text(encoding="utf-8"))
 
         self.assertEqual("lean-coding-agent", manifest["name"])
-        self.assertEqual("0.1.0", manifest["version"])
+        self.assertEqual("0.2.0", manifest["version"])
         self.assertEqual("MIT", manifest["license"])
         self.assertTrue(manifest["author"]["name"])
         self.assertIn("extensions", manifest)
@@ -26,13 +26,18 @@ class PluginPackageContractTest(unittest.TestCase):
         self.assertEqual("Lean Coding Agent", interface["displayName"])
         self.assertTrue(interface["defaultPrompt"])
         self.assertEqual(["Interactive", "Write"], interface["capabilities"])
-        skill_dirs = [
+        expected_skill_dirs = sorted(
+            path.name
+            for path in (REPO_ROOT / "skills").iterdir()
+            if path.is_dir() and (path / "SKILL.md").is_file()
+        )
+        skill_dirs = sorted(
             path.name
             for path in (self.plugin_root / "skills").iterdir()
-            if path.is_dir()
-        ]
-        self.assertEqual(["setup-project"], skill_dirs)
-        self.assertTrue((self.plugin_root / "skills" / "setup-project" / "SKILL.md").is_file())
+            if path.is_dir() and (path / "SKILL.md").is_file()
+        )
+        self.assertEqual(expected_skill_dirs, skill_dirs)
+        self.assertNotIn("setup-project", skill_dirs)
 
     def test_marketplace_source_and_presentation_resolve_to_the_plugin_package(self) -> None:
         marketplace_path = REPO_ROOT / ".agents" / "plugins" / "marketplace.json"
@@ -47,15 +52,7 @@ class PluginPackageContractTest(unittest.TestCase):
         self.assertTrue((REPO_ROOT / source_path.removeprefix("./")).is_dir())
 
     def test_packaged_skill_links_resolve_inside_the_plugin_copy(self) -> None:
-        skill_roots = [
-            self.plugin_root / "skills",
-            self.plugin_root / "assets" / "baseline" / "skills",
-        ]
-        markdown_files = [
-            path
-            for skill_root in skill_roots
-            for path in skill_root.rglob("SKILL.md")
-        ]
+        markdown_files = list((self.plugin_root / "skills").rglob("SKILL.md"))
         self.assertTrue(markdown_files)
         unresolved = []
         external_schemes = {"http", "https", "mailto", "tel"}
@@ -82,19 +79,9 @@ class PluginPackageContractTest(unittest.TestCase):
 
         self.assertEqual([], unresolved)
 
-    def test_bundled_engine_and_assets_do_not_depend_on_the_source_checkout(self) -> None:
-        engine_path = (
-            self.plugin_root
-            / "skills"
-            / "setup-project"
-            / "scripts"
-            / "setup_project.py"
-        )
-        self.assertTrue(engine_path.is_file())
-        self.assertTrue((self.plugin_root / "assets" / "baseline" / "AGENTS.md").is_file())
-        self.assertTrue((self.plugin_root / "assets" / "baseline" / ".codex" / "agents").is_dir())
-        self.assertTrue((self.plugin_root / "assets" / "upstream-skills.json").is_file())
-        self.assertNotIn(str(REPO_ROOT), engine_path.read_text(encoding="utf-8"))
+    def test_plugin_package_has_no_project_installer_or_project_baseline_copy(self) -> None:
+        self.assertFalse((self.plugin_root / "skills" / "setup-project").exists())
+        self.assertFalse((self.plugin_root / "assets" / "baseline").exists())
 
 
 if __name__ == "__main__":

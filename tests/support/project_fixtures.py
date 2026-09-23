@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import tempfile
-import importlib.util
 from pathlib import Path
 from typing import Any
 
@@ -27,16 +26,6 @@ def temporary_plugin(test_case: Any) -> Path:
     if problems:
         raise AssertionError(f"Could not build temporary plugin: {problems}")
     return plugin
-
-
-def load_packaged_engine(plugin_root: Path) -> Any:
-    script_path = plugin_root / "skills" / "setup-project" / "scripts" / "setup_project.py"
-    spec = importlib.util.spec_from_file_location("packaged_setup_project", script_path)
-    if spec is None or spec.loader is None:
-        raise AssertionError(f"Could not load packaged setup engine: {script_path}")
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
 
 
 def file_contents(root: Path) -> dict[Path, bytes]:
