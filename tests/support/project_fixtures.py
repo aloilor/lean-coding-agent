@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -17,14 +18,21 @@ def temporary_project(test_case: Any) -> Path:
 
 
 def temporary_plugin(test_case: Any) -> Path:
-    from scripts.build_codex_plugin import build_plugin
-
     temporary_directory = tempfile.TemporaryDirectory()
     test_case.addCleanup(temporary_directory.cleanup)
     plugin = Path(temporary_directory.name) / "installed-plugin-copy"
-    problems = build_plugin(plugin)
-    if problems:
-        raise AssertionError(f"Could not build temporary plugin: {problems}")
+    subprocess.run(
+        [
+            "node",
+            str(REPO_ROOT / "scripts" / "build_codex_plugin.mjs"),
+            "--output",
+            str(plugin),
+        ],
+        cwd=REPO_ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     return plugin
 
 

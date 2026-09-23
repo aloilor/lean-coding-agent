@@ -16,9 +16,10 @@ class PluginPackageContractTest(unittest.TestCase):
 
     def test_portable_manifest_and_complete_skill_bundle_match_plugin_contract(self) -> None:
         manifest = json.loads((self.plugin_root / "plugin.json").read_text(encoding="utf-8"))
+        package = json.loads((REPO_ROOT / "package.json").read_text(encoding="utf-8"))
 
         self.assertEqual("lean-coding-agent", manifest["name"])
-        self.assertEqual("0.2.0", manifest["version"])
+        self.assertEqual(package["version"], manifest["version"])
         self.assertEqual("MIT", manifest["license"])
         self.assertTrue(manifest["author"]["name"])
         self.assertIn("extensions", manifest)

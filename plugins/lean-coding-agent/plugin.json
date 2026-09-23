@@ -2,19 +2,29 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "lean-coding-agent",
   "version": "0.2.0",
-  "description": "A managed bundle of coding standards, onboarding, Git, REST, and workflow skills for Codex.",
+  "description": "A managed bundle of coding standards, project setup, onboarding, Git, REST, and workflow skills for Codex.",
   "author": {
     "name": "aloilor"
   },
   "repository": "https://github.com/aloilor/lean-coding-agent",
   "license": "MIT",
-  "keywords": ["codex", "coding-agent", "project-baseline"],
+  "keywords": [
+    "codex",
+    "coding-agent",
+    "project-baseline",
+    "developer-tools",
+    "coding-standards",
+    "project-setup",
+    "repository-onboarding",
+    "code-review",
+    "development-workflows"
+  ],
   "extensions": {
     "com.openai": {
       "interface": {
         "displayName": "Lean Coding Agent",
-        "shortDescription": "A complete, managed bundle of coding skills for Codex.",
-        "longDescription": "Subscribe to one Codex plugin for the complete Lean Coding Agent skill set. The skills are packaged and updated together.",
+        "shortDescription": "A complete, managed coding and project setup bundle for Codex.",
+        "longDescription": "Subscribe to one Codex plugin for the complete Lean Coding Agent skill set, including a project setup skill. The skills are packaged and updated together.",
         "developerName": "aloilor",
         "category": "Productivity",
         "capabilities": ["Interactive", "Write"],

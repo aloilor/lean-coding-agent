@@ -1,0 +1,15 @@
+{
+  "name": "lean-coding-agent",
+  "version": "0.2.0",
+  "private": true,
+  "description": "A managed bundle of coding standards, project setup, onboarding, Git, REST, and workflow skills for Codex.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/aloilor/lean-coding-agent"
+  },
+  "license": "MIT",
+  "scripts": {
+    "version": "node scripts/sync-plugin-version.mjs",
+    "check-plugin-version": "node scripts/sync-plugin-version.mjs --check"
+  }
+}
