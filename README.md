@@ -54,6 +54,8 @@ npx skills update -p
 
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
+Project setup also registers a local Codex `SessionStart` hook and records the installed version in `agent-context/skills-installed.json`. On startup and resume, the hook checks GitHub for a newer stable release. If one is available, Codex mentions it in its first reply and recommends updating Lean Coding Agent and rerunning `$setup-lean-coding-agent` to refresh the project's skill copies. The hook does not update files automatically and stays quiet when the project is current or GitHub cannot be reached. Codex may ask you to review and trust the project-local hook before it runs.
+
 Make changes in this repository; do not edit the installed plugin cache.
 
 ## Skill reference
@@ -99,7 +101,11 @@ Setup also installs these skills from upstream repositories. Use this list to ch
 | [`sql-code-review`](https://github.com/github/awesome-copilot/blob/main/skills/sql-code-review/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Review SQL for injection risks, access control, correctness, maintainability, and database best practices. |
 | [`sql-optimization`](https://github.com/github/awesome-copilot/blob/main/skills/sql-optimization/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Analyze query performance and improve SQL queries, indexes, and execution plans. |
 
-The setup also applies a local override to [`tdd`](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md).
+### Skill overrides
+
+Overrides add project guidance to an installed skill without changing the skill itself. The setup copies bundled overrides into `.agents/skill-overrides/` and maintains an `INDEX.md` there that maps skill names to their override files. Before using a skill, Codex checks this index and reads the matching `<skill-name>.md` file when one is listed. The override extends the skill's instructions; if they conflict, the override takes precedence.
+
+For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md) applies the baseline's testing guidance whenever tests are planned, written, or reviewed. To add project-specific guidance for another skill, create a matching Markdown file in `.agents/skill-overrides/` and add a link for it to `INDEX.md`. Setup refreshes bundled override files while preserving project-owned entries in the index.
 
 ## Working on this repository
 
