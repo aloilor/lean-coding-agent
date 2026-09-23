@@ -145,6 +145,10 @@ The root [`package.json`](package.json) is the plugin release version source, an
 
 All utilities in `scripts/` run on Node.js built-in modules and need no package installation.
 
+### Pre-commit hook
+
+The `.githooks/pre-commit` hook synchronizes release metadata and rebuilds the generated plugin bundle before each commit. Enable it once in each clone with `git config core.hooksPath .githooks`; this setting is local to the clone. The scripts can modify files, and the hook does not stage their output. If it generates changes during a commit, stage those files for a follow-up commit.
+
 To compare this checkout's `plugin.json` version with the latest stable GitHub Release, run:
 
 ```sh
