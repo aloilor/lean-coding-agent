@@ -4,7 +4,7 @@ A managed Codex plugin and skill collection for working on real codebases. It gi
 
 The skills are small and composable. Install the complete bundle as a plugin, or choose selected skills with the Skills CLI. The project setup skill installs the shared baseline and prepares the repository for day-to-day work.
 
-## Installation (30-second setup)
+## Installation
 
 ### 1. Install the skills
 
@@ -32,7 +32,7 @@ Open the target repository in Codex and run:
 $setup-lean-coding-agent
 ```
 
-The setup skill installs the shared project guidance, skills, skill overrides, and Codex subagents. It also installs Agent Browser and the upstream skills used by the baseline, then offers to run project-specific onboarding. Node.js is required for setup.
+The setup skill installs the shared project guidance, skills, skill overrides, Codex subagents, and a project-local session-start version check. It also installs Agent Browser and the upstream skills used by the baseline, then offers to run project-specific onboarding. Node.js is required for setup.
 
 ### 3. Use the skills
 
@@ -55,26 +55,6 @@ npx skills update -p
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
 Make changes in this repository; do not edit the installed plugin cache.
-
-## Why these skills exist
-
-### 1. Give the agent the context it needs
-
-An agent joining a repository has to learn its architecture, terminology, testing practices, and local conventions. The shared [`AGENTS.md`](AGENTS.md) provides the baseline; [`codebase-onboarding`](skills/codebase-onboarding/SKILL.md) records evidence-backed project context under `agent-context/` so future work can start from it.
-
-### 2. Align on changes before they grow
-
-Misunderstood requirements are expensive to repair after implementation. [`grill-with-docs`](skills/grill-with-docs/SKILL.md) helps clarify a change against the project's domain language and decisions. The specification and feature workflows turn resolved requirements into an agreed plan before implementation.
-
-All `workflow-*` skills are opt-in: Codex runs one only when you explicitly name or call it. When a planning workflow is invoked, it requires `grill-with-docs` before writing the plan or starting implementation.
-
-### 3. Keep feedback and engineering standards close
-
-[`engineering-standards`](skills/engineering-standards/SKILL.md) supplies shared guidance for code changes. [`rest-api-design`](skills/rest-api-design/SKILL.md) covers HTTP contracts, and the workflow skills connect implementation with verification and independent review. The setup skill also installs focused [upstream skills](#upstream-skills-installed-by-setup).
-
-### 4. Keep project setup consistent
-
-The setup skill installs the baseline into each repository and refreshes its managed files when run again after the installed plugin is upgraded.
 
 ## Skill reference
 
@@ -105,28 +85,25 @@ Planning workflows keep an approved plan under `.agents/plans/`. Feature, refact
 
 ### Upstream skills installed by setup
 
-Setup also installs these skills from upstream repositories. Each skill name links to its upstream definition.
+Setup also installs these skills from upstream repositories. Use this list to choose a skill for a task; each skill name links to its upstream definition.
 
-| Skill | Source | Purpose |
+| Skill | Source | Use when |
 | --- | --- | --- |
-| [`find-skills`](https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | Find and evaluate skills from the agent skills ecosystem. |
-| [`agent-browser`](https://github.com/vercel-labs/agent-browser/blob/main/skills/agent-browser/SKILL.md) | [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser) | Automate browser tasks such as navigating pages, filling forms, extracting data, and testing web apps. |
-| [`handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Summarize a session so another agent can continue the work. |
-| [`resolving-merge-conflicts`](https://github.com/mattpocock/skills/blob/main/skills/engineering/resolving-merge-conflicts/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Resolve merge and rebase conflicts while preserving the intent of each change. |
-| [`tdd`](https://github.com/mattpocock/skills/blob/main/skills/engineering/tdd/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Build features and fix bugs with a test-first red-green-refactor workflow. |
-| [`changelog-automation`](https://github.com/wshobson/agents/blob/main/plugins/documentation-generation/skills/changelog-automation/SKILL.md) | [wshobson/agents](https://github.com/wshobson/agents) | Generate changelog entries from Conventional Commits. |
-| [`create-readme`](https://github.com/github/awesome-copilot/blob/main/skills/create-readme/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Create a README based on the project and its documentation. |
-| [`create-specification`](https://github.com/github/awesome-copilot/blob/main/skills/create-specification/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Create a specification written for generative AI consumption. |
-| [`prd`](https://github.com/github/awesome-copilot/blob/main/skills/prd/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Generate product requirements documents for software and AI features. |
-| [`refactor`](https://github.com/github/awesome-copilot/blob/main/skills/refactor/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Improve code structure and maintainability without changing behavior. |
-| [`sql-code-review`](https://github.com/github/awesome-copilot/blob/main/skills/sql-code-review/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Review SQL for security, maintainability, and quality across database systems. |
-| [`sql-optimization`](https://github.com/github/awesome-copilot/blob/main/skills/sql-optimization/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Tune SQL queries and indexes and analyze database performance. |
+| [`agent-browser`](https://github.com/vercel-labs/agent-browser/blob/main/skills/agent-browser/SKILL.md) | [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser) | Navigate and interact with websites, fill forms, extract page data, or test web apps through a browser. |
+| [`handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Pass ongoing work to another agent or session with a concise summary, next steps, and links to existing artifacts. |
+| [`resolving-merge-conflicts`](https://github.com/mattpocock/skills/blob/main/skills/engineering/resolving-merge-conflicts/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Resolve active Git merge or rebase conflicts by tracing each change to its intent and completing the merge checks. |
+| [`tdd`](https://github.com/mattpocock/skills/blob/main/skills/engineering/tdd/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Build a feature or fix a bug test-first, one behavior slice at a time, using red-green-refactor. |
+| [`changelog-automation`](https://github.com/wshobson/agents/blob/main/plugins/documentation-generation/skills/changelog-automation/SKILL.md) | [wshobson/agents](https://github.com/wshobson/agents) | Create or automate changelogs and release notes from commits, using commit conventions and versioning. |
+| [`create-readme`](https://github.com/github/awesome-copilot/blob/main/skills/create-readme/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Draft a project README after reviewing the codebase and its existing documentation. |
+| [`refactor`](https://github.com/github/awesome-copilot/blob/main/skills/refactor/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Improve code structure or readability while preserving externally visible behavior. |
+| [`sql-code-review`](https://github.com/github/awesome-copilot/blob/main/skills/sql-code-review/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Review SQL for injection risks, access control, correctness, maintainability, and database best practices. |
+| [`sql-optimization`](https://github.com/github/awesome-copilot/blob/main/skills/sql-optimization/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Analyze query performance and improve SQL queries, indexes, and execution plans. |
 
-The setup also applies local overrides to [`create-specification`](skills/skill-overrides/create-specification.md), [`prd`](skills/skill-overrides/prd.md), and [`tdd`](skills/skill-overrides/tdd.md).
+The setup also applies a local override to [`tdd`](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md).
 
 ## Working on this repository
 
-The root [`package.json`](package.json) is the release version source, and root [`plugin.json`](plugin.json) is synchronized from it. The root `plugin.json` and [`skills/`](skills/) are canonical plugin content. The build script generates [`plugins/lean-coding-agent/`](plugins/lean-coding-agent/); do not edit generated files directly.
+The root [`package.json`](package.json) is the plugin release version source, and root [`plugin.json`](plugin.json) is synchronized from it. The setup skill's [`release.json`](skills/setup-lean-coding-agent/references/release.json) is synchronized at the same time and supplies the version recorded for project-installed skill copies. The root `plugin.json` and [`skills/`](skills/) are canonical plugin content. The build script generates [`plugins/lean-coding-agent/`](plugins/lean-coding-agent/); do not edit generated files directly.
 
 All utilities in `scripts/` run on Node.js built-in modules and need no package installation.
 
@@ -141,10 +118,9 @@ When shipping skill changes, bump the version in `package.json`, then run `npm r
 ```sh
 node scripts/build_codex_plugin.mjs
 node scripts/build_codex_plugin.mjs --check
-python -m unittest discover -s tests
 ```
 
-Manual Codex UI smoke scenarios are documented in [`tests/smoke/README.md`](tests/smoke/README.md). To try the local build, add this checkout as a marketplace, rebuild the plugin, and upgrade the marketplace entry:
+To try the local build, add this checkout as a marketplace, rebuild the plugin, and upgrade the marketplace entry:
 
 ```sh
 codex plugin marketplace add .

@@ -9,6 +9,8 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const skillDirectory = path.resolve(scriptDirectory, '..');
 const pluginSkillsDirectory = path.resolve(skillDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
+const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
+const updateCheckerSourcePath = path.join(scriptDirectory, 'check_skill_updates.mjs');
 const agentNames = ['bug-diagnostician', 'implementer', 'code-reviewer'];
 const defaultModel = 'gpt-6-luna';
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
@@ -19,6 +21,9 @@ const agentsDirectoryName = '.agents';
 const skillOverridesDirectoryName = 'skill-overrides';
 const skillOverridesIndexName = 'INDEX.md';
 const lessonsIndexName = 'LESSONS.md';
+const projectUpdateHookMarker = '# Lean Coding Agent session-start version check';
+const projectUpdateHookScript = '.codex/hooks/lean-coding-agent/check_skill_updates.mjs';
+const projectSkillsManifest = 'agent-context/skills-installed.json';
 const localFiles = ['AGENTS.local.md', 'CLAUDE.local.md'];
 const ignoredAgentFiles = [
   '.agents/code-reviews/',
@@ -29,10 +34,6 @@ const ignoredAgentFiles = [
 ];
 
 const upstreamSkillGroups = [
-  {
-    source: 'https://github.com/vercel-labs/skills',
-    skills: ['find-skills'],
-  },
   {
     source: 'https://github.com/vercel-labs/agent-browser',
     skills: ['agent-browser'],
@@ -49,8 +50,6 @@ const upstreamSkillGroups = [
     source: 'https://github.com/github/awesome-copilot',
     skills: [
       'create-readme',
-      'create-specification',
-      'prd',
       'refactor',
       'sql-code-review',
       'sql-optimization',
@@ -144,6 +143,23 @@ async function requiredReference(...parts) {
     throw error;
   }
   return referencePath;
+}
+
+async function readReleaseMetadata() {
+  let releaseMetadata;
+  try {
+    releaseMetadata = JSON.parse(await fs.readFile(releaseMetadataPath, 'utf8'));
+  } catch (error) {
+    throw new Error(`Could not read setup skill release metadata: ${error.message}`);
+  }
+  if (
+    !releaseMetadata
+    || typeof releaseMetadata.version !== 'string'
+    || typeof releaseMetadata.repository !== 'string'
+  ) {
+    throw new Error(`Setup skill release metadata is invalid: ${releaseMetadataPath}`);
+  }
+  return releaseMetadata;
 }
 
 function validateModels(models) {
@@ -363,7 +379,7 @@ async function removeManagedSkill(skillPath) {
   }
 }
 
-async function syncBundledSkills(targetProject) {
+export async function syncBundledSkills(targetProject) {
   const agentsDirectory = path.join(targetProject, agentsDirectoryName);
   const skillsDirectory = path.join(agentsDirectory, 'skills');
   try {
@@ -396,8 +412,11 @@ async function syncBundledSkills(targetProject) {
     });
   }
 
+  const releaseMetadata = await readReleaseMetadata();
   const manifest = {
     source_root: pluginSkillsDirectory,
+    version: releaseMetadata.version,
+    repository: releaseMetadata.repository,
     managed_skill_dirs: [path.join(agentsDirectoryName, 'skills')],
     skills: sourceDirectories.map((directory) => ({
       source: path.basename(directory),
@@ -407,6 +426,115 @@ async function syncBundledSkills(targetProject) {
   const manifestPath = path.join(targetProject, agentContextDirectoryName, manifestName);
   await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
   return { skillDirectory: skillsDirectory, skillCount: sourceDirectories.length };
+}
+
+function projectUpdateHookCommands() {
+  const projectRoot = '$(git rev-parse --show-toplevel)';
+  const scriptPath = `"${projectRoot}/${projectUpdateHookScript.replaceAll('\\', '/')}"`;
+  const manifestPath = `"${projectRoot}/${projectSkillsManifest}"`;
+  return {
+    command: `node ${scriptPath} --hook --project --manifest ${manifestPath}`,
+    commandWindows: `powershell -NoProfile -Command "$root = git rev-parse --show-toplevel; node (Join-Path $root '.codex/hooks/lean-coding-agent/check_skill_updates.mjs') --hook --project --manifest (Join-Path $root 'agent-context/skills-installed.json')"`,
+  };
+}
+
+async function ensureRegularDirectory(directoryPath) {
+  try {
+    const details = await fs.lstat(directoryPath);
+    if (details.isSymbolicLink() || !details.isDirectory()) {
+      throw new Error(`Refusing to write through a non-directory path: ${directoryPath}`);
+    }
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    await fs.mkdir(directoryPath);
+  }
+}
+
+async function installProjectHookInJson(hooksJsonPath, commands) {
+  let configuration = { hooks: {} };
+  if (await pathExists(hooksJsonPath)) {
+    try {
+      configuration = JSON.parse(await fs.readFile(hooksJsonPath, 'utf8'));
+    } catch (error) {
+      throw new Error(`Project hooks.json is not valid JSON: ${error.message}`);
+    }
+    if (!configuration || typeof configuration !== 'object' || Array.isArray(configuration)) {
+      throw new Error(`Project hooks.json must contain a JSON object: ${hooksJsonPath}`);
+    }
+  }
+
+  if (!configuration.hooks) configuration.hooks = {};
+  if (typeof configuration.hooks !== 'object' || Array.isArray(configuration.hooks)) {
+    throw new Error(`Project hooks.json hooks must be an object: ${hooksJsonPath}`);
+  }
+  if (!configuration.hooks.SessionStart) configuration.hooks.SessionStart = [];
+  if (!Array.isArray(configuration.hooks.SessionStart)) {
+    throw new Error(`Project hooks.json SessionStart must be an array: ${hooksJsonPath}`);
+  }
+
+  let handler = null;
+  for (const group of configuration.hooks.SessionStart) {
+    if (!group || typeof group !== 'object' || !Array.isArray(group.hooks)) continue;
+    handler = group.hooks.find((candidate) => candidate?.command === commands.command);
+    if (handler) break;
+  }
+  if (handler) {
+    handler.commandWindows = commands.commandWindows;
+    handler.timeout = 10;
+  } else {
+    configuration.hooks.SessionStart.push({
+      matcher: 'startup|resume',
+      hooks: [{ type: 'command', ...commands, timeout: 10 }],
+    });
+  }
+  await fs.writeFile(hooksJsonPath, `${JSON.stringify(configuration, null, 2)}\n`, 'utf8');
+}
+
+async function installProjectHookInToml(configPath, commands) {
+  const existing = (await pathExists(configPath)) ? await fs.readFile(configPath, 'utf8') : '';
+  if (existing.includes(projectUpdateHookMarker)) return;
+
+  const separator = existing.length === 0 || existing.endsWith('\n') ? '' : '\n';
+  const hookConfiguration = [
+    projectUpdateHookMarker,
+    '[[hooks.SessionStart]]',
+    'matcher = "startup|resume"',
+    '',
+    '[[hooks.SessionStart.hooks]]',
+    'type = "command"',
+    `command = ${JSON.stringify(commands.command)}`,
+    `command_windows = ${JSON.stringify(commands.commandWindows)}`,
+    'timeout = 10',
+    '',
+  ].join('\n');
+  await fs.writeFile(configPath, `${existing}${separator}${hookConfiguration}`, 'utf8');
+}
+
+export async function ensureSkillUpdateHook(targetProject) {
+  const codexDirectory = path.join(targetProject, '.codex');
+  const hooksDirectory = path.join(codexDirectory, 'hooks');
+  const skillHooksDirectory = path.join(hooksDirectory, 'lean-coding-agent');
+  await ensureRegularDirectory(codexDirectory);
+  await ensureRegularDirectory(hooksDirectory);
+  await ensureRegularDirectory(skillHooksDirectory);
+
+  const checkerPath = path.join(targetProject, projectUpdateHookScript);
+  await fs.copyFile(updateCheckerSourcePath, checkerPath);
+
+  const commands = projectUpdateHookCommands();
+  const hooksJsonPath = path.join(codexDirectory, 'hooks.json');
+  const configPath = path.join(codexDirectory, 'config.toml');
+  const configText = (await pathExists(configPath)) ? await fs.readFile(configPath, 'utf8') : '';
+  if (configText.includes(projectUpdateHookMarker)) {
+    return { checkerPath, hookConfigPath: configPath };
+  }
+  if (await pathExists(hooksJsonPath)) {
+    await installProjectHookInJson(hooksJsonPath, commands);
+    return { checkerPath, hookConfigPath: hooksJsonPath };
+  }
+
+  await installProjectHookInToml(configPath, commands);
+  return { checkerPath, hookConfigPath: configPath };
 }
 
 async function detectPackageManager(targetProject) {
@@ -507,6 +635,7 @@ async function initializeProject(targetProject, models) {
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
   const skillResult = await syncBundledSkills(targetProject);
+  const updateHook = await ensureSkillUpdateHook(targetProject);
   const agentBrowserStatus = await installAgentBrowser(targetProject);
   const upstreamSkillNames = await installUpstreamSkills(targetProject);
 
@@ -526,6 +655,8 @@ async function initializeProject(targetProject, models) {
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} bundled skills into: ${skillResult.skillDirectory}`);
+  console.log(`Installed session-start version hook: ${updateHook.hookConfigPath}`);
+  console.log(`Installed version checker: ${updateHook.checkerPath}`);
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
 }
 
@@ -537,7 +668,9 @@ async function main() {
   await initializeProject(targetProject, options.models);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}
