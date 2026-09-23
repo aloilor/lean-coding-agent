@@ -1,17 +1,16 @@
 import importlib.util
 import io
 import json
-import subprocess
 import sys
-import tempfile
 import tomllib
 import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 from unittest import mock
 
+from tests.support.project_fixtures import file_contents, temporary_project
 
-SCRIPT_PATH = Path(__file__).parents[1] / "scripts" / "init_project_agent.py"
+SCRIPT_PATH = Path(__file__).parents[2] / "scripts" / "init_project_agent.py"
 SPEC = importlib.util.spec_from_file_location("init_project_agent", SCRIPT_PATH)
 assert SPEC is not None and SPEC.loader is not None
 INIT_PROJECT_AGENT = importlib.util.module_from_spec(SPEC)
@@ -19,22 +18,9 @@ SPEC.loader.exec_module(INIT_PROJECT_AGENT)
 REPO_ROOT = SCRIPT_PATH.parents[1]
 
 
-def file_contents(root: Path) -> dict[Path, bytes]:
-    return {
-        path.relative_to(root): path.read_bytes()
-        for path in root.rglob("*")
-        if path.is_file() and ".git" not in path.parts and "__pycache__" not in path.parts
-    }
-
-
 class InitializationIntegrationTest(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.repo = Path(self.temp_dir.name) / "target"
-        self.repo.mkdir()
-
-    def tearDown(self) -> None:
-        self.temp_dir.cleanup()
+        self.repo = temporary_project(self)
 
     def run_initializer(self) -> list[object]:
         output = io.StringIO()
@@ -362,81 +348,3 @@ class InitializationIntegrationTest(unittest.TestCase):
         agent_index = command.index("--agent")
         self.assertEqual(["codex"], command[agent_index + 1 : agent_index + 2])
         self.assertEqual("--copy", command[agent_index + 2])
-
-
-class PackageManagerDetectionTest(unittest.TestCase):
-    def test_prefers_package_manager_declaration_then_known_lockfiles(self) -> None:
-        cases = [
-            ({"packageManager": "pnpm@10.0.0"}, [], "pnpm"),
-            ({"packageManager": "unknown@1.0.0"}, ["yarn.lock"], "yarn"),
-            ({}, ["bun.lockb"], "bun"),
-            ({}, ["package-lock.json"], "npm"),
-            ({}, [], "npm"),
-        ]
-
-        for package_json, lockfiles, expected in cases:
-            with self.subTest(package_json=package_json, lockfiles=lockfiles):
-                with tempfile.TemporaryDirectory() as temp_dir:
-                    repo = Path(temp_dir)
-                    for lockfile in lockfiles:
-                        (repo / lockfile).touch()
-                    self.assertEqual(
-                        expected,
-                        INIT_PROJECT_AGENT.detect_package_manager(repo, package_json),
-                    )
-
-    def test_agent_browser_uses_the_selected_package_manager_commands(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            repo = Path(temp_dir)
-            (repo / "package.json").write_text(
-                json.dumps({"packageManager": "pnpm@10.0.0"}),
-                encoding="utf-8",
-            )
-
-            with mock.patch.object(INIT_PROJECT_AGENT.subprocess, "run") as run:
-                result = INIT_PROJECT_AGENT.install_agent_browser(repo)
-
-            self.assertEqual("package installed and browser installed with pnpm", result)
-            self.assertEqual(
-                [
-                    mock.call(
-                        [
-                            INIT_PROJECT_AGENT.executable_name("pnpm"),
-                            "add",
-                            "--save-dev",
-                            INIT_PROJECT_AGENT.AGENT_BROWSER_PACKAGE,
-                        ],
-                        cwd=repo,
-                        check=True,
-                    ),
-                    mock.call(
-                        [
-                            INIT_PROJECT_AGENT.executable_name("pnpm"),
-                            "exec",
-                            INIT_PROJECT_AGENT.AGENT_BROWSER_COMMAND,
-                            "install",
-                        ],
-                        cwd=repo,
-                        check=True,
-                    ),
-                ],
-                run.call_args_list,
-            )
-
-    def test_install_failure_reports_the_selected_package_manager(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            repo = Path(temp_dir)
-            with mock.patch.object(
-                INIT_PROJECT_AGENT.subprocess,
-                "run",
-                side_effect=subprocess.CalledProcessError(1, "npm"),
-            ):
-                with self.assertRaisesRegex(
-                    SystemExit,
-                    "Could not install agent-browser@latest with npm",
-                ):
-                    INIT_PROJECT_AGENT.install_agent_browser(repo)
-
-
-if __name__ == "__main__":
-    unittest.main()

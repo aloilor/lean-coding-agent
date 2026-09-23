@@ -142,6 +142,11 @@ def baseline_guard_block(filename: str) -> str:
     )
 
 
+def guarded_baseline_content(filename: str, baseline_text: str) -> str:
+    prefix = "" if baseline_text.endswith("\n") else "\n"
+    return baseline_text + prefix + baseline_guard_block(filename)
+
+
 def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]:
     copied_paths: list[Path] = []
 
@@ -152,11 +157,11 @@ def copy_baseline_files(target_repo: Path, shared_repo_root: Path) -> list[Path]
 
         target_path = target_repo / filename
         shutil.copy2(source_path, target_path)
-
         baseline_text = source_path.read_text(encoding="utf-8")
-        prefix = "" if baseline_text.endswith("\n") else "\n"
-        with target_path.open("a", encoding="utf-8") as target_file:
-            target_file.write(prefix + baseline_guard_block(filename))
+        target_path.write_text(
+            guarded_baseline_content(filename, baseline_text),
+            encoding="utf-8",
+        )
 
         copied_paths.append(target_path)
 
@@ -409,21 +414,24 @@ def copy_agent_context_baseline(target_repo: Path, shared_repo_root: Path) -> li
     return copied_paths
 
 
+def lessons_index_content() -> str:
+    return "\n".join(
+        [
+            "# Lessons",
+            "",
+            "Add shared agent lessons here.",
+            "",
+        ]
+    )
+
+
 def ensure_lessons_index(target_repo: Path) -> Path:
     lessons_dir = target_repo / AGENTS_DIRNAME / LESSONS_DIRNAME
     lessons_dir.mkdir(parents=True, exist_ok=True)
 
     index_path = lessons_dir / LESSONS_INDEX_NAME
     if not index_path.exists():
-        content = "\n".join(
-            [
-                "# Lessons",
-                "",
-                "Add shared agent lessons here.",
-                "",
-            ]
-        )
-        index_path.write_text(content, encoding="utf-8")
+        index_path.write_text(lessons_index_content(), encoding="utf-8")
 
     return index_path
 

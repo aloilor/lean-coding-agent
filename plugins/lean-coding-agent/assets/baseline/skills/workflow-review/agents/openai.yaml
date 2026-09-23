@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Review Workflow"
+  short_description: "Review code and report actionable findings"
+  default_prompt: "Use $workflow-review to review the requested scope, record a durable review pass, and report findings before the verdict."

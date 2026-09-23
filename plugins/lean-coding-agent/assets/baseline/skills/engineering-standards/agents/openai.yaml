@@ -1,0 +1,4 @@
+interface:
+  display_name: "Engineering Standards"
+  short_description: "Apply engineering standards to every code change"
+  default_prompt: "Apply $engineering-standards to this code task, preserve correctness and public contracts, choose the smallest justified design, and report semantic reasoning and deterministic verification."

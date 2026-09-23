@@ -1,0 +1,27 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "lean-coding-agent",
+  "version": "0.1.0",
+  "description": "A minimal, opt-in baseline for Codex with clear-code standards, TDD, and repeatable workflows.",
+  "author": {
+    "name": "coding-agent-baseline contributors"
+  },
+  "repository": "https://github.com/aloilor/coding-agent-baseline",
+  "license": "MIT",
+  "keywords": ["codex", "coding-agent", "project-baseline"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Lean Coding Agent",
+        "shortDescription": "A minimal, opt-in coding baseline for Codex.",
+        "longDescription": "Set up project guidance, choose skills and optional tooling, select models for custom agents, and synchronize safely.",
+        "developerName": "coding-agent-baseline contributors",
+        "category": "Productivity",
+        "capabilities": ["Interactive", "Write"],
+        "defaultPrompt": [
+          "Use $setup-project to configure this project."
+        ]
+      }
+    }
+  }
+}
