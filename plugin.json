@@ -4,7 +4,7 @@
   "version": "0.2.0",
   "description": "A managed bundle of coding standards, onboarding, Git, REST, and workflow skills for Codex.",
   "author": {
-    "name": "coding-agent-baseline contributors"
+    "name": "aloilor"
   },
   "repository": "https://github.com/aloilor/lean-coding-agent",
   "license": "MIT",
@@ -15,7 +15,7 @@
         "displayName": "Lean Coding Agent",
         "shortDescription": "A complete, managed bundle of coding skills for Codex.",
         "longDescription": "Subscribe to one Codex plugin for the complete Lean Coding Agent skill set. The skills are packaged and updated together.",
-        "developerName": "coding-agent-baseline contributors",
+        "developerName": "aloilor",
         "category": "Productivity",
         "capabilities": ["Interactive", "Write"],
         "defaultPrompt": [
