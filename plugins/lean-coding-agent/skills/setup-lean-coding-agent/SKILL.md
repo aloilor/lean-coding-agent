@@ -9,13 +9,13 @@ Run this skill after installing Lean Coding Agent to initialize the current proj
 
 ## Workflow
 
-1. Identify the target project. Use the current working directory when the user invoked this skill from the project; otherwise ask which existing project directory to initialize.
-2. Ask which model ID to assign to each Codex subagent:
-   - `bug-diagnostician` (default: `gpt-6-luna`)
-   - `implementer` (default: `gpt-6-luna`)
-   - `code-reviewer` (default: `gpt-6-luna`)
+1. Ask which existing project directory to initialize. Offer the current working directory as the recommended default, and let the user choose it or provide another path. Do not silently assume the current directory.
+2. Before asking about models, check the current official [OpenAI model catalog](https://developers.openai.com/api/docs/models) and [reasoning guide](https://developers.openai.com/api/docs/guides/reasoning). Show the latest generally available coding-capable model IDs and their supported reasoning-effort levels, with a short description of each model. Treat this list as a current reference; replace it with newer options if the official documentation has changed:
+   - `gpt-6-astra` — most capable for complex reasoning and coding; supports `low`, `medium`, `high`, `xhigh`, and `max`.
+   - `gpt-6-sol` — designed for complex coding and agentic workflows; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
+   - `gpt-6-luna` — efficient for focused, high-volume work; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
 
-   The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's existing `model_reasoning_effort` setting.
+   Tell the user the current defaults for all three subagents are `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults for all three, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's existing `model_reasoning_effort` setting.
 3. Run the bundled Node.js setup script from the target project, passing the selected models:
 
    ```text
@@ -24,13 +24,14 @@ Run this skill after installing Lean Coding Agent to initialize the current proj
 
    Locate `<setup-skill>` from this skill's installed directory. Do not ask the user to find or run the script. It uses Node.js and npm's `npx` on Windows, macOS, and Linux. If setup fails, report the failed command and stop; rerun only after resolving the reported environment or network issue.
 4. After setup completes, ask the user whether they want to run `$codebase-onboarding` to fill in project-specific `agent-context/` documentation. Run it only if they agree. If the skill is not available in the active thread, read `<target-project>/.agents/skills/codebase-onboarding/SKILL.md` and follow it directly after they agree.
-5. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/skills/`, `.codex/agents/` with all three model choices, the session-start version hook and checker, `agent-context/skills-installed.json`, and the upstream skills. Summarize the installed skills and selected models, and whether onboarding was run or deferred.
+5. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/skills/`, `.codex/config.toml` with the bundled multi-agent defaults, `.codex/agents/` with all three model choices and their reasoning effort, the session-start version hook and checker, `agent-context/skills-installed.json`, and the upstream skills. Summarize the installed skills, selected models and reasoning effort, and whether onboarding was run or deferred.
 
 ## Managed Files And Effects
 
 - The script defaults to the current directory if the target path is omitted. It requires an existing directory.
+- If `.codex/config.toml` is missing, setup copies the bundled baseline config. Existing config files are preserved, and the version-check hook is added to the selected hook config without replacing existing settings.
 - `AGENTS.md`, `CLAUDE.md`, bundled Codex agents, bundled shared skill copies, baseline override files, and the managed upstream skills are refreshed on each run. Existing project context files, local-private files, and project-owned override index entries are preserved.
-- The setup creates `AGENTS.local.md`, `CLAUDE.local.md`, `agent-context/` for its setup manifest, `.agents/lessons/`, `.agents/skill-overrides/`, and required `.gitignore` entries when missing.
+- The setup creates `AGENTS.local.md`, `CLAUDE.local.md`, `agent-context/` for its setup manifest, `.agents/lessons/`, `.agents/skill-overrides/`, and required `.gitignore` entries when missing. Managed ignore entries include the local files, agent task/report directories, and `node_modules/`.
 - It copies the plugin's bundled skill folders into `.agents/skills/`. Those copies are managed outputs; local edits to a copied baseline skill are replaced when setup runs again.
 - It records the installed Lean Coding Agent release in `agent-context/skills-installed.json`, copies the version checker into `.codex/hooks/lean-coding-agent/`, and registers a `SessionStart` hook in `.codex/hooks.json` or `.codex/config.toml`. Existing hook definitions are preserved, and rerunning setup does not add duplicate registrations.
 - Codex requires review and trust for project-local hooks before they run. The version check runs on startup and resume, stays quiet when current or when GitHub is unavailable, and asks Codex to mention a newer release in its first reply.
@@ -42,6 +43,7 @@ Run this skill after installing Lean Coding Agent to initialize the current proj
 The `references/` directory contains the baseline inputs needed after the plugin is installed and the original source repository is unavailable:
 
 - `references/agents/` contains the three native Codex subagent TOML templates.
+- `references/config.toml` contains the baseline Codex project configuration copied when the target has no `.codex/config.toml`.
 - `references/baseline/` contains `AGENTS.md` and `CLAUDE.md`.
 - `references/docs/incidents/README.md` contains the incident report template.
 - `references/skill-overrides/` contains the baseline override index and override files copied into `.agents/skill-overrides/`.

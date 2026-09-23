@@ -31,6 +31,7 @@ const ignoredAgentFiles = [
   '.agents/implementation-reports/',
   '.agents/tasks/',
   '.codex/tasks/',
+  'node_modules/',
 ];
 
 const upstreamSkillGroups = [
@@ -243,6 +244,14 @@ async function ensureLocalGitignore(targetProject) {
     await fs.writeFile(gitignorePath, `${existing}${separator}${missingLines.join('\n')}\n`, 'utf8');
   }
   return gitignorePath;
+}
+
+async function ensureCodexConfig(targetProject) {
+  const configPath = path.join(targetProject, '.codex', 'config.toml');
+  if (!(await pathExists(configPath))) {
+    await fs.copyFile(await requiredReference('config.toml'), configPath);
+  }
+  return configPath;
 }
 
 async function installCodexAgents(targetProject, models) {
@@ -523,8 +532,8 @@ export async function ensureSkillUpdateHook(targetProject) {
 
   const commands = projectUpdateHookCommands();
   const hooksJsonPath = path.join(codexDirectory, 'hooks.json');
-  const configPath = path.join(codexDirectory, 'config.toml');
-  const configText = (await pathExists(configPath)) ? await fs.readFile(configPath, 'utf8') : '';
+  const configPath = await ensureCodexConfig(targetProject);
+  const configText = await fs.readFile(configPath, 'utf8');
   if (configText.includes(projectUpdateHookMarker)) {
     return { checkerPath, hookConfigPath: configPath };
   }
@@ -653,6 +662,7 @@ async function initializeProject(targetProject, models) {
   console.log(`Ensured shared lessons index: ${lessonsIndex}`);
   console.log(`Ensured skill overrides: ${path.join(targetProject, agentsDirectoryName, skillOverridesDirectoryName)}`);
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
+  console.log(`Ensured Codex config: ${path.join(targetProject, '.codex', 'config.toml')}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} bundled skills into: ${skillResult.skillDirectory}`);
   console.log(`Installed session-start version hook: ${updateHook.hookConfigPath}`);
