@@ -1,4 +1,9 @@
 #!/usr/bin/env node
+/*
+ * Build the publishable plugin directory from the root manifest and skills with a SKILL.md.
+ * Default mode writes generated files and prunes files recorded by the previous build;
+ * --check reports missing, stale, or extra files without modifying the directory.
+ */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -76,6 +81,7 @@ function addTree(files, source, destination) {
 }
 
 function generatedFiles() {
+  // A skill is included only when it has an entrypoint; its nested files are bundled with it.
   const files = new Map();
   addFile(files, path.join(REPO_ROOT, "plugin.json"), "plugin.json");
 
@@ -150,6 +156,7 @@ function buildGeneratedTree(destination, expected, check = false) {
     }
   }
 
+  // Remove only files listed by the previous build, preserving unrelated files in the output.
   for (const relativePath of previousGenerated) {
     if (expected.has(relativePath)) continue;
     const stalePath = path.resolve(destination, relativePath);

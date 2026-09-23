@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+/*
+ * Keep plugin release metadata derived from package.json.
+ * Default mode updates plugin.json and the setup skill's release.json; --check only reports drift.
+ */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,6 +35,7 @@ function main(argv = process.argv.slice(2)) {
     return 2;
   }
 
+  // package.json is the release source of truth; its repository URL also feeds setup metadata.
   const packageManifest = readJson(PACKAGE_PATH);
   if (typeof packageManifest.version !== "string" || !VERSION_PATTERN.test(packageManifest.version)) {
     console.error("package.json version must use MAJOR.MINOR.PATCH format.");
@@ -65,6 +70,7 @@ function main(argv = process.argv.slice(2)) {
 
   if (pluginManifest.version !== packageManifest.version) {
     const versionField = /("version"\s*:\s*")[^"]*(")/;
+    // Change only the version value so hand-maintained fields and formatting remain intact.
     const updatedPlugin = pluginSource.replace(versionField, `$1${packageManifest.version}$2`);
     if (JSON.parse(updatedPlugin).version !== packageManifest.version) {
       console.error(`Could not synchronize the version in ${PLUGIN_PATH}.`);
