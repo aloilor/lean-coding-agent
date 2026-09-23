@@ -6,9 +6,9 @@ Lean Coding Agent is a managed Codex plugin that bundles the complete skill set 
 
 Add the marketplace in Codex:
 
-    codex plugin marketplace add aloir/coding-agent-baseline
+    codex plugin marketplace add aloilor/lean-coding-agent
 
-Then open Codex's Plugins directory, choose the Lean Coding Agent marketplace, and install **Lean Coding Agent**. This installs all bundled skills together. There is no per-skill setup or project-local copy step.
+Then open Codex's Plugins directory, choose the Lean Coding Agent marketplace, and install **Lean Coding Agent** (`lean-coding-agent`). The GitHub repository is `aloilor/lean-coding-agent`; the plugin ID is `lean-coding-agent`. This installs all bundled skills together. There is no per-skill setup or project-local copy step.
 
 Ask Codex for help with a task or invoke a skill by name, such as `$engineering-standards`, `$codebase-onboarding`, or `$workflow-feature-development`.
 
@@ -26,7 +26,7 @@ Every directory under [`skills/`](skills/) that contains a `SKILL.md` is include
 
 ## Local development
 
-The repository is the canonical source. `scripts/build_codex_plugin.py` generates `plugins/lean-coding-agent/` from `plugin-src/plugin.json` and the installable skills under `skills/`.
+The repository is the canonical source. `scripts/build_codex_plugin.py` generates `plugins/lean-coding-agent/` from the root `plugin.json` and the installable skills under `skills/`.
 
     python scripts/build_codex_plugin.py
     python scripts/build_codex_plugin.py --check
@@ -42,9 +42,9 @@ To test the plugin from this working tree, add its local marketplace and refresh
 
 Restart Codex if the updated package is not visible.
 
-Edit canonical skill sources in `skills/` and plugin metadata in `plugin-src/plugin.json`. The build script generates `plugins/lean-coding-agent/`; do not hand-edit generated files.
+Edit canonical plugin metadata in the root `plugin.json` and skill sources in `skills/`. The build script generates `plugins/lean-coding-agent/`; do not hand-edit generated files.
 
-Submit changes as a pull request against [aloilor/coding-agent-baseline](https://github.com/aloilor/coding-agent-baseline). Public plugin publication and release versioning are separate from local development.
+Submit changes as a pull request against [aloilor/lean-coding-agent](https://github.com/aloilor/lean-coding-agent). Public plugin publication and release versioning are separate from local development.
 
 ## License
 

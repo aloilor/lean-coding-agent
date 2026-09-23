@@ -43,7 +43,7 @@ def add_tree(
 
 def generated_files() -> dict[Path, bytes]:
     files: dict[Path, bytes] = {}
-    add_file(files, REPO_ROOT / "plugin-src" / "plugin.json", Path("plugin.json"))
+    add_file(files, REPO_ROOT / "plugin.json", Path("plugin.json"))
     source_skills = REPO_ROOT / "skills"
     for skill_dir in sorted(path for path in source_skills.iterdir() if path.is_dir()):
         if not (skill_dir / "SKILL.md").is_file():

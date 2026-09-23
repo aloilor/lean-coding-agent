@@ -6,7 +6,7 @@
   "author": {
     "name": "coding-agent-baseline contributors"
   },
-  "repository": "https://github.com/aloilor/coding-agent-baseline",
+  "repository": "https://github.com/aloilor/lean-coding-agent",
   "license": "MIT",
   "keywords": ["codex", "coding-agent", "project-baseline"],
   "extensions": {
