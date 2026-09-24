@@ -27,8 +27,11 @@ const skillOverridesDirectoryName = 'skill-overrides';
 const skillOverridesIndexName = 'INDEX.md';
 const lessonsIndexName = 'LESSONS.md';
 const projectUpdateHookMarker = '# Lean Coding Agent session-start version check';
-const projectUpdateHookScript = '.codex/hooks/lean-coding-agent/check-skill-updates.mjs';
-const legacyProjectUpdateHookScript = '.codex/hooks/lean-coding-agent/check_skill_updates.mjs';
+const projectUpdateCheckerPath = 'scripts/check-skill-updates.mjs';
+const legacyProjectUpdateHookScripts = [
+  '.codex/hooks/lean-coding-agent/check-skill-updates.mjs',
+  '.codex/hooks/lean-coding-agent/check_skill_updates.mjs',
+];
 const localFiles = ['AGENTS.local.md', 'CLAUDE.local.md'];
 const ignoredAgentFiles = [
   '.agents/code-reviews/',
@@ -500,131 +503,106 @@ async function ensureCodebaseOnboardingContextFiles(targetProject) {
   return copyMissingFiles(codebaseOnboardingReferencesDirectory, agentContextDirectory);
 }
 
-async function readProjectUpdateHook() {
-  const templatePath = await requiredReference('hooks.json');
-  let template;
-  try {
-    template = JSON.parse(await fs.readFile(templatePath, 'utf8'));
-  } catch (error) {
-    throw new Error(`Bundled hooks.json is not valid JSON: ${error.message}`);
-  }
-
-  const sessionStartGroups = template?.hooks?.SessionStart;
-  if (!Array.isArray(sessionStartGroups)) {
-    throw new Error(`Bundled hooks.json must define a SessionStart hook array: ${templatePath}`);
-  }
-  const group = sessionStartGroups.find(
-    (candidate) => candidate?.matcher === 'startup|resume' && Array.isArray(candidate.hooks),
-  );
-  const hook = group?.hooks.find(
-    (candidate) => candidate?.type === 'command' && typeof candidate.command === 'string',
-  );
-  if (!hook || typeof hook.commandWindows !== 'string') {
-    throw new Error(`Bundled hooks.json must define a Windows-compatible SessionStart command: ${templatePath}`);
-  }
-  return { matcher: group.matcher, hook };
+function isLegacyProjectUpdateHook(handler) {
+  return [handler?.command, handler?.commandWindows].some((command) => {
+    if (typeof command !== 'string') return false;
+    const normalizedCommand = command.replaceAll('\\', '/');
+    return legacyProjectUpdateHookScripts.some((scriptPath) =>
+      normalizedCommand.includes(scriptPath.replaceAll('\\', '/')),
+    );
+  });
 }
 
-async function installProjectHookInJson(hooksJsonPath, projectHook) {
-  let configuration = { hooks: {} };
-  if (await pathExists(hooksJsonPath)) {
-    try {
-      configuration = JSON.parse(await fs.readFile(hooksJsonPath, 'utf8'));
-    } catch (error) {
-      throw new Error(`Project hooks.json is not valid JSON: ${error.message}`);
-    }
-    if (!configuration || typeof configuration !== 'object' || Array.isArray(configuration)) {
-      throw new Error(`Project hooks.json must contain a JSON object: ${hooksJsonPath}`);
-    }
-  }
+async function removeLegacyProjectHookFromJson(hooksJsonPath) {
+  if (!await pathExists(hooksJsonPath)) return;
 
-  if (!configuration.hooks) configuration.hooks = {};
-  if (typeof configuration.hooks !== 'object' || Array.isArray(configuration.hooks)) {
+  let configuration;
+  try {
+    configuration = JSON.parse(await fs.readFile(hooksJsonPath, 'utf8'));
+  } catch (error) {
+    throw new Error(`Project hooks.json is not valid JSON: ${error.message}`);
+  }
+  if (!configuration || typeof configuration !== 'object' || Array.isArray(configuration)) {
+    throw new Error(`Project hooks.json must contain a JSON object: ${hooksJsonPath}`);
+  }
+  const hooks = configuration.hooks;
+  if (hooks === undefined) return;
+  if (!hooks || typeof hooks !== 'object' || Array.isArray(hooks)) {
     throw new Error(`Project hooks.json hooks must be an object: ${hooksJsonPath}`);
   }
-  if (!configuration.hooks.SessionStart) configuration.hooks.SessionStart = [];
-  if (!Array.isArray(configuration.hooks.SessionStart)) {
+  const sessionStartGroups = hooks.SessionStart;
+  if (sessionStartGroups === undefined) return;
+  if (!Array.isArray(sessionStartGroups)) {
     throw new Error(`Project hooks.json SessionStart must be an array: ${hooksJsonPath}`);
   }
 
-  let handler = null;
-  const legacyHookCommand = projectHook.hook.command.replaceAll(
-    path.basename(projectUpdateHookScript),
-    path.basename(legacyProjectUpdateHookScript),
-  );
-  for (const group of configuration.hooks.SessionStart) {
-    if (!group || typeof group !== 'object' || !Array.isArray(group.hooks)) continue;
-    handler = group.hooks.find(
-      (candidate) => candidate?.command === projectHook.hook.command
-        || candidate?.command === legacyHookCommand,
-    );
-    if (handler) break;
+  let changed = false;
+  const remainingGroups = [];
+  for (const group of sessionStartGroups) {
+    if (!group || typeof group !== 'object' || !Array.isArray(group.hooks)) {
+      remainingGroups.push(group);
+      continue;
+    }
+    const remainingHandlers = group.hooks.filter((handler) => !isLegacyProjectUpdateHook(handler));
+    if (remainingHandlers.length !== group.hooks.length) changed = true;
+    if (remainingHandlers.length > 0 || group.hooks.length === 0) {
+      remainingGroups.push({ ...group, hooks: remainingHandlers });
+    }
   }
-  if (handler) {
-    Object.assign(handler, projectHook.hook);
-  } else {
-    configuration.hooks.SessionStart.push({
-      matcher: projectHook.matcher,
-      hooks: [projectHook.hook],
-    });
+  if (!changed) return;
+
+  if (remainingGroups.length > 0) hooks.SessionStart = remainingGroups;
+  else delete hooks.SessionStart;
+  if (Object.keys(hooks).length === 0) delete configuration.hooks;
+  if (Object.keys(configuration).length === 0) {
+    await fs.rm(hooksJsonPath, { force: true });
+    return;
   }
   await fs.writeFile(hooksJsonPath, `${JSON.stringify(configuration, null, 2)}\n`, 'utf8');
 }
 
-async function removeLegacyProjectHookFromToml(configPath, hook) {
+async function removeLegacyProjectHookFromToml(configPath) {
+  if (!await pathExists(configPath)) return;
   const existing = await fs.readFile(configPath, 'utf8');
   const lineEnding = existing.includes('\r\n') ? '\r\n' : '\n';
-  const legacyHook = {
-    command: hook.command.replaceAll(
-      path.basename(projectUpdateHookScript),
-      path.basename(legacyProjectUpdateHookScript),
-    ),
-    commandWindows: hook.commandWindows.replaceAll(
-      path.basename(projectUpdateHookScript),
-      path.basename(legacyProjectUpdateHookScript),
-    ),
-  };
-  for (const hookDefinition of [hook, legacyHook]) {
-    const hookConfiguration = [
-      projectUpdateHookMarker,
-      '[[hooks.SessionStart]]',
-      'matcher = "startup|resume"',
-      '',
-      '[[hooks.SessionStart.hooks]]',
-      'type = "command"',
-      `command = ${JSON.stringify(hookDefinition.command)}`,
-      `command_windows = ${JSON.stringify(hookDefinition.commandWindows)}`,
-      'timeout = 10',
-      '',
-    ].join(lineEnding);
-    const hookIndex = existing.indexOf(hookConfiguration);
-    if (hookIndex < 0 || (hookIndex > 0 && existing[hookIndex - 1] !== '\n')) continue;
+  const lines = existing.split(/\r?\n/);
+  const markerIndex = lines.findIndex((line) => line.trim() === projectUpdateHookMarker);
+  if (markerIndex < 0) return;
 
-    const updated = existing.slice(0, hookIndex)
-      + existing.slice(hookIndex + hookConfiguration.length);
-    await fs.writeFile(configPath, updated, 'utf8');
-    return;
-  }
+  const timeoutIndex = lines.findIndex((line, index) => index > markerIndex && line.trim() === 'timeout = 10');
+  if (timeoutIndex < 0) return;
+  lines.splice(markerIndex, timeoutIndex - markerIndex + 1);
+  await fs.writeFile(configPath, lines.join(lineEnding), 'utf8');
 }
 
-export async function ensureSkillUpdateHook(targetProject) {
-  const projectHook = await readProjectUpdateHook();
-  const codexDirectory = path.join(targetProject, '.codex');
-  const hooksDirectory = path.join(codexDirectory, 'hooks');
-  const skillHooksDirectory = path.join(hooksDirectory, 'lean-coding-agent');
-  await ensureRegularDirectory(codexDirectory);
-  await ensureRegularDirectory(hooksDirectory);
-  await ensureRegularDirectory(skillHooksDirectory);
+async function removeEmptyDirectory(directoryPath) {
+  let directoryInfo;
+  try {
+    directoryInfo = await fs.lstat(directoryPath);
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw error;
+  }
+  if (!directoryInfo.isDirectory() || (await fs.readdir(directoryPath)).length > 0) return;
+  await fs.rmdir(directoryPath);
+}
 
-  const checkerPath = path.join(targetProject, projectUpdateHookScript);
+export async function installUpdateChecker(targetProject) {
+  const scriptsDirectory = path.join(targetProject, 'scripts');
+  await ensureRegularDirectory(scriptsDirectory);
+  const checkerPath = path.join(targetProject, projectUpdateCheckerPath);
   await fs.copyFile(updateCheckerSourcePath, checkerPath);
 
-  const hooksJsonPath = path.join(codexDirectory, 'hooks.json');
-  const configPath = await ensureCodexConfig(targetProject);
-  await installProjectHookInJson(hooksJsonPath, projectHook);
-  await removeLegacyProjectHookFromToml(configPath, projectHook.hook);
-  await fs.rm(path.join(targetProject, legacyProjectUpdateHookScript), { force: true });
-  return { checkerPath, hookConfigPath: hooksJsonPath };
+  const codexDirectory = path.join(targetProject, '.codex');
+  await removeLegacyProjectHookFromJson(path.join(codexDirectory, 'hooks.json'));
+  await removeLegacyProjectHookFromToml(path.join(codexDirectory, 'config.toml'));
+  for (const scriptPath of legacyProjectUpdateHookScripts) {
+    await fs.rm(path.join(targetProject, scriptPath), { force: true });
+  }
+  const legacyHookDirectory = path.join(targetProject, '.codex', 'hooks', 'lean-coding-agent');
+  await removeEmptyDirectory(legacyHookDirectory);
+  await removeEmptyDirectory(path.dirname(legacyHookDirectory));
+  return { checkerPath };
 }
 
 async function detectPackageManager(targetProject) {
@@ -726,7 +704,7 @@ async function initializeProject(targetProject, models) {
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
   const skillResult = await syncBundledSkills(targetProject);
-  const updateHook = await ensureSkillUpdateHook(targetProject);
+  const updateChecker = await installUpdateChecker(targetProject);
   const agentBrowserStatus = await installAgentBrowser(targetProject);
   const upstreamSkillNames = await installUpstreamSkills(targetProject);
 
@@ -749,8 +727,7 @@ async function initializeProject(targetProject, models) {
   console.log(`Installed ${skillResult.skillCount} bundled skills into: ${skillResult.skillDirectory}`);
   console.log(`Seeded codebase-onboarding context files in: ${path.join(targetProject, agentContextDirectoryName)}`);
   for (const filePath of onboardingContextPaths) console.log(`- ${filePath}`);
-  console.log(`Installed session-start version hook: ${updateHook.hookConfigPath}`);
-  console.log(`Installed version checker: ${updateHook.checkerPath}`);
+  console.log(`Installed version checker: ${updateChecker.checkerPath}`);
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
 }
 

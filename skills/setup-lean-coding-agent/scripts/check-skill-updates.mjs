@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const DEFAULT_PLUGIN_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..", "..", "..");
 const DEFAULT_TIMEOUT_MS = 15_000;
-const HOOK_TIMEOUT_MS = 5_000;
 const GITHUB_API_VERSION = "2022-11-28";
 
 class UpdateCheckError extends Error {}
@@ -41,16 +40,16 @@ function getGitHubRepository(repositoryValue) {
   try {
     repositoryUrl = new URL(repositoryValue);
   } catch {
-    throw new UpdateCheckError(`plugin.json has an invalid repository URL: ${repositoryValue}`);
+    throw new UpdateCheckError(`Version manifest has an invalid repository URL: ${repositoryValue}`);
   }
 
   if (repositoryUrl.protocol !== "https:" || repositoryUrl.hostname !== "github.com") {
-    throw new UpdateCheckError("plugin.json repository must be an HTTPS GitHub URL.");
+    throw new UpdateCheckError("Repository must be an HTTPS GitHub URL.");
   }
 
   const segments = repositoryUrl.pathname.split("/").filter(Boolean);
   if (segments.length !== 2) {
-    throw new UpdateCheckError("plugin.json repository URL must have the form https://github.com/owner/repo.");
+    throw new UpdateCheckError("Repository URL must have the form https://github.com/owner/repo.");
   }
 
   const [owner, repository] = segments;
@@ -60,7 +59,7 @@ function getGitHubRepository(repositoryValue) {
   };
 }
 
-async function readPluginManifest(manifestPath = path.join(process.env.PLUGIN_ROOT || DEFAULT_PLUGIN_ROOT, "plugin.json")) {
+async function readVersionManifest(manifestPath = path.join(process.env.PLUGIN_ROOT || DEFAULT_PLUGIN_ROOT, "plugin.json")) {
   let manifest;
   try {
     manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
@@ -72,11 +71,11 @@ async function readPluginManifest(manifestPath = path.join(process.env.PLUGIN_RO
   }
 
   if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
-    throw new UpdateCheckError("plugin.json must contain a JSON object.");
+    throw new UpdateCheckError("Version manifest must contain a JSON object.");
   }
 
   return {
-    version: parseStableVersion(manifest.version, "plugin.json version"),
+    version: parseStableVersion(manifest.version, "installed version"),
     repository: getGitHubRepository(manifest.repository),
   };
 }
@@ -123,96 +122,19 @@ async function fetchLatestRelease({ owner, repository }, timeoutMs = DEFAULT_TIM
   };
 }
 
-function createSessionStartHookOutput(additionalContext, systemMessage = null) {
-  const output = {
-    hookSpecificOutput: {
-      hookEventName: "SessionStart",
-      additionalContext,
-    },
-  };
-  if (systemMessage) output.systemMessage = systemMessage;
-  return output;
-}
-
-function createSessionStartHookResult(installedVersionText, latestVersionText, projectInstall = false) {
-  const installedVersion = parseStableVersion(installedVersionText, "installed plugin version");
-  if (latestVersionText === null) {
-    const message = "Lean Coding Agent update check completed: no stable GitHub release is published yet; no version comparison was possible.";
-    return createSessionStartHookOutput(
-      message + " This check is advisory; continue with the user's request.",
-      message,
-    );
-  }
-
-  const latestVersion = parseStableVersion(latestVersionText, "latest release version", true);
-  const comparison = compareVersions(latestVersion, installedVersion);
-  if (comparison <= 0) {
-    const installDescription = projectInstall
-      ? "project skill copies are at v" + installedVersion.text
-      : "the installed plugin is at v" + installedVersion.text;
-    const releaseDescription = comparison === 0
-      ? "the latest stable release is v" + latestVersion.text + "; no update is available."
-      : "the latest stable release is v" + latestVersion.text + "; the installed version is ahead, so no update is available.";
-    const message = "Lean Coding Agent update check completed: "
-      + installDescription
-      + "; "
-      + releaseDescription;
-    return createSessionStartHookOutput(
-      message + " This check is advisory; continue with the user's request.",
-      message,
-    );
-  }
-
-  const updateContext = projectInstall
-    ? `The project's Lean Coding Agent skill copies are outdated (installed from v${installedVersion.text}; v${latestVersion.text} is the latest stable release). In your first reply, briefly tell the user to update Lean Coding Agent and rerun \`$setup-lean-coding-agent\` to refresh this project's skill copies, then continue with their request.`
-    : `Lean Coding Agent update available: v${installedVersion.text} is installed and v${latestVersion.text} is the latest stable release. In your first reply, briefly tell the user and recommend updating with \`codex plugin marketplace upgrade lean-coding-agent\`, then continue with their request.`;
-
-  return createSessionStartHookOutput(updateContext);
-}
-
-function createSessionStartHookFailure(error) {
-  const reason = error instanceof UpdateCheckError ? error.message : "Unexpected error.";
-  const message = "Lean Coding Agent update check failed: " + reason;
-  return createSessionStartHookOutput(
-    message + ". This check is advisory; continue with the user's request.",
-    message,
-  );
-}
-
 function printUsage() {
-  console.log("Usage: node check-skill-updates.mjs [--hook] [--project] [--manifest <path>]");
-  console.log("Compare the installed version with the latest stable GitHub Release.");
-  console.log("Use --hook to return Codex SessionStart status, --manifest to select the installed version, and --project for project skill copies.");
-  console.log("In --hook mode, the outcome is reported without blocking session startup.");
-  console.log("CLI exit codes: 0 = no newer release (or no release yet), 1 = update available, 2 = check failed; --hook always returns 0 so it cannot block startup.");
-}
-
-async function runSessionStartCheck(manifestPath, projectInstall) {
-  let output;
-  try {
-    const manifest = await readPluginManifest(manifestPath);
-    const release = await fetchLatestRelease(manifest.repository, HOOK_TIMEOUT_MS);
-    output = createSessionStartHookResult(
-      manifest.version.text,
-      release?.version.text ?? null,
-      projectInstall,
-    );
-  } catch (error) {
-    output = createSessionStartHookFailure(error);
-  }
-  console.log(JSON.stringify(output));
-  return 0;
+  console.log("Usage: node check-skill-updates.mjs [--project] [--manifest <path>]");
+  console.log("Compare the installed plugin or project skill version with the latest stable GitHub Release.");
+  console.log("Use --manifest to select the installed version and --project to describe project skill copies.");
+  console.log("CLI exit codes: 0 = no newer release (or no release yet), 1 = update available, 2 = check failed.");
 }
 
 function parseArgs(argv) {
-  let hook = false;
   let projectInstall = false;
   let manifestPath = path.join(process.env.PLUGIN_ROOT || DEFAULT_PLUGIN_ROOT, "plugin.json");
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
-    if (argument === "--hook") {
-      hook = true;
-    } else if (argument === "--project") {
+    if (argument === "--project") {
       projectInstall = true;
     } else if (argument === "--manifest") {
       if (!argv[index + 1] || argv[index + 1].startsWith("--")) {
@@ -223,7 +145,7 @@ function parseArgs(argv) {
       throw new UpdateCheckError(`Unknown argument: ${argument}`);
     }
   }
-  return { hook, manifestPath, projectInstall };
+  return { manifestPath, projectInstall };
 }
 
 async function main(argv = process.argv.slice(2)) {
@@ -239,9 +161,7 @@ async function main(argv = process.argv.slice(2)) {
     printUsage();
     return 2;
   }
-  if (options.hook) return runSessionStartCheck(options.manifestPath, options.projectInstall);
-
-  const manifest = await readPluginManifest(options.manifestPath);
+  const manifest = await readVersionManifest(options.manifestPath);
   const release = await fetchLatestRelease(manifest.repository);
   if (!release) {
     console.log("No GitHub Release is published yet; there is nothing to compare.");
@@ -249,20 +169,27 @@ async function main(argv = process.argv.slice(2)) {
   }
 
   const comparison = compareVersions(release.version, manifest.version);
-  console.log(`Local plugin.json version: ${manifest.version.text}`);
+  const versionLabel = options.projectInstall ? "Project skill version" : "Local plugin.json version";
+  console.log(`${versionLabel}: ${manifest.version.text}`);
   console.log(`Latest stable release:     v${release.version.text}`);
   if (release.url) console.log(`Release page:               ${release.url}`);
 
   if (comparison > 0) {
-    console.log("Update available: the latest release is newer than this checkout.");
+    console.log(options.projectInstall
+      ? "Update available: the project skill copies are older; update Lean Coding Agent and rerun its setup skill."
+      : "Update available: the latest release is newer than this checkout.");
     return 1;
   }
   if (comparison < 0) {
-    console.log("This checkout is ahead of the latest release; its version has not been released yet.");
+    console.log(options.projectInstall
+      ? "The project skill copies are ahead of the latest release; their version has not been released yet."
+      : "This checkout is ahead of the latest release; its version has not been released yet.");
     return 0;
   }
 
-  console.log("Up to date: plugin.json matches the latest stable release.");
+  console.log(options.projectInstall
+    ? "Up to date: the project skill copies match the latest stable release."
+    : "Up to date: plugin.json matches the latest stable release.");
   return 0;
 }
 

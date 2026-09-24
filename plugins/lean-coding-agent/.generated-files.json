@@ -1,5 +1,4 @@
 [
-  "hooks/hooks.json",
   "plugin.json",
   "skills/codebase-onboarding/SKILL.md",
   "skills/codebase-onboarding/agents/openai.yaml",
@@ -53,7 +52,6 @@
   "skills/setup-lean-coding-agent/references/baseline/CLAUDE.md",
   "skills/setup-lean-coding-agent/references/config.toml",
   "skills/setup-lean-coding-agent/references/docs/incidents/README.md",
-  "skills/setup-lean-coding-agent/references/hooks.json",
   "skills/setup-lean-coding-agent/references/release.json",
   "skills/setup-lean-coding-agent/references/skill-overrides/INDEX.md",
   "skills/setup-lean-coding-agent/references/skill-overrides/tdd.md",

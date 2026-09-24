@@ -21,11 +21,10 @@
   ],
   "extensions": {
     "com.openai": {
-      "hooks": "./hooks/hooks.json",
       "interface": {
         "displayName": "Lean Coding Agent",
         "shortDescription": "A complete, managed coding and project setup bundle for Codex.",
-        "longDescription": "Subscribe to one Codex plugin for the complete Lean Coding Agent skill set, a project setup skill, and a session-start release check. The skills are packaged and updated together.",
+        "longDescription": "Subscribe to one Codex plugin for the complete Lean Coding Agent skill set, project setup, and onboarding. The skills are packaged and updated together.",
         "developerName": "aloilor",
         "category": "Productivity",
         "capabilities": ["Interactive", "Write"],
