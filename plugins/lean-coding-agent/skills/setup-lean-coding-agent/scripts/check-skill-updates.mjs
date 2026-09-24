@@ -123,45 +123,84 @@ async function fetchLatestRelease({ owner, repository }, timeoutMs = DEFAULT_TIM
   };
 }
 
-function createSessionStartHookOutput(installedVersionText, latestVersionText, projectInstall = false) {
-  if (latestVersionText === null) return null;
+function createSessionStartHookOutput(additionalContext, systemMessage = null) {
+  const output = {
+    hookSpecificOutput: {
+      hookEventName: "SessionStart",
+      additionalContext,
+    },
+  };
+  if (systemMessage) output.systemMessage = systemMessage;
+  return output;
+}
 
+function createSessionStartHookResult(installedVersionText, latestVersionText, projectInstall = false) {
   const installedVersion = parseStableVersion(installedVersionText, "installed plugin version");
+  if (latestVersionText === null) {
+    const message = "Lean Coding Agent update check completed: no stable GitHub release is published yet; no version comparison was possible.";
+    return createSessionStartHookOutput(
+      message + " This check is advisory; continue with the user's request.",
+      message,
+    );
+  }
+
   const latestVersion = parseStableVersion(latestVersionText, "latest release version", true);
-  if (compareVersions(latestVersion, installedVersion) <= 0) return null;
+  const comparison = compareVersions(latestVersion, installedVersion);
+  if (comparison <= 0) {
+    const installDescription = projectInstall
+      ? "project skill copies are at v" + installedVersion.text
+      : "the installed plugin is at v" + installedVersion.text;
+    const releaseDescription = comparison === 0
+      ? "the latest stable release is v" + latestVersion.text + "; no update is available."
+      : "the latest stable release is v" + latestVersion.text + "; the installed version is ahead, so no update is available.";
+    const message = "Lean Coding Agent update check completed: "
+      + installDescription
+      + "; "
+      + releaseDescription;
+    return createSessionStartHookOutput(
+      message + " This check is advisory; continue with the user's request.",
+      message,
+    );
+  }
 
   const updateContext = projectInstall
     ? `The project's Lean Coding Agent skill copies are outdated (installed from v${installedVersion.text}; v${latestVersion.text} is the latest stable release). In your first reply, briefly tell the user to update Lean Coding Agent and rerun \`$setup-lean-coding-agent\` to refresh this project's skill copies, then continue with their request.`
     : `Lean Coding Agent update available: v${installedVersion.text} is installed and v${latestVersion.text} is the latest stable release. In your first reply, briefly tell the user and recommend updating with \`codex plugin marketplace upgrade lean-coding-agent\`, then continue with their request.`;
 
-  return {
-    hookSpecificOutput: {
-      hookEventName: "SessionStart",
-      additionalContext: updateContext,
-    },
-  };
+  return createSessionStartHookOutput(updateContext);
+}
+
+function createSessionStartHookFailure(error) {
+  const reason = error instanceof UpdateCheckError ? error.message : "Unexpected error.";
+  const message = "Lean Coding Agent update check failed: " + reason;
+  return createSessionStartHookOutput(
+    message + ". This check is advisory; continue with the user's request.",
+    message,
+  );
 }
 
 function printUsage() {
   console.log("Usage: node check-skill-updates.mjs [--hook] [--project] [--manifest <path>]");
   console.log("Compare the installed version with the latest stable GitHub Release.");
-  console.log("Use --hook for quiet Codex SessionStart output, --manifest to select the installed version, and --project for project skill copies.");
-  console.log("Exit codes: 0 = no newer release (or no release yet), 1 = update available, 2 = check failed.");
+  console.log("Use --hook to return Codex SessionStart status, --manifest to select the installed version, and --project for project skill copies.");
+  console.log("In --hook mode, the outcome is reported without blocking session startup.");
+  console.log("CLI exit codes: 0 = no newer release (or no release yet), 1 = update available, 2 = check failed; --hook always returns 0 so it cannot block startup.");
 }
 
 async function runSessionStartCheck(manifestPath, projectInstall) {
+  let output;
   try {
     const manifest = await readPluginManifest(manifestPath);
     const release = await fetchLatestRelease(manifest.repository, HOOK_TIMEOUT_MS);
-    const output = createSessionStartHookOutput(
+    output = createSessionStartHookResult(
       manifest.version.text,
       release?.version.text ?? null,
       projectInstall,
     );
-    if (output) console.log(JSON.stringify(output));
-  } catch {
-    // Keep startup quiet when the release check cannot determine the latest version.
+  } catch (error) {
+    output = createSessionStartHookFailure(error);
   }
+  console.log(JSON.stringify(output));
   return 0;
 }
 
