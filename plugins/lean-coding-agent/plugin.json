@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "lean-coding-agent",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A managed bundle of coding standards, project setup, onboarding, Git, REST, and workflow skills for Codex.",
   "author": {
     "name": "aloilor"
