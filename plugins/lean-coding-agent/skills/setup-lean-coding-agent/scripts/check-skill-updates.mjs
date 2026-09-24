@@ -143,7 +143,7 @@ function createSessionStartHookOutput(installedVersionText, latestVersionText, p
 }
 
 function printUsage() {
-  console.log("Usage: node check_skill_updates.mjs [--hook] [--project] [--manifest <path>]");
+  console.log("Usage: node check-skill-updates.mjs [--hook] [--project] [--manifest <path>]");
   console.log("Compare the installed version with the latest stable GitHub Release.");
   console.log("Use --hook for quiet Codex SessionStart output, --manifest to select the installed version, and --project for project skill copies.");
   console.log("Exit codes: 0 = no newer release (or no release yet), 1 = update available, 2 = check failed.");

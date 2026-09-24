@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { promises as fs } from 'node:fs';
+import { constants as fsConstants, promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -9,8 +9,13 @@ const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const skillDirectory = path.resolve(scriptDirectory, '..');
 const pluginSkillsDirectory = path.resolve(skillDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
+const codebaseOnboardingReferencesDirectory = path.join(
+  pluginSkillsDirectory,
+  'codebase-onboarding',
+  'references',
+);
 const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
-const updateCheckerSourcePath = path.join(scriptDirectory, 'check_skill_updates.mjs');
+const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
 const agentNames = ['bug-diagnostician', 'implementer', 'code-reviewer'];
 const defaultModel = 'gpt-6-luna';
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
@@ -22,8 +27,8 @@ const skillOverridesDirectoryName = 'skill-overrides';
 const skillOverridesIndexName = 'INDEX.md';
 const lessonsIndexName = 'LESSONS.md';
 const projectUpdateHookMarker = '# Lean Coding Agent session-start version check';
-const projectUpdateHookScript = '.codex/hooks/lean-coding-agent/check_skill_updates.mjs';
-const projectSkillsManifest = 'agent-context/skills-installed.json';
+const projectUpdateHookScript = '.codex/hooks/lean-coding-agent/check-skill-updates.mjs';
+const legacyProjectUpdateHookScript = '.codex/hooks/lean-coding-agent/check_skill_updates.mjs';
 const localFiles = ['AGENTS.local.md', 'CLAUDE.local.md'];
 const ignoredAgentFiles = [
   '.agents/code-reviews/',
@@ -86,7 +91,7 @@ function readOptions() {
   if (values.help) {
     console.log(
       [
-        'Usage: node setup_lean_coding_agent.mjs [target-project] [options]',
+        'Usage: node setup-lean-coding-agent.mjs [target-project] [options]',
         '',
         'Options:',
         `  --bug-diagnostician-model <id>  Model for bug-diagnostician (default ${defaultModel})`,
@@ -437,16 +442,6 @@ export async function syncBundledSkills(targetProject) {
   return { skillDirectory: skillsDirectory, skillCount: sourceDirectories.length };
 }
 
-function projectUpdateHookCommands() {
-  const projectRoot = '$(git rev-parse --show-toplevel)';
-  const scriptPath = `"${projectRoot}/${projectUpdateHookScript.replaceAll('\\', '/')}"`;
-  const manifestPath = `"${projectRoot}/${projectSkillsManifest}"`;
-  return {
-    command: `node ${scriptPath} --hook --project --manifest ${manifestPath}`,
-    commandWindows: `powershell -NoProfile -Command "$root = git rev-parse --show-toplevel; node (Join-Path $root '.codex/hooks/lean-coding-agent/check_skill_updates.mjs') --hook --project --manifest (Join-Path $root 'agent-context/skills-installed.json')"`,
-  };
-}
-
 async function ensureRegularDirectory(directoryPath) {
   try {
     const details = await fs.lstat(directoryPath);
@@ -459,7 +454,80 @@ async function ensureRegularDirectory(directoryPath) {
   }
 }
 
-async function installProjectHookInJson(hooksJsonPath, commands) {
+async function ensureCodebaseOnboardingReferences(targetProject) {
+  let sourceDetails;
+  try {
+    sourceDetails = await fs.stat(codebaseOnboardingReferencesDirectory);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error(
+        `Bundled codebase-onboarding references are missing: ${codebaseOnboardingReferencesDirectory}`,
+      );
+    }
+    throw error;
+  }
+  if (!sourceDetails.isDirectory()) {
+    throw new Error(
+      `Bundled codebase-onboarding references are not a directory: ${codebaseOnboardingReferencesDirectory}`,
+    );
+  }
+
+  const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
+  const targetDirectory = path.join(agentContextDirectory, 'references');
+  await ensureRegularDirectory(agentContextDirectory);
+  await ensureRegularDirectory(targetDirectory);
+
+  async function copyMissingFiles(sourceDirectory, destinationDirectory) {
+    const createdPaths = [];
+    const entries = await fs.readdir(sourceDirectory, { withFileTypes: true });
+    for (const entry of entries) {
+      if (entry.name === '.git' || entry.name === '__pycache__') continue;
+      const sourcePath = path.join(sourceDirectory, entry.name);
+      const destinationPath = path.join(destinationDirectory, entry.name);
+      if (entry.isDirectory()) {
+        await ensureRegularDirectory(destinationPath);
+        createdPaths.push(...await copyMissingFiles(sourcePath, destinationPath));
+      } else if (entry.isFile()) {
+        try {
+          await fs.copyFile(sourcePath, destinationPath, fsConstants.COPYFILE_EXCL);
+          createdPaths.push(destinationPath);
+        } catch (error) {
+          if (error.code !== 'EEXIST') throw error;
+        }
+      }
+    }
+    return createdPaths;
+  }
+
+  return copyMissingFiles(codebaseOnboardingReferencesDirectory, targetDirectory);
+}
+
+async function readProjectUpdateHook() {
+  const templatePath = await requiredReference('hooks.json');
+  let template;
+  try {
+    template = JSON.parse(await fs.readFile(templatePath, 'utf8'));
+  } catch (error) {
+    throw new Error(`Bundled hooks.json is not valid JSON: ${error.message}`);
+  }
+
+  const sessionStartGroups = template?.hooks?.SessionStart;
+  if (!Array.isArray(sessionStartGroups)) {
+    throw new Error(`Bundled hooks.json must define a SessionStart hook array: ${templatePath}`);
+  }
+  const group = sessionStartGroups.find(
+    (candidate) => candidate?.matcher === 'startup|resume' && Array.isArray(candidate.hooks),
+  );
+  const hook = group?.hooks.find(
+    (candidate) => candidate?.type === 'command' && typeof candidate.command === 'string',
+  );
+  if (!hook || typeof hook.commandWindows !== 'string') {
+    throw new Error(`Bundled hooks.json must define a Windows-compatible SessionStart command: ${templatePath}`);
+  }
+  return { matcher: group.matcher, hook };
+}
+
+async function installProjectHookInJson(hooksJsonPath, projectHook) {
   let configuration = { hooks: {} };
   if (await pathExists(hooksJsonPath)) {
     try {
@@ -482,44 +550,67 @@ async function installProjectHookInJson(hooksJsonPath, commands) {
   }
 
   let handler = null;
+  const legacyHookCommand = projectHook.hook.command.replaceAll(
+    path.basename(projectUpdateHookScript),
+    path.basename(legacyProjectUpdateHookScript),
+  );
   for (const group of configuration.hooks.SessionStart) {
     if (!group || typeof group !== 'object' || !Array.isArray(group.hooks)) continue;
-    handler = group.hooks.find((candidate) => candidate?.command === commands.command);
+    handler = group.hooks.find(
+      (candidate) => candidate?.command === projectHook.hook.command
+        || candidate?.command === legacyHookCommand,
+    );
     if (handler) break;
   }
   if (handler) {
-    handler.commandWindows = commands.commandWindows;
-    handler.timeout = 10;
+    Object.assign(handler, projectHook.hook);
   } else {
     configuration.hooks.SessionStart.push({
-      matcher: 'startup|resume',
-      hooks: [{ type: 'command', ...commands, timeout: 10 }],
+      matcher: projectHook.matcher,
+      hooks: [projectHook.hook],
     });
   }
   await fs.writeFile(hooksJsonPath, `${JSON.stringify(configuration, null, 2)}\n`, 'utf8');
 }
 
-async function installProjectHookInToml(configPath, commands) {
-  const existing = (await pathExists(configPath)) ? await fs.readFile(configPath, 'utf8') : '';
-  if (existing.includes(projectUpdateHookMarker)) return;
+async function removeLegacyProjectHookFromToml(configPath, hook) {
+  const existing = await fs.readFile(configPath, 'utf8');
+  const lineEnding = existing.includes('\r\n') ? '\r\n' : '\n';
+  const legacyHook = {
+    command: hook.command.replaceAll(
+      path.basename(projectUpdateHookScript),
+      path.basename(legacyProjectUpdateHookScript),
+    ),
+    commandWindows: hook.commandWindows.replaceAll(
+      path.basename(projectUpdateHookScript),
+      path.basename(legacyProjectUpdateHookScript),
+    ),
+  };
+  for (const hookDefinition of [hook, legacyHook]) {
+    const hookConfiguration = [
+      projectUpdateHookMarker,
+      '[[hooks.SessionStart]]',
+      'matcher = "startup|resume"',
+      '',
+      '[[hooks.SessionStart.hooks]]',
+      'type = "command"',
+      `command = ${JSON.stringify(hookDefinition.command)}`,
+      `command_windows = ${JSON.stringify(hookDefinition.commandWindows)}`,
+      'timeout = 10',
+      '',
+    ].join(lineEnding);
+    const hookIndex = existing.indexOf(hookConfiguration);
+    if (hookIndex < 0 || (hookIndex > 0 && existing[hookIndex - 1] !== '\n')) continue;
 
-  const separator = existing.length === 0 || existing.endsWith('\n') ? '' : '\n';
-  const hookConfiguration = [
-    projectUpdateHookMarker,
-    '[[hooks.SessionStart]]',
-    'matcher = "startup|resume"',
-    '',
-    '[[hooks.SessionStart.hooks]]',
-    'type = "command"',
-    `command = ${JSON.stringify(commands.command)}`,
-    `command_windows = ${JSON.stringify(commands.commandWindows)}`,
-    'timeout = 10',
-    '',
-  ].join('\n');
-  await fs.writeFile(configPath, `${existing}${separator}${hookConfiguration}`, 'utf8');
+    const updated = existing.slice(0, hookIndex)
+      + existing.slice(hookIndex + hookConfiguration.length);
+    await fs.writeFile(configPath, updated, 'utf8');
+    return;
+  }
 }
 
 export async function ensureSkillUpdateHook(targetProject) {
+  const projectHook = await readProjectUpdateHook();
   const codexDirectory = path.join(targetProject, '.codex');
   const hooksDirectory = path.join(codexDirectory, 'hooks');
   const skillHooksDirectory = path.join(hooksDirectory, 'lean-coding-agent');
@@ -530,20 +621,12 @@ export async function ensureSkillUpdateHook(targetProject) {
   const checkerPath = path.join(targetProject, projectUpdateHookScript);
   await fs.copyFile(updateCheckerSourcePath, checkerPath);
 
-  const commands = projectUpdateHookCommands();
   const hooksJsonPath = path.join(codexDirectory, 'hooks.json');
   const configPath = await ensureCodexConfig(targetProject);
-  const configText = await fs.readFile(configPath, 'utf8');
-  if (configText.includes(projectUpdateHookMarker)) {
-    return { checkerPath, hookConfigPath: configPath };
-  }
-  if (await pathExists(hooksJsonPath)) {
-    await installProjectHookInJson(hooksJsonPath, commands);
-    return { checkerPath, hookConfigPath: hooksJsonPath };
-  }
-
-  await installProjectHookInToml(configPath, commands);
-  return { checkerPath, hookConfigPath: configPath };
+  await installProjectHookInJson(hooksJsonPath, projectHook);
+  await removeLegacyProjectHookFromToml(configPath, projectHook.hook);
+  await fs.rm(path.join(targetProject, legacyProjectUpdateHookScript), { force: true });
+  return { checkerPath, hookConfigPath: hooksJsonPath };
 }
 
 async function detectPackageManager(targetProject) {
@@ -636,6 +719,7 @@ async function installUpstreamSkills(targetProject) {
 async function initializeProject(targetProject, models) {
   const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
   await fs.mkdir(agentContextDirectory, { recursive: true });
+  const onboardingReferencePaths = await ensureCodebaseOnboardingReferences(targetProject);
   const incidentReadme = await ensureIncidentsReadme(targetProject);
   const lessonsIndex = await ensureLessonsIndex(targetProject);
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
@@ -665,6 +749,8 @@ async function initializeProject(targetProject, models) {
   console.log(`Ensured Codex config: ${path.join(targetProject, '.codex', 'config.toml')}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} bundled skills into: ${skillResult.skillDirectory}`);
+  console.log(`Ensured codebase-onboarding references in: ${path.join(targetProject, agentContextDirectoryName, 'references')}`);
+  for (const filePath of onboardingReferencePaths) console.log(`- ${filePath}`);
   console.log(`Installed session-start version hook: ${updateHook.hookConfigPath}`);
   console.log(`Installed version checker: ${updateHook.checkerPath}`);
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);

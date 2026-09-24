@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/lean-coding-agent/check-skill-updates.mjs\" --hook --project --manifest \"$(git rev-parse --show-toplevel)/agent-context/skills-installed.json\"",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; node (Join-Path $root '.codex/hooks/lean-coding-agent/check-skill-updates.mjs') --hook --project --manifest (Join-Path $root 'agent-context/skills-installed.json')\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

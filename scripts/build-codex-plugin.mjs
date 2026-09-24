@@ -84,6 +84,8 @@ function generatedFiles() {
   // A skill is included only when it has an entrypoint; its nested files are bundled with it.
   const files = new Map();
   addFile(files, path.join(REPO_ROOT, "plugin.json"), "plugin.json");
+  addTree(files, path.join(REPO_ROOT, "hooks"), "hooks");
+  addFile(files, path.join(REPO_ROOT, "hooks", "hooks.json"), path.join("hooks", "hooks.json"));
 
   const sourceSkills = path.join(REPO_ROOT, "skills");
   for (const entry of fs.readdirSync(sourceSkills, { withFileTypes: true }).sort((a, b) => compareNames(a.name, b.name))) {

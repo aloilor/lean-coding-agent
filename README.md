@@ -54,7 +54,9 @@ npx skills update -p
 
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-Project setup also registers a local Codex `SessionStart` hook and records the installed version in `agent-context/skills-installed.json`. On startup and resume, the hook checks GitHub for a newer stable release. If one is available, Codex mentions it in its first reply and recommends updating Lean Coding Agent and rerunning `$setup-lean-coding-agent` to refresh the project's skill copies. The hook does not update files automatically and stays quiet when the project is current or GitHub cannot be reached. Codex may ask you to review and trust the project-local hook before it runs.
+The plugin registers a Codex `SessionStart` hook that checks GitHub for a newer stable release on startup and resume. If one is available, Codex mentions it in its first reply and recommends upgrading the plugin with `codex plugin marketplace upgrade lean-coding-agent`. It does not update files automatically and stays quiet when the plugin is current or GitHub cannot be reached. Codex may ask you to review and trust the plugin hook before it runs.
+
+For skills installed through the Skills CLI, project setup also registers a local `SessionStart` hook and records the installed version in `agent-context/skills-installed.json`. If a newer release is available, Codex recommends updating Lean Coding Agent and rerunning `$setup-lean-coding-agent` to refresh the project's skill copies. This hook also stays quiet when the project is current or GitHub cannot be reached, and Codex may ask you to review and trust it before it runs.
 
 Make changes in this repository; do not edit the installed plugin cache.
 
