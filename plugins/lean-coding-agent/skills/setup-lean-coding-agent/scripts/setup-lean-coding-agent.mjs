@@ -454,7 +454,7 @@ async function ensureRegularDirectory(directoryPath) {
   }
 }
 
-async function ensureCodebaseOnboardingReferences(targetProject) {
+async function ensureCodebaseOnboardingContextFiles(targetProject) {
   let sourceDetails;
   try {
     sourceDetails = await fs.stat(codebaseOnboardingReferencesDirectory);
@@ -473,9 +473,7 @@ async function ensureCodebaseOnboardingReferences(targetProject) {
   }
 
   const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
-  const targetDirectory = path.join(agentContextDirectory, 'references');
   await ensureRegularDirectory(agentContextDirectory);
-  await ensureRegularDirectory(targetDirectory);
 
   async function copyMissingFiles(sourceDirectory, destinationDirectory) {
     const createdPaths = [];
@@ -499,7 +497,7 @@ async function ensureCodebaseOnboardingReferences(targetProject) {
     return createdPaths;
   }
 
-  return copyMissingFiles(codebaseOnboardingReferencesDirectory, targetDirectory);
+  return copyMissingFiles(codebaseOnboardingReferencesDirectory, agentContextDirectory);
 }
 
 async function readProjectUpdateHook() {
@@ -719,7 +717,7 @@ async function installUpstreamSkills(targetProject) {
 async function initializeProject(targetProject, models) {
   const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
   await fs.mkdir(agentContextDirectory, { recursive: true });
-  const onboardingReferencePaths = await ensureCodebaseOnboardingReferences(targetProject);
+  const onboardingContextPaths = await ensureCodebaseOnboardingContextFiles(targetProject);
   const incidentReadme = await ensureIncidentsReadme(targetProject);
   const lessonsIndex = await ensureLessonsIndex(targetProject);
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
@@ -749,8 +747,8 @@ async function initializeProject(targetProject, models) {
   console.log(`Ensured Codex config: ${path.join(targetProject, '.codex', 'config.toml')}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} bundled skills into: ${skillResult.skillDirectory}`);
-  console.log(`Ensured codebase-onboarding references in: ${path.join(targetProject, agentContextDirectoryName, 'references')}`);
-  for (const filePath of onboardingReferencePaths) console.log(`- ${filePath}`);
+  console.log(`Seeded codebase-onboarding context files in: ${path.join(targetProject, agentContextDirectoryName)}`);
+  for (const filePath of onboardingContextPaths) console.log(`- ${filePath}`);
   console.log(`Installed session-start version hook: ${updateHook.hookConfigPath}`);
   console.log(`Installed version checker: ${updateHook.checkerPath}`);
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
