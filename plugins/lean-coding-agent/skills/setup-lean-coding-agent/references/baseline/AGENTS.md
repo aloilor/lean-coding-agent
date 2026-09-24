@@ -41,7 +41,7 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 ## Context And Skills
 
 - This file is the shared baseline. Put project-specific shared rules in `agent-context/`.
-- At the start of every session, run `node scripts/check-skill-updates.mjs --project --manifest agent-context/skills-installed.json` and report the complete output to the user before continuing.
+- At the start of every session, run `node scripts/check-skill-updates.mjs --project --manifest agent-context/skills-installed.json` and report the complete output to the user before continuing. The checker also checks GitHub-backed skills recorded in `skills-lock.json`.
 - Read relevant `agent-context/` content only when the task involves inspecting, developing, debugging, reviewing, or otherwise working on that codebase. Do not load it for unrelated conversation or general tasks.
 - Read `.agents/lessons/LESSONS.md` and local-private, git-ignored `AGENTS.local.md` or `CLAUDE.local.md` content when present.
 - Before using a skill, check `.agents/skill-overrides/INDEX.md`. Apply a listed `<skill-name>.md` override before the skill and keep the index synchronized when adding overrides.

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -7,6 +8,7 @@ const SCRIPT_PATH = fileURLToPath(import.meta.url);
 const DEFAULT_PLUGIN_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..", "..", "..");
 const DEFAULT_TIMEOUT_MS = 15_000;
 const GITHUB_API_VERSION = "2022-11-28";
+const SKILLS_LOCK_FILE = "skills-lock.json";
 
 class UpdateCheckError extends Error {}
 
@@ -82,17 +84,9 @@ async function readVersionManifest(manifestPath = path.join(process.env.PLUGIN_R
 
 async function fetchLatestRelease({ owner, repository }, timeoutMs = DEFAULT_TIMEOUT_MS) {
   const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repository)}/releases/latest`;
-  const headers = {
-    Accept: "application/vnd.github+json",
-    "User-Agent": "lean-coding-agent-release-check",
-    "X-GitHub-Api-Version": GITHUB_API_VERSION,
-  };
-  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-  if (token) headers.Authorization = `Bearer ${token}`;
-
   let response;
   try {
-    response = await fetch(apiUrl, { headers, signal: AbortSignal.timeout(timeoutMs) });
+    response = await fetch(apiUrl, { headers: getGitHubHeaders(), signal: AbortSignal.timeout(timeoutMs) });
   } catch (error) {
     throw new UpdateCheckError(`Could not reach GitHub: ${error.message}`);
   }
@@ -122,16 +116,272 @@ async function fetchLatestRelease({ owner, repository }, timeoutMs = DEFAULT_TIM
   };
 }
 
+function getGitHubRepositoryFromSkillLock(source) {
+  if (typeof source !== "string") {
+    throw new UpdateCheckError("A tracked GitHub skill is missing its source repository.");
+  }
+
+  const shorthand = /^([^/]+)\/([^/]+?)(?:\.git)?$/.exec(source);
+  if (shorthand) return { owner: shorthand[1], repository: shorthand[2] };
+  return getGitHubRepository(source);
+}
+
+function getGitHubHeaders() {
+  const headers = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "lean-coding-agent-release-check",
+    "X-GitHub-Api-Version": GITHUB_API_VERSION,
+  };
+  const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
+}
+
+async function fetchGitHubJson(apiUrl, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  let response;
+  try {
+    response = await fetch(apiUrl, {
+      headers: getGitHubHeaders(),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (error) {
+    throw new UpdateCheckError(`Could not reach GitHub: ${error.message}`);
+  }
+
+  if (!response.ok) {
+    const reason = response.status === 403 || response.status === 429
+      ? "GitHub API rate limit or access restriction. Set GITHUB_TOKEN or GH_TOKEN to authenticate."
+      : `GitHub API returned HTTP ${response.status}.`;
+    throw new UpdateCheckError(reason);
+  }
+
+  try {
+    return await response.json();
+  } catch {
+    throw new UpdateCheckError("GitHub returned an invalid API response.");
+  }
+}
+
+async function fetchGitHubFile(repository, ref, filePath, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  const encodedRef = ref.split("/").map(encodeURIComponent).join("/");
+  const encodedPath = filePath.split("/").map(encodeURIComponent).join("/");
+  const fileUrl = `https://raw.githubusercontent.com/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.repository)}/${encodedRef}/${encodedPath}`;
+
+  let response;
+  try {
+    response = await fetch(fileUrl, {
+      headers: getGitHubHeaders(),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+  } catch (error) {
+    throw new UpdateCheckError(`Could not fetch an upstream skill file from GitHub: ${error.message}`);
+  }
+
+  if (!response.ok) {
+    throw new UpdateCheckError(`GitHub returned HTTP ${response.status} while fetching ${filePath}.`);
+  }
+  try {
+    return Buffer.from(await response.arrayBuffer());
+  } catch (error) {
+    throw new UpdateCheckError(`Could not read the upstream skill file ${filePath}: ${error.message}`);
+  }
+}
+
+async function fetchGitHubSkillTree(repository, ref, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  let resolvedRef = ref;
+  if (!resolvedRef) {
+    const repositoryUrl = `https://api.github.com/repos/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.repository)}`;
+    const repositoryDetails = await fetchGitHubJson(repositoryUrl, timeoutMs);
+    if (!repositoryDetails || typeof repositoryDetails !== "object" || Array.isArray(repositoryDetails)
+      || typeof repositoryDetails.default_branch !== "string" || !repositoryDetails.default_branch) {
+      throw new UpdateCheckError(`GitHub did not report a default branch for ${repository.owner}/${repository.repository}.`);
+    }
+    resolvedRef = repositoryDetails.default_branch;
+  }
+
+  const encodedRef = encodeURIComponent(resolvedRef);
+  const treeUrl = `https://api.github.com/repos/${encodeURIComponent(repository.owner)}/${encodeURIComponent(repository.repository)}/git/trees/${encodedRef}?recursive=1`;
+  const tree = await fetchGitHubJson(treeUrl, timeoutMs);
+  if (!tree || typeof tree !== "object" || Array.isArray(tree) || !Array.isArray(tree.tree)) {
+    throw new UpdateCheckError(`GitHub returned an invalid file tree for ${repository.owner}/${repository.repository}.`);
+  }
+  if (tree.truncated) {
+    throw new UpdateCheckError(`GitHub's file tree is too large to check ${repository.owner}/${repository.repository}.`);
+  }
+  return { ref: resolvedRef, entries: tree.tree };
+}
+
+function getSkillDirectory(skillPath, skillName) {
+  if (typeof skillPath !== "string" || skillPath.includes("\\") || skillPath.startsWith("/")) {
+    throw new UpdateCheckError(`The GitHub skill lock entry for ${skillName} has an invalid skillPath.`);
+  }
+  const pathParts = skillPath.split("/");
+  if (pathParts.some((part) => !part || part === "." || part === "..") || pathParts.at(-1) !== "SKILL.md") {
+    throw new UpdateCheckError(`The GitHub skill lock entry for ${skillName} must point to a SKILL.md file.`);
+  }
+  return pathParts.slice(0, -1).join("/");
+}
+
+async function collectSkillFiles(baseDirectory, currentDirectory, files) {
+  const entries = await fs.readdir(currentDirectory, { withFileTypes: true });
+  await Promise.all(entries.map(async (entry) => {
+    if (entry.name === ".git" || entry.name === "node_modules") return;
+    const fullPath = path.join(currentDirectory, entry.name);
+    if (entry.isDirectory()) {
+      await collectSkillFiles(baseDirectory, fullPath, files);
+    } else if (entry.isFile()) {
+      const relativePath = path.relative(baseDirectory, fullPath).split(path.sep).join("/");
+      files.push({ relativePath, content: await fs.readFile(fullPath) });
+    }
+  }));
+}
+
+async function hashInstalledSkill(skillDirectory, skillName) {
+  try {
+    await fs.access(skillDirectory);
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw new UpdateCheckError(`Could not access the installed skill ${skillName}: ${error.message}`);
+  }
+
+  const files = [];
+  try {
+    await collectSkillFiles(skillDirectory, skillDirectory, files);
+  } catch (error) {
+    throw new UpdateCheckError(`Could not read the installed skill ${skillName}: ${error.message}`);
+  }
+  if (!files.some((file) => file.relativePath === "SKILL.md")) return null;
+
+  files.sort((left, right) => left.relativePath.localeCompare(right.relativePath));
+  const hash = createHash("sha256");
+  for (const file of files) {
+    hash.update(file.relativePath);
+    hash.update(file.content);
+  }
+  return hash.digest("hex");
+}
+
+async function fetchLatestSkillHash(repository, skill, treeCache) {
+  const skillDirectory = getSkillDirectory(skill.skillPath, skill.name);
+  if (skill.ref !== undefined && (typeof skill.ref !== "string" || !skill.ref.trim())) {
+    throw new UpdateCheckError(`The GitHub skill lock entry for ${skill.name} has an invalid ref.`);
+  }
+  const ref = skill.ref?.trim() || null;
+  const cacheKey = `${repository.owner}/${repository.repository}@${ref || "<default>"}`;
+  if (!treeCache.has(cacheKey)) {
+    treeCache.set(cacheKey, fetchGitHubSkillTree(repository, ref));
+  }
+  const tree = await treeCache.get(cacheKey);
+  const directoryPrefix = skillDirectory ? `${skillDirectory}/` : "";
+  const files = tree.entries
+    .filter((entry) => {
+      if (entry.type !== "blob" || entry.mode === "120000" || typeof entry.path !== "string") return false;
+      if (directoryPrefix && !entry.path.startsWith(directoryPrefix)) return false;
+      const relativePath = directoryPrefix ? entry.path.slice(directoryPrefix.length) : entry.path;
+      const excludedDirectory = relativePath.split("/").some((part) => part === ".git" || part === "node_modules");
+      return relativePath.length > 0 && !excludedDirectory;
+    })
+    .map((entry) => ({ path: entry.path, relativePath: directoryPrefix ? entry.path.slice(directoryPrefix.length) : entry.path }));
+
+  if (!files.some((file) => file.path === skill.skillPath)) {
+    throw new UpdateCheckError(`GitHub no longer has ${skill.skillPath} for upstream skill ${skill.name}.`);
+  }
+
+  files.sort((left, right) => left.relativePath.localeCompare(right.relativePath));
+  const contents = await Promise.all(files.map((file) => fetchGitHubFile(repository, tree.ref, file.path)));
+  const hash = createHash("sha256");
+  for (let index = 0; index < files.length; index += 1) {
+    hash.update(files[index].relativePath);
+    hash.update(contents[index]);
+  }
+  return hash.digest("hex");
+}
+
+async function checkUpstreamSkillUpdates(lockPath) {
+  let lockText;
+  try {
+    lockText = await fs.readFile(lockPath, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      console.log(`No ${SKILLS_LOCK_FILE} found; upstream skill updates were not checked.`);
+      return false;
+    }
+    throw new UpdateCheckError(`Could not read ${lockPath}: ${error.message}`);
+  }
+
+  let lock;
+  try {
+    lock = JSON.parse(lockText);
+  } catch (error) {
+    throw new UpdateCheckError(`Could not parse ${lockPath}: ${error.message}`);
+  }
+  if (!lock || typeof lock !== "object" || Array.isArray(lock) || !lock.skills || typeof lock.skills !== "object" || Array.isArray(lock.skills)) {
+    throw new UpdateCheckError(`${SKILLS_LOCK_FILE} must contain an object with a skills map.`);
+  }
+
+  const entries = Object.entries(lock.skills)
+    .filter(([, skill]) => skill && skill.sourceType === "github")
+    .map(([name, skill]) => ({ name, ...skill }));
+  const tracked = entries.filter((skill) => typeof skill.skillPath === "string");
+  const untrackedCount = entries.length - tracked.length;
+
+  if (tracked.length === 0) {
+    console.log(`No GitHub-backed skills with source paths are tracked in ${lockPath}.`);
+    if (untrackedCount > 0) console.log(`Skipped ${untrackedCount} GitHub skill(s) without a source path.`);
+    return false;
+  }
+
+  const treeCache = new Map();
+  const outdated = [];
+  const missing = [];
+  for (const skill of tracked) {
+    if (typeof skill.name !== "string" || !skill.name || skill.name === "." || skill.name === ".." || skill.name.includes("/") || skill.name.includes("\\")) {
+      throw new UpdateCheckError("A GitHub skill lock entry has an invalid installed skill name.");
+    }
+    const repository = getGitHubRepositoryFromSkillLock(skill.sourceUrl || skill.source);
+    const localDirectory = path.join(path.dirname(lockPath), ".agents", "skills", skill.name);
+    const localHash = await hashInstalledSkill(localDirectory, skill.name);
+    if (!localHash) {
+      missing.push({ name: skill.name, repository });
+      continue;
+    }
+    const latestHash = await fetchLatestSkillHash(repository, skill, treeCache);
+    if (latestHash !== localHash) outdated.push({ name: skill.name, repository });
+  }
+
+  console.log(`Tracked upstream GitHub skills: ${tracked.length}`);
+  if (untrackedCount > 0) console.log(`Skipped ${untrackedCount} GitHub skill(s) without a source path.`);
+  if (missing.length > 0) {
+    console.log(`Missing installed upstream skill copies: ${missing.map((skill) => skill.name).join(", ")}`);
+  }
+  if (outdated.length === 0 && missing.length === 0) {
+    console.log("Up to date: all tracked upstream skills match their latest source.");
+    return false;
+  }
+
+  if (outdated.length > 0) {
+    console.log(`Updates available for ${outdated.length} upstream skill(s):`);
+    for (const skill of outdated) {
+      console.log(`  ${skill.name} (${skill.repository.owner}/${skill.repository.repository})`);
+    }
+  console.log("Run npx skills update -p to refresh project upstream skills.");
+  }
+  if (missing.length > 0) console.log("Re-run Lean Coding Agent setup to restore missing upstream skill copies.");
+  return true;
+}
+
 function printUsage() {
-  console.log("Usage: node check-skill-updates.mjs [--project] [--manifest <path>]");
-  console.log("Compare the installed plugin or project skill version with the latest stable GitHub Release.");
-  console.log("Use --manifest to select the installed version and --project to describe project skill copies.");
-  console.log("CLI exit codes: 0 = no newer release (or no release yet), 1 = update available, 2 = check failed.");
+  console.log("Usage: node check-skill-updates.mjs [--project] [--manifest <path>] [--lock <path>]");
+  console.log("Compare the installed plugin or project skill version with its latest stable GitHub Release.");
+  console.log("Also compare GitHub skills in skills-lock.json with their latest upstream contents.");
+  console.log("Use --manifest to select the installed version, --project to describe project skill copies, and --lock to select the upstream skill lock file.");
+  console.log("CLI exit codes: 0 = no updates available (or no release yet), 1 = update available, 2 = check failed.");
 }
 
 function parseArgs(argv) {
   let projectInstall = false;
   let manifestPath = path.join(process.env.PLUGIN_ROOT || DEFAULT_PLUGIN_ROOT, "plugin.json");
+  let lockPath = path.resolve(SKILLS_LOCK_FILE);
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--project") {
@@ -141,11 +391,16 @@ function parseArgs(argv) {
         throw new UpdateCheckError("--manifest requires a file path.");
       }
       manifestPath = path.resolve(argv[++index]);
+    } else if (argument === "--lock") {
+      if (!argv[index + 1] || argv[index + 1].startsWith("--")) {
+        throw new UpdateCheckError("--lock requires a file path.");
+      }
+      lockPath = path.resolve(argv[++index]);
     } else {
       throw new UpdateCheckError(`Unknown argument: ${argument}`);
     }
   }
-  return { manifestPath, projectInstall };
+  return { lockPath, manifestPath, projectInstall };
 }
 
 async function main(argv = process.argv.slice(2)) {
@@ -163,34 +418,34 @@ async function main(argv = process.argv.slice(2)) {
   }
   const manifest = await readVersionManifest(options.manifestPath);
   const release = await fetchLatestRelease(manifest.repository);
+  let releaseUpdateAvailable = false;
   if (!release) {
     console.log("No GitHub Release is published yet; there is nothing to compare.");
-    return 0;
+  } else {
+    const comparison = compareVersions(release.version, manifest.version);
+    const versionLabel = options.projectInstall ? "Project skill version" : "Local plugin.json version";
+    console.log(`${versionLabel}: ${manifest.version.text}`);
+    console.log(`Latest stable release:     v${release.version.text}`);
+    if (release.url) console.log(`Release page:               ${release.url}`);
+
+    if (comparison > 0) {
+      releaseUpdateAvailable = true;
+      console.log(options.projectInstall
+        ? "Update available: the project skill copies are older; update Lean Coding Agent and rerun its setup skill."
+        : "Update available: the latest release is newer than this checkout.");
+    } else if (comparison < 0) {
+      console.log(options.projectInstall
+        ? "The project skill copies are ahead of the latest release; their version has not been released yet."
+        : "This checkout is ahead of the latest release; its version has not been released yet.");
+    } else {
+      console.log(options.projectInstall
+        ? "Up to date: the project skill copies match the latest stable release."
+        : "Up to date: plugin.json matches the latest stable release.");
+    }
   }
 
-  const comparison = compareVersions(release.version, manifest.version);
-  const versionLabel = options.projectInstall ? "Project skill version" : "Local plugin.json version";
-  console.log(`${versionLabel}: ${manifest.version.text}`);
-  console.log(`Latest stable release:     v${release.version.text}`);
-  if (release.url) console.log(`Release page:               ${release.url}`);
-
-  if (comparison > 0) {
-    console.log(options.projectInstall
-      ? "Update available: the project skill copies are older; update Lean Coding Agent and rerun its setup skill."
-      : "Update available: the latest release is newer than this checkout.");
-    return 1;
-  }
-  if (comparison < 0) {
-    console.log(options.projectInstall
-      ? "The project skill copies are ahead of the latest release; their version has not been released yet."
-      : "This checkout is ahead of the latest release; its version has not been released yet.");
-    return 0;
-  }
-
-  console.log(options.projectInstall
-    ? "Up to date: the project skill copies match the latest stable release."
-    : "Up to date: plugin.json matches the latest stable release.");
-  return 0;
+  const upstreamUpdateAvailable = await checkUpstreamSkillUpdates(options.lockPath);
+  return releaseUpdateAvailable || upstreamUpdateAvailable ? 1 : 0;
 }
 
 export function runCli() {

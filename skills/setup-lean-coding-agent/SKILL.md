@@ -47,6 +47,6 @@ The `references/` directory contains the baseline inputs needed after the plugin
 - `references/docs/incidents/README.md` contains the incident report template.
 - `references/skill-overrides/` contains the baseline override index and override files copied into `.agents/skill-overrides/`.
 - `references/release.json` records the release version and repository for the copied update checker.
-- `scripts/check-skill-updates.mjs` is the shared checker copied into initialized projects.
+- `scripts/check-skill-updates.mjs` is the shared checker copied into initialized projects. It checks the Lean Coding Agent release and GitHub-backed skills recorded in `skills-lock.json` without changing installed files.
 
 These files are bundled snapshots of this repository's canonical files. When updating a canonical source, refresh its matching reference copy before building the plugin.

@@ -54,7 +54,7 @@ npx skills update -p
 
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-Run `node scripts/check-skill-updates.mjs` to compare this checkout with the latest stable release. Initialized projects also receive the checker at `scripts/check-skill-updates.mjs`; their `AGENTS.md` instructs agents to run it at session start and report the output. In an initialized project, pass `--project --manifest agent-context/skills-installed.json` to compare the installed skill copies and get setup-specific update guidance.
+Run `node scripts/check-skill-updates.mjs` to compare this checkout with the latest stable release and check the GitHub-backed skill copies tracked in `skills-lock.json` against their upstream files. Initialized projects also receive the checker at `scripts/check-skill-updates.mjs`; their `AGENTS.md` instructs agents to run it at session start and report the output. In an initialized project, pass `--project --manifest agent-context/skills-installed.json` to compare the installed Lean Coding Agent version and get setup-specific update guidance. Use `--lock <path>` when the upstream skills lock file is stored somewhere else.
 
 Make changes in this repository; do not edit the installed plugin cache.
 
