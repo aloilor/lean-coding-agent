@@ -204,7 +204,7 @@ function parseArgs(argv) {
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
     if (argument === "--help" || argument === "-h") {
-      console.log("Usage: node scripts/build_codex_plugin.mjs [--check] [--output <directory>]");
+      console.log("Usage: node scripts/build-codex-plugin.mjs [--check] [--output <directory>]");
       console.log("Build the plugin bundle, or check that its generated files are current.");
       return null;
     } else if (argument === "--check") {
@@ -241,7 +241,7 @@ function main(argv = process.argv.slice(2)) {
   }
   if (problems.length > 0) {
     console.error(problems.join("\n"));
-    if (options.check) console.error("Run node scripts/build_codex_plugin.mjs to refresh generated package files.");
+    if (options.check) console.error("Run node scripts/build-codex-plugin.mjs to refresh generated package files.");
     return 1;
   }
   const absoluteOutput = resolvePath(options.output);

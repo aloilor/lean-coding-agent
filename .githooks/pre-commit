@@ -1,7 +1,0 @@
-#!/bin/sh
-# Keep release metadata and the generated plugin bundle in sync before commits.
-set -eu
-
-cd "$(git rev-parse --show-toplevel)"
-node scripts/sync-plugin-version.mjs
-node scripts/build_codex_plugin.mjs

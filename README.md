@@ -143,30 +143,42 @@ Plans use `.agents/plans/plan_YYYYMMDD_<name>.md`. Implementations use `.agents/
 
 The root [`package.json`](package.json) is the plugin release version source, and root [`plugin.json`](plugin.json) is synchronized from it. The setup skill's [`release.json`](skills/setup-lean-coding-agent/references/release.json) is synchronized at the same time and supplies the version recorded for project-installed skill copies. The root `plugin.json` and [`skills/`](skills/) are canonical plugin content. The build script generates [`plugins/lean-coding-agent/`](plugins/lean-coding-agent/); do not edit generated files directly.
 
-All utilities in `scripts/` run on Node.js built-in modules and need no package installation.
+Utilities in `scripts/` use Node.js built-ins. Changesets is a development dependency for release notes and versioning, installed by `npm ci` in the release workflow.
 
-### Pre-commit hook
+### Releases
 
-The `.githooks/pre-commit` hook synchronizes release metadata and rebuilds the generated plugin bundle before each commit. Enable it once in each clone with `git config core.hooksPath .githooks`; this setting is local to the clone. The scripts can modify files, and the hook does not stage their output. If it generates changes during a commit, stage those files for a follow-up commit.
+Add a Changeset to each pull request that changes the released plugin or its skills:
+
+```sh
+npm run changeset
+```
+
+Choose the version bump and write a short release note when prompted. Changesets records that intent in a Markdown file under `.changeset/`. Changes that do not affect the released plugin, such as documentation-only maintenance, do not need a Changeset.
+
+After a Changeset reaches `main`, the Release GitHub Action opens or updates a `chore: version skills` pull request. Its version step updates `package.json` and `CHANGELOG.md`, syncs `plugin.json` and the setup skill's `release.json`, and rebuilds the generated plugin directory. Merge that pull request to create the matching `vMAJOR.MINOR.PATCH` Git tag and GitHub Release. Project setup checks GitHub Releases to detect newer versions.
+
+The repository must allow GitHub Actions to create pull requests. Enable **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** once for the repository.
 
 To compare this checkout's `plugin.json` version with the latest stable GitHub Release, run:
 
 ```sh
-node scripts/check_skill_updates.mjs
+node scripts/check-skill-updates.mjs
 ```
 
-When shipping skill changes, bump the version in `package.json`, then run `npm run version` to sync `plugin.json`. Run `npm run check-plugin-version` to verify the manifests match, rebuild the plugin with `node scripts/build_codex_plugin.mjs`, then publish a matching `vMAJOR.MINOR.PATCH` release tag. This checks the source checkout; it does not inspect a separate project's installed plugin version.
+This checks the source checkout; it does not inspect a separate project's installed plugin version.
+
+To rebuild or check the generated plugin locally, run:
 
 ```sh
-node scripts/build_codex_plugin.mjs
-node scripts/build_codex_plugin.mjs --check
+node scripts/build-codex-plugin.mjs
+node scripts/build-codex-plugin.mjs --check
 ```
 
 To try the local build, add this checkout as a marketplace, rebuild the plugin, and upgrade the marketplace entry:
 
 ```sh
 codex plugin marketplace add .
-node scripts/build_codex_plugin.mjs
+node scripts/build-codex-plugin.mjs
 codex plugin marketplace upgrade lean-coding-agent
 ```
 
