@@ -1,6 +1,6 @@
 {
   "name": "lean-coding-agent",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "A managed bundle of coding standards, project setup, onboarding, Git, REST, and workflow skills for Codex.",
   "repository": {
