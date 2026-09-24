@@ -7,7 +7,7 @@
           {
             "type": "command",
             "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/lean-coding-agent/check-skill-updates.mjs\" --hook --project --manifest \"$(git rev-parse --show-toplevel)/agent-context/skills-installed.json\"",
-            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; node (Join-Path $root '.codex/hooks/lean-coding-agent/check-skill-updates.mjs') --hook --project --manifest (Join-Path $root 'agent-context/skills-installed.json')\"",
+            "commandWindows": "node -e \"const cp=require('node:child_process'),p=require('node:path');const root=cp.execFileSync('git',['rev-parse','--show-toplevel'],{encoding:'utf8'}).trim();cp.execFileSync(process.execPath,[p.join(root,'.codex/hooks/lean-coding-agent/check-skill-updates.mjs'),'--hook','--project','--manifest',p.join(root,'agent-context/skills-installed.json')],{stdio:'inherit'});\"",
             "timeout": 10
           }
         ]
