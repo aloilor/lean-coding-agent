@@ -1,5 +1,0 @@
-# CLAUDE.md
-
-Read and follow [AGENTS.md](AGENTS.md) before making changes in this repo.
-
-Also read `CLAUDE.local.md` when it exists. That file is local, private, and ignored by git.

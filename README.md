@@ -1,30 +1,20 @@
 # Lean Coding Agent
 
-A managed Codex plugin and skill collection for working on real codebases. It gives Codex a shared project baseline, practical engineering guidance, and repeatable ways to set up and understand a repository. `AGENTS.md` is the active baseline; the initializer also copies `CLAUDE.md` for compatibility but does not configure Claude Code.
+A collection of Codex skills for working on real codebases. It provides practical engineering guidance and repeatable ways to set up and understand a repository. `AGENTS.md` is the active baseline; the initializer also copies `CLAUDE.md` for compatibility but does not configure Claude Code.
 
-The skills are small and composable. Install the complete bundle as a plugin, or choose selected skills with the Skills CLI. The project setup skill installs the shared baseline and prepares the repository for day-to-day work.
+The skills are small and composable. Install the ones you want with the Skills CLI. The project setup skill installs the shared baseline and prepares the repository for day-to-day work.
 
 ## Installation
 
-### 1. Install the skills
-
-For the complete, managed Codex bundle, add the marketplace:
-
-```sh
-codex plugin marketplace add aloilor/lean-coding-agent
-```
-
-Then open Codex's Plugins directory, select the Lean Coding Agent marketplace, and install **Lean Coding Agent** (`lean-coding-agent`).
-
-To choose individual skills instead, run:
+Install skills from this repository:
 
 ```sh
 npx skills@latest add aloilor/lean-coding-agent
 ```
 
-In the installer, select `setup-lean-coding-agent` and Codex. Add any other skills you want available.
+In the installer, select Codex and the skills you want. Select `setup-lean-coding-agent` to initialize a project with the shared baseline.
 
-### 2. Set up your project
+## Set up your project
 
 Open the target repository in Codex and run:
 
@@ -32,21 +22,15 @@ Open the target repository in Codex and run:
 $setup-lean-coding-agent
 ```
 
-The setup skill installs the shared project guidance, skills, skill overrides, Codex subagents, and a cross-tool update checker that agents run at session start. It also installs Agent Browser and the upstream skills used by the baseline, then offers to run project-specific onboarding. Node.js is required for setup.
+The setup skill installs the shared project guidance, available skills, skill overrides, Codex subagents, and a cross-tool skills update checker that agents run at session start. It also installs Agent Browser and the upstream skills used by the baseline, then offers to run project-specific onboarding. Node.js is required for setup.
 
-### 3. Use the skills
+## Use the skills
 
 Ask Codex for help as usual, or call a skill by name when you want it. For example, use `$codebase-onboarding` to understand an unfamiliar repository or `$workflow-feature-development` to explicitly start that workflow.
 
 ## Updates
 
-The plugin ships as a versioned bundle. To refresh its marketplace source when a release is available, run:
-
-```sh
-codex plugin marketplace upgrade lean-coding-agent
-```
-
-For skills installed through the Skills CLI, update project-installed skills from the project directory with:
+Update project-installed skills from the project directory with:
 
 ```sh
 npx skills update -p
@@ -54,15 +38,13 @@ npx skills update -p
 
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-Run `node scripts/check-skill-updates.mjs` to compare this checkout with the latest stable release and check the GitHub-backed skill copies tracked in `skills-lock.json` against their upstream files. Initialized projects also receive the checker at `scripts/check-skill-updates.mjs`; their `AGENTS.md` instructs agents to run it at session start and report the output. In an initialized project, pass `--project --manifest agent-context/skills-installed.json` to compare the installed Lean Coding Agent version and get setup-specific update guidance. Use `--lock <path>` when the upstream skills lock file is stored somewhere else.
-
-Make changes in this repository; do not edit the installed plugin cache.
+Run `node scripts/check-skill-updates.mjs` to compare this checkout's release metadata with the latest stable GitHub Release and check GitHub-backed skill copies tracked in `skills-lock.json`. Initialized projects also receive the checker; their `AGENTS.md` tells agents to pass `--project --manifest agent-context/skills-installed.json` when that manifest exists. The checker does not change installed files.
 
 ## Skill reference
 
 ### Setup and project context
 
-- [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the plugin.
+- [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the skill.
 - [`codebase-onboarding`](skills/codebase-onboarding/SKILL.md) — analyze a repository and write structured project context.
 - [`grill-with-docs`](skills/grill-with-docs/SKILL.md) — clarify a plan against project terminology and documented decisions.
 
@@ -142,45 +124,20 @@ Plans use `.agents/plans/plan_YYYYMMDD_<name>.md`. Implementations use `.agents/
 
 ## Working on this repository
 
-The root [`package.json`](package.json) is the plugin release version source, and root [`plugin.json`](plugin.json) is synchronized from it. The setup skill's [`release.json`](skills/setup-lean-coding-agent/references/release.json) is synchronized at the same time and supplies the version recorded for project-installed skill copies. The root `plugin.json` and [`skills/`](skills/) are canonical plugin content. The build script generates [`plugins/lean-coding-agent/`](plugins/lean-coding-agent/); do not edit generated files directly.
+The [`skills/`](skills/) directory contains the source skills. The setup skill's `references/` directory contains baseline snapshots it needs when installed on its own; update those copies when their source files change.
 
-Utilities in `scripts/` use Node.js built-ins. Changesets is a development dependency for release notes and versioning, installed by `npm ci` in the release workflow.
-
-### Releases
-
-Add a Changeset to each pull request that changes the released plugin or its skills:
+The root [`package.json`](package.json) is the release version source; the setup skill's [`release.json`](skills/setup-lean-coding-agent/references/release.json) is synchronized from it so initialized projects can check for newer skill releases. This repository uses Changesets to version the skills collection and prepare GitHub releases. Install the development dependencies with `npm ci`, then add a changeset for each user-facing change:
 
 ```sh
 npm run changeset
 ```
 
-Choose the version bump and write a short release note when prompted. Changesets records that intent in a Markdown file under `.changeset/`. Changes that do not affect the released plugin, such as documentation-only maintenance, do not need a Changeset.
+The release workflow opens a version pull request after changesets reach `main`. Merging that pull request updates `package.json` and `CHANGELOG.md`, synchronizes `release.json`, then creates a GitHub tag and release for the skills collection. Run `npm run check-release-version` to check that the release metadata is synchronized.
 
-After a Changeset reaches `main`, the Release GitHub Action opens or updates a `chore: version skills` pull request. Its version step updates `package.json` and `CHANGELOG.md`, syncs `plugin.json` and the setup skill's `release.json`, and rebuilds the generated plugin directory. Merge that pull request to create the matching `vMAJOR.MINOR.PATCH` Git tag and GitHub Release. Project setup checks GitHub Releases to detect newer versions.
-
-The repository must allow GitHub Actions to create pull requests. Enable **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** once for the repository.
-
-To compare this checkout's `plugin.json` version with the latest stable GitHub Release, run:
+Run the Node.js test suite with:
 
 ```sh
-node scripts/check-skill-updates.mjs
-```
-
-This checks the source checkout; it does not inspect a separate project's installed plugin version.
-
-To rebuild or check the generated plugin locally, run:
-
-```sh
-node scripts/build-codex-plugin.mjs
-node scripts/build-codex-plugin.mjs --check
-```
-
-To try the local build, add this checkout as a marketplace, rebuild the plugin, and upgrade the marketplace entry:
-
-```sh
-codex plugin marketplace add .
-node scripts/build-codex-plugin.mjs
-codex plugin marketplace upgrade lean-coding-agent
+node --test
 ```
 
 ## License

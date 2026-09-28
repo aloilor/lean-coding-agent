@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const SCRIPT_PATH = fileURLToPath(import.meta.url);
-const DEFAULT_PLUGIN_ROOT = path.resolve(path.dirname(SCRIPT_PATH), "..", "..", "..");
+const DEFAULT_RELEASE_METADATA_PATH = path.resolve(path.dirname(SCRIPT_PATH), "../references/release.json");
 const DEFAULT_TIMEOUT_MS = 15_000;
 const GITHUB_API_VERSION = "2022-11-28";
 const SKILLS_LOCK_FILE = "skills-lock.json";
@@ -42,7 +42,7 @@ function getGitHubRepository(repositoryValue) {
   try {
     repositoryUrl = new URL(repositoryValue);
   } catch {
-    throw new UpdateCheckError(`Version manifest has an invalid repository URL: ${repositoryValue}`);
+    throw new UpdateCheckError(`Invalid GitHub repository URL: ${repositoryValue}`);
   }
 
   if (repositoryUrl.protocol !== "https:" || repositoryUrl.hostname !== "github.com") {
@@ -61,7 +61,7 @@ function getGitHubRepository(repositoryValue) {
   };
 }
 
-async function readVersionManifest(manifestPath = path.join(process.env.PLUGIN_ROOT || DEFAULT_PLUGIN_ROOT, "plugin.json")) {
+async function readVersionManifest(manifestPath) {
   let manifest;
   try {
     manifest = JSON.parse(await fs.readFile(manifestPath, "utf8"));
@@ -73,7 +73,7 @@ async function readVersionManifest(manifestPath = path.join(process.env.PLUGIN_R
   }
 
   if (!manifest || typeof manifest !== "object" || Array.isArray(manifest)) {
-    throw new UpdateCheckError("Version manifest must contain a JSON object.");
+    throw new UpdateCheckError("Skills release metadata must contain a JSON object.");
   }
 
   return {
@@ -116,6 +116,16 @@ async function fetchLatestRelease({ owner, repository }, timeoutMs = DEFAULT_TIM
   };
 }
 
+async function pathExists(targetPath) {
+  try {
+    await fs.access(targetPath);
+    return true;
+  } catch (error) {
+    if (error.code === "ENOENT") return false;
+    throw error;
+  }
+}
+
 function getGitHubRepositoryFromSkillLock(source) {
   if (typeof source !== "string") {
     throw new UpdateCheckError("A tracked GitHub skill is missing its source repository.");
@@ -129,7 +139,7 @@ function getGitHubRepositoryFromSkillLock(source) {
 function getGitHubHeaders() {
   const headers = {
     Accept: "application/vnd.github+json",
-    "User-Agent": "lean-coding-agent-release-check",
+    "User-Agent": "lean-coding-agent-update-check",
     "X-GitHub-Api-Version": GITHUB_API_VERSION,
   };
   const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
@@ -364,7 +374,7 @@ async function checkUpstreamSkillUpdates(lockPath) {
     for (const skill of outdated) {
       console.log(`  ${skill.name} (${skill.repository.owner}/${skill.repository.repository})`);
     }
-  console.log("Run npx skills update -p to refresh project upstream skills.");
+    console.log("Run npx skills update -p to refresh project upstream skills.");
   }
   if (missing.length > 0) console.log("Re-run Lean Coding Agent setup to restore missing upstream skill copies.");
   return true;
@@ -372,15 +382,14 @@ async function checkUpstreamSkillUpdates(lockPath) {
 
 function printUsage() {
   console.log("Usage: node check-skill-updates.mjs [--project] [--manifest <path>] [--lock <path>]");
-  console.log("Compare the installed plugin or project skill version with its latest stable GitHub Release.");
-  console.log("Also compare GitHub skills in skills-lock.json with their latest upstream contents.");
-  console.log("Use --manifest to select the installed version, --project to describe project skill copies, and --lock to select the upstream skill lock file.");
+  console.log("Compare a Lean Coding Agent skill version with GitHub Releases and check upstream GitHub skills.");
+  console.log("Use --manifest for an initialized project's installed version and --lock for its upstream skills lock file.");
   console.log("CLI exit codes: 0 = no updates available (or no release yet), 1 = update available, 2 = check failed.");
 }
 
 function parseArgs(argv) {
   let projectInstall = false;
-  let manifestPath = path.join(process.env.PLUGIN_ROOT || DEFAULT_PLUGIN_ROOT, "plugin.json");
+  let manifestPath = null;
   let lockPath = path.resolve(SKILLS_LOCK_FILE);
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -416,32 +425,39 @@ async function main(argv = process.argv.slice(2)) {
     printUsage();
     return 2;
   }
-  const manifest = await readVersionManifest(options.manifestPath);
-  const release = await fetchLatestRelease(manifest.repository);
+  const manifestPath = options.manifestPath ?? DEFAULT_RELEASE_METADATA_PATH;
   let releaseUpdateAvailable = false;
-  if (!release) {
-    console.log("No GitHub Release is published yet; there is nothing to compare.");
-  } else {
-    const comparison = compareVersions(release.version, manifest.version);
-    const versionLabel = options.projectInstall ? "Project skill version" : "Local plugin.json version";
-    console.log(`${versionLabel}: ${manifest.version.text}`);
-    console.log(`Latest stable release:     v${release.version.text}`);
-    if (release.url) console.log(`Release page:               ${release.url}`);
-
-    if (comparison > 0) {
-      releaseUpdateAvailable = true;
-      console.log(options.projectInstall
-        ? "Update available: the project skill copies are older; update Lean Coding Agent and rerun its setup skill."
-        : "Update available: the latest release is newer than this checkout.");
-    } else if (comparison < 0) {
-      console.log(options.projectInstall
-        ? "The project skill copies are ahead of the latest release; their version has not been released yet."
-        : "This checkout is ahead of the latest release; its version has not been released yet.");
+  if (options.manifestPath || await pathExists(manifestPath)) {
+    const manifest = await readVersionManifest(manifestPath);
+    const release = await fetchLatestRelease(manifest.repository);
+    if (!release) {
+      console.log("No GitHub Release is published yet; there is nothing to compare.");
     } else {
-      console.log(options.projectInstall
-        ? "Up to date: the project skill copies match the latest stable release."
-        : "Up to date: plugin.json matches the latest stable release.");
+      const comparison = compareVersions(release.version, manifest.version);
+      const versionLabel = options.projectInstall
+        ? "Installed Lean Coding Agent skill version"
+        : "Local Lean Coding Agent skill version";
+      console.log(`${versionLabel}: ${manifest.version.text}`);
+      console.log(`Latest stable release:     v${release.version.text}`);
+      if (release.url) console.log(`Release page:               ${release.url}`);
+
+      if (comparison > 0) {
+        releaseUpdateAvailable = true;
+        console.log(options.projectInstall
+          ? "Update available: run npx skills update -p, then rerun setup to refresh managed skill copies."
+          : "Update available: the latest GitHub Release is newer than this skills checkout.");
+      } else if (comparison < 0) {
+        console.log(options.projectInstall
+          ? "The installed skill copies are ahead of the latest release; their version has not been released yet."
+          : "This skills checkout is ahead of the latest release; its version has not been released yet.");
+      } else {
+        console.log(options.projectInstall
+          ? "Up to date: the installed skill copies match the latest stable release."
+          : "Up to date: release metadata matches the latest stable release.");
+      }
     }
+  } else {
+    console.log("No Lean Coding Agent release metadata found; skill package updates were not checked.");
   }
 
   const upstreamUpdateAvailable = await checkUpstreamSkillUpdates(options.lockPath);

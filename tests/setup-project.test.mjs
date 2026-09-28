@@ -74,6 +74,7 @@ test('setup initializes project files and preserves project-owned content on rer
     '.agents/lessons/LESSONS.md',
     '.agents/skill-overrides/tdd.md',
     '.agents/skills/setup-lean-coding-agent/SKILL.md',
+    'scripts/check-skill-updates.mjs',
     '.codex/config.toml',
     '.codex/agents/planner.toml',
     '.codex/agents/bug-diagnostician.toml',
@@ -82,7 +83,6 @@ test('setup initializes project files and preserves project-owned content on rer
     'docs/incidents/README.md',
     'agent-context/architecture.md',
     'agent-context/skills-installed.json',
-    'scripts/check-skill-updates.mjs',
   ]) {
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
   }

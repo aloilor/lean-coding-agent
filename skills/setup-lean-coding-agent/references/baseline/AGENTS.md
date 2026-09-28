@@ -41,7 +41,7 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 ## Context And Skills
 
 - This file is the shared baseline. Put project-specific shared rules in `agent-context/`.
-- At the start of every session, run `node scripts/check-skill-updates.mjs`; if `agent-context/skills-installed.json` exists, add `--project --manifest agent-context/skills-installed.json`. Report the complete output to the user before continuing. If it reports outdated upstream skills, recommend running `npx skills update -p` to refresh them; do not run the update automatically.
+- At the start of every session, run `node scripts/check-skill-updates.mjs`; if `agent-context/skills-installed.json` exists, add `--project --manifest agent-context/skills-installed.json`. Report its complete output. If the installed Lean Coding Agent skills are behind the latest release, recommend `npx skills update -p` and rerunning setup. If upstream skill copies are outdated, recommend `npx skills update -p`; if copies are missing, recommend rerunning setup. Do not run updates automatically.
 - Read relevant `agent-context/` content only when the task involves inspecting, developing, debugging, reviewing, or otherwise working on that codebase. Do not load it for unrelated conversation or general tasks.
 - Read `.agents/lessons/LESSONS.md` and local-private, git-ignored `AGENTS.local.md` or `CLAUDE.local.md` content when present.
 - Before using a skill, check `.agents/skill-overrides/INDEX.md`. Apply a listed `<skill-name>.md` override before the skill and keep the index synchronized when adding overrides.

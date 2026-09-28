@@ -7,14 +7,14 @@ import { parseArgs } from 'node:util';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const skillDirectory = path.resolve(scriptDirectory, '..');
-const pluginSkillsDirectory = path.resolve(skillDirectory, '..');
+const siblingSkillsDirectory = path.resolve(skillDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
+const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
 const codebaseOnboardingReferencesDirectory = path.join(
-  pluginSkillsDirectory,
+  siblingSkillsDirectory,
   'codebase-onboarding',
   'references',
 );
-const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
 const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
 const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
 const defaultModel = 'gpt-6-luna';
@@ -366,19 +366,19 @@ async function syncBaselineSkillOverrides(targetProject) {
   return copiedPaths;
 }
 
-async function discoverBundledSkills() {
-  const entries = await fs.readdir(pluginSkillsDirectory, { withFileTypes: true });
+async function discoverSiblingSkills() {
+  const entries = await fs.readdir(siblingSkillsDirectory, { withFileTypes: true });
   const skillDirectories = [];
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
-    const sourceDirectory = path.join(pluginSkillsDirectory, entry.name);
+    const sourceDirectory = path.join(siblingSkillsDirectory, entry.name);
     if (await pathExists(path.join(sourceDirectory, 'SKILL.md'))) {
       skillDirectories.push(sourceDirectory);
     }
   }
   skillDirectories.sort((left, right) => path.basename(left).localeCompare(path.basename(right)));
   if (skillDirectories.length === 0) {
-    throw new Error(`No installable skills found in the plugin bundle: ${pluginSkillsDirectory}`);
+    throw new Error(`No installable skills found beside the setup skill: ${siblingSkillsDirectory}`);
   }
   return skillDirectories;
 }
@@ -398,7 +398,7 @@ async function removeManagedSkill(skillPath) {
   }
 }
 
-export async function syncBundledSkills(targetProject) {
+export async function syncInstalledSkills(targetProject) {
   const agentsDirectory = path.join(targetProject, agentsDirectoryName);
   const skillsDirectory = path.join(agentsDirectory, 'skills');
   try {
@@ -417,7 +417,7 @@ export async function syncBundledSkills(targetProject) {
   }
   await fs.mkdir(skillsDirectory, { recursive: true });
 
-  const sourceDirectories = await discoverBundledSkills();
+  const sourceDirectories = await discoverSiblingSkills();
   for (const sourceDirectory of sourceDirectories) {
     const destination = path.join(skillsDirectory, path.basename(sourceDirectory));
     if (path.resolve(sourceDirectory) === path.resolve(destination)) continue;
@@ -433,7 +433,7 @@ export async function syncBundledSkills(targetProject) {
 
   const releaseMetadata = await readReleaseMetadata();
   const manifest = {
-    source_root: pluginSkillsDirectory,
+    source_root: siblingSkillsDirectory,
     version: releaseMetadata.version,
     repository: releaseMetadata.repository,
     managed_skill_dirs: [path.join(agentsDirectoryName, 'skills')],
@@ -444,6 +444,7 @@ export async function syncBundledSkills(targetProject) {
   };
   const manifestPath = path.join(targetProject, agentContextDirectoryName, manifestName);
   await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+
   return { skillDirectory: skillsDirectory, skillCount: sourceDirectories.length };
 }
 
@@ -706,7 +707,7 @@ async function initializeProject(targetProject, models) {
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
-  const skillResult = await syncBundledSkills(targetProject);
+  const skillResult = await syncInstalledSkills(targetProject);
   const updateChecker = await installUpdateChecker(targetProject);
   const agentBrowserStatus = await installAgentBrowser(targetProject);
   const upstreamSkillNames = await installUpstreamSkills(targetProject);
@@ -727,10 +728,10 @@ async function initializeProject(targetProject, models) {
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
   console.log(`Ensured Codex config: ${path.join(targetProject, '.codex', 'config.toml')}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
-  console.log(`Installed ${skillResult.skillCount} bundled skills into: ${skillResult.skillDirectory}`);
+  console.log(`Installed ${skillResult.skillCount} available skills into: ${skillResult.skillDirectory}`);
+  console.log(`Installed skills update checker: ${updateChecker.checkerPath}`);
   console.log(`Seeded codebase-onboarding context files in: ${path.join(targetProject, agentContextDirectoryName)}`);
   for (const filePath of onboardingContextPaths) console.log(`- ${filePath}`);
-  console.log(`Installed version checker: ${updateChecker.checkerPath}`);
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
 }
 

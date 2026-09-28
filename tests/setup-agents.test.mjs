@@ -9,7 +9,7 @@ import test from 'node:test';
 import {
   installCodexAgents,
   installUpdateChecker,
-  syncBundledSkills,
+  syncInstalledSkills,
 } from '../skills/setup-lean-coding-agent/scripts/setup-lean-coding-agent.mjs';
 
 const runFile = promisify(execFile);
@@ -52,23 +52,23 @@ test('agent installation assigns selected models and preserves reasoning effort 
   assert.equal(await fs.readFile(customAgent, 'utf8'), 'name = "custom"\n');
 });
 
-test('bundled skill sync writes the release manifest and refreshes managed copies on rerun', async (t) => {
+test('installed skill sync refreshes managed copies and preserves project-owned skills on rerun', async (t) => {
   const project = await temporaryProject(t);
   await fs.mkdir(path.join(project, 'agent-context'));
 
-  const firstSync = await syncBundledSkills(project);
+  const firstSync = await syncInstalledSkills(project);
   const installedSkill = path.join(firstSync.skillDirectory, 'setup-lean-coding-agent', 'SKILL.md');
-  const bundledSkill = path.join(skillRoot, 'SKILL.md');
+  const sourceSkill = path.join(skillRoot, 'SKILL.md');
   const customSkill = path.join(firstSync.skillDirectory, 'project-skill', 'SKILL.md');
   await fs.mkdir(path.dirname(customSkill));
   await fs.writeFile(customSkill, 'Project-owned skill\n');
   await fs.writeFile(installedSkill, 'Local edit to a managed skill\n');
 
-  const secondSync = await syncBundledSkills(project);
+  const secondSync = await syncInstalledSkills(project);
   const manifest = JSON.parse(await fs.readFile(path.join(project, 'agent-context', 'skills-installed.json'), 'utf8'));
   const release = JSON.parse(await fs.readFile(path.join(skillRoot, 'references', 'release.json'), 'utf8'));
 
-  assert.equal(await fs.readFile(installedSkill, 'utf8'), await fs.readFile(bundledSkill, 'utf8'));
+  assert.equal(await fs.readFile(installedSkill, 'utf8'), await fs.readFile(sourceSkill, 'utf8'));
   assert.equal(await fs.readFile(customSkill, 'utf8'), 'Project-owned skill\n');
   assert.equal(secondSync.skillCount, firstSync.skillCount);
   assert.equal(manifest.version, release.version);

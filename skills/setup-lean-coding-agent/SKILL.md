@@ -1,11 +1,11 @@
 ---
 name: setup-lean-coding-agent
-description: Initialize the current project with the Lean Coding Agent baseline after installation, including project guidance, bundled skills, skill overrides, configurable Codex subagents, and a cross-tool session-start version check.
+description: Initialize the current project with the Lean Coding Agent baseline after installing its skills, including project guidance, available skills, skill overrides, configurable Codex subagents, and release and upstream skill update checks.
 ---
 
 # Setup Lean Coding Agent
 
-Run this skill after installing Lean Coding Agent to initialize the current project. The bundled Node.js script copies the skills and baseline assets into the project, installs the Codex subagents with the models selected by the user, copies the version checker into `scripts/` for agents to run at session start, installs the agent-browser development dependency, and adds the upstream skills.
+Run this skill after installing it with the Skills CLI to initialize the current project. The Node.js script copies the available skills and baseline assets into the project, records the installed release in `agent-context/skills-installed.json`, installs the Codex subagents with the models selected by the user, installs the release and skills update checker at `scripts/check-skill-updates.mjs`, installs the agent-browser development dependency, and adds the upstream skills.
 
 ## Workflow
 
@@ -24,29 +24,30 @@ Run this skill after installing Lean Coding Agent to initialize the current proj
 
    Locate `<setup-skill>` from this skill's installed directory. Do not ask the user to find or run the script. It uses Node.js and npm's `npx` on Windows, macOS, and Linux. If setup fails, report the failed command and stop; rerun only after resolving the reported environment or network issue.
 4. After setup completes, ask the user whether they want to run `$codebase-onboarding` to fill in project-specific `agent-context/` documentation. Run it only if they agree. If the skill is not available in the active thread, read `<target-project>/.agents/skills/codebase-onboarding/SKILL.md` and follow it directly after they agree.
-5. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/skills/`, `.codex/config.toml` with the bundled multi-agent defaults, `.codex/agents/` with all four model choices and their reasoning effort, `scripts/check-skill-updates.mjs`, `agent-context/skills-installed.json`, and the upstream skills. Summarize the installed skills, selected models and reasoning effort, and whether onboarding was run or deferred.
+5. Confirm the project contains the baseline files, `scripts/check-skill-updates.mjs`, `agent-context/skills-installed.json`, `.agents/skill-overrides/` and its index, `.agents/skills/`, `.codex/config.toml` with the bundled multi-agent defaults, `.codex/agents/` with all four model choices and their reasoning effort, and the upstream skills. Summarize the installed skills, selected models and reasoning effort, and whether onboarding was run or deferred.
 
 ## Managed Files And Effects
 
 - The script defaults to the current directory if the target path is omitted. It requires an existing directory.
-- If `.codex/config.toml` is missing, setup copies the bundled baseline config. The version checker is copied to `scripts/check-skill-updates.mjs`; the installed `AGENTS.md` tells agents to run it at session start and report its output.
+- If `.codex/config.toml` is missing, setup copies the bundled baseline config.
 - `AGENTS.md`, `CLAUDE.md`, bundled Codex agents, bundled shared skill copies, baseline override files, and the managed upstream skills are refreshed on each run. Existing project context files, local-private files, and project-owned override index entries are preserved.
-- The setup creates `AGENTS.local.md`, `CLAUDE.local.md`, `agent-context/` for its setup manifest and onboarding docs, `.agents/lessons/`, `.agents/skill-overrides/`, and required `.gitignore` entries when missing. Before onboarding, it seeds missing codebase-onboarding documents directly in `agent-context/`; existing files are preserved so onboarding can update them in place. Managed ignore entries include the local files, agent task/report directories, and `node_modules/`.
-- It copies the plugin's bundled skill folders into `.agents/skills/`. Those copies are managed outputs; local edits to a copied baseline skill are replaced when setup runs again.
-- It records the installed Lean Coding Agent release in `agent-context/skills-installed.json` and copies the version checker into `scripts/check-skill-updates.mjs`. On reruns, it removes the old Lean Coding Agent hook registration and checker while preserving unrelated hooks.
+- The setup creates `AGENTS.local.md`, `CLAUDE.local.md`, `agent-context/` for release metadata and onboarding docs, `.agents/lessons/`, `.agents/skill-overrides/`, and required `.gitignore` entries when missing. Before onboarding, it seeds missing codebase-onboarding documents directly in `agent-context/`; existing files are preserved so onboarding can update them in place. Managed ignore entries include the local files, agent task/report directories, and `node_modules/`.
+- It copies available sibling skill folders into `.agents/skills/`. Those copies are managed outputs; local edits to a copied baseline skill are replaced when setup runs again.
+- It records the installed Lean Coding Agent release in `agent-context/skills-installed.json` and copies the version checker into `scripts/check-skill-updates.mjs`. On reruns, it removes old checker hooks while preserving unrelated hooks.
+- `references/release.json` records the skills release version and repository. The checker compares that release with GitHub Releases and checks GitHub-backed upstream skills listed in `skills-lock.json`.
+- The baseline `AGENTS.md` asks agents to run the checker at session start and recommends `npx skills update -p` when skill updates are available.
 - The agent-browser setup installs a development dependency with the detected package manager and installs its browser runtime. Upstream skills are installed through `npx skills add` and require network access.
 - The Node.js script is the single cross-platform entry point for both project setup and skill installation.
 
 ## Bundled References
 
-The `references/` directory contains the baseline inputs needed after the plugin is installed and the original source repository is unavailable:
+The `references/` directory contains the baseline inputs needed when this skill runs outside the source repository:
 
 - `references/agents/` contains the four native Codex subagent TOML templates.
 - `references/config.toml` contains the baseline Codex project configuration copied when the target has no `.codex/config.toml`.
 - `references/baseline/` contains `AGENTS.md` and `CLAUDE.md`.
 - `references/docs/incidents/README.md` contains the incident report template.
 - `references/skill-overrides/` contains the baseline override index and override files copied into `.agents/skill-overrides/`.
-- `references/release.json` records the release version and repository for the copied update checker.
-- `scripts/check-skill-updates.mjs` is the shared checker copied into initialized projects. It checks the Lean Coding Agent release and GitHub-backed skills recorded in `skills-lock.json` without changing installed files.
+- Sibling skill directories provide the additional skills copied into initialized projects when they are installed alongside this setup skill.
 
-These files are bundled snapshots of this repository's canonical files. When updating a canonical source, refresh its matching reference copy before building the plugin.
+These files are snapshots of canonical sources in this repository. Keep their matching copies synchronized when those sources change.
