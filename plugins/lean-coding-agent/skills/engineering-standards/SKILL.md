@@ -5,7 +5,7 @@ description: Apply this skill to every task that writes, generates, changes, fix
 
 # Engineering Standards
 
-Apply this semantic quality baseline to every code change, proportionate to scope and risk. Use it with the applicable workflow and repository checks; never substitute prose review for deterministic evidence.
+Apply this semantic quality baseline to every code change, proportionate to scope and risk. Run applicable repository checks; never substitute prose review for deterministic evidence.
 
 ## Precedence And Scope
 
@@ -35,15 +35,6 @@ Apply this semantic quality baseline to every code change, proportionate to scop
 - Require both semantic review and deterministic evidence; neither replaces the other.
 - Do not complete work with an unresolved in-scope correctness, security, data-integrity, compatibility, contract, or required verification failure.
 - For review findings, cite the concrete code, trigger, risk, and smallest responsible correction. Do not report taste, raw size, or a smell label as a defect.
-
-## Companion Skills
-
-| Decision | Also Use |
-| --- | --- |
-| Behavioral implementation, regression fixes, test design, or verification | `$tdd` |
-| Behavior-preserving restructuring | `$refactor` |
-| HTTP resource and API contract changes | `$rest-api-design` |
-| Database correctness, access control, or material query performance | `$sql-code-review` and, when performance matters, `$sql-optimization` |
 
 ## References
 
