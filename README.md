@@ -114,7 +114,7 @@ Workflow skills define a consistent process for specification, implementation, b
 
 The specification, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](.codex/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
 
-Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner defaults to `gpt-6-sol` with `high` reasoning; the other three agents default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test scripts/setup-agents.test.mjs` to check agent installation and rerun behavior.
+Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner defaults to `gpt-6-sol` with `high` reasoning; the other three agents default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
 
 ### Feature specification
 

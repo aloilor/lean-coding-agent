@@ -702,6 +702,7 @@ async function initializeProject(targetProject, models) {
   const lessonsIndex = await ensureLessonsIndex(targetProject);
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
   const agentPaths = await installCodexAgents(targetProject, models);
+  await ensureCodexConfig(targetProject);
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
