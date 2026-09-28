@@ -1,8 +1,8 @@
 # Bundled Setup Inputs
 
-These references let `setup-lean-coding-agent` initialize a project using only the installed plugin. They are snapshots of canonical sources in this repository:
+These references let `setup-lean-coding-agent` initialize a project using only the installed plugin. The files here are the canonical agent templates; the remaining references are bundled copies of their canonical sources:
 
-- [Agent TOML templates](agents/) are snapshots of `.codex/agents/*.toml`.
+- [Agent TOML templates](agents/) are the canonical templates copied into initialized projects, with each project's selected model applied during setup.
 - [`config.toml`](config.toml) is the baseline Codex project configuration copied when the target has no `.codex/config.toml`.
 - [`baseline/AGENTS.md`](baseline/AGENTS.md) and [`baseline/CLAUDE.md`](baseline/CLAUDE.md) are snapshots of the repository baseline files.
 - [`docs/incidents/README.md`](docs/incidents/README.md) is the incident report template.

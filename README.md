@@ -112,7 +112,7 @@ For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/referen
 
 Workflow skills define a consistent process for specification, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
 
-The specification, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](.codex/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
+The specification, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](skills/setup-lean-coding-agent/references/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
 
 Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner defaults to `gpt-6-sol` with `high` reasoning; the other three agents default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
 
