@@ -16,8 +16,9 @@ const codebaseOnboardingReferencesDirectory = path.join(
 );
 const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
 const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
-const agentNames = ['bug-diagnostician', 'implementer', 'code-reviewer'];
+const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
 const defaultModel = 'gpt-6-luna';
+const defaultPlannerModel = 'gpt-6-sol';
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
 const modelAssignmentPattern = /^model\s*=\s*"[^"]*"\s*$/m;
 const manifestName = 'skills-installed.json';
@@ -85,6 +86,7 @@ function readOptions() {
     allowPositionals: true,
     options: {
       help: { type: 'boolean', short: 'h' },
+      'planner-model': { type: 'string', default: defaultPlannerModel },
       'bug-diagnostician-model': { type: 'string', default: defaultModel },
       'implementer-model': { type: 'string', default: defaultModel },
       'code-reviewer-model': { type: 'string', default: defaultModel },
@@ -97,6 +99,7 @@ function readOptions() {
         'Usage: node setup-lean-coding-agent.mjs [target-project] [options]',
         '',
         'Options:',
+        `  --planner-model <id>            Model for planner (default ${defaultPlannerModel})`,
         `  --bug-diagnostician-model <id>  Model for bug-diagnostician (default ${defaultModel})`,
         `  --implementer-model <id>        Model for implementer (default ${defaultModel})`,
         `  --code-reviewer-model <id>      Model for code-reviewer (default ${defaultModel})`,
@@ -112,6 +115,7 @@ function readOptions() {
   return {
     targetProject: path.resolve(positionals[0] ?? process.cwd()),
     models: {
+      planner: values['planner-model'],
       'bug-diagnostician': values['bug-diagnostician-model'],
       implementer: values['implementer-model'],
       'code-reviewer': values['code-reviewer-model'],
@@ -262,7 +266,7 @@ async function ensureCodexConfig(targetProject) {
   return configPath;
 }
 
-async function installCodexAgents(targetProject, models) {
+export async function installCodexAgents(targetProject, models) {
   const targetDirectory = path.join(targetProject, '.codex', 'agents');
   const installedPaths = [];
   await fs.mkdir(targetDirectory, { recursive: true });

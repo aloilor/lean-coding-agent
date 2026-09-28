@@ -7,13 +7,13 @@ description: Orchestration workflow for producing requirements, acceptance crite
 
 This is a requirements and contracts workflow, not a deep technical design or OOP class-design workflow.
 
-Every run produces the approved specification plan at `.agents/plans/plan_YYYYMMDD_<name>.md`; that plan is the durable artifact handed to any later implementation workflow.
+Every run produces the user-approved specification plan at `.agents/plans/plan_YYYYMMDD_<name>.md`; that plan is the durable artifact handed to any later implementation workflow.
 
-Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
+The main agent orchestrates this workflow and owns user communication. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions**.
 
 ## Steps
 
-1. **Mandatory grill gate.** The main agent **MUST run `$grill-with-docs` first**. It must not consolidate requirements, write the plan, request approval, or proceed until the grill has run. It then consolidates the resolved requirements, contracts, acceptance criteria, non-goals, decisions, risks, verification, and necessary standards-aware implementation notes into `.agents/plans/plan_YYYYMMDD_<name>.md`, then obtains explicit user approval.
+1. **Produce and approve the specification plan.** Spawn `planner` with the request and this workflow's planning requirements. The main agent obtains explicit user approval of the completed plan. This workflow ends with that approved plan for a later implementation task; it does not start implementation.
 
 Add deep implementation details, OOP classes, internal interfaces, or module designs only when the user asks for them, an ADR requires them, or the existing architecture makes them necessary.
 

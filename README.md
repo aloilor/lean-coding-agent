@@ -72,13 +72,13 @@ Workflows are opt-in: name the matching skill in your request to start one. They
 
 | Workflow | Use it for | Process and output |
 | --- | --- | --- |
-| [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) | Clarifying requirements and contracts before implementation. | Resolve requirements and acceptance criteria, then obtain approval for a specification plan in `.agents/plans/`. |
-| [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) | Changing externally observable behavior. | Clarify and plan the change, get approval, implement test-first, then run an independent review and verification. Produces a plan, implementation report, and review pass. |
-| [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) | Investigating and repairing a bug or regression. | Record the symptom and diagnosis, get approval for the repair, reproduce and fix test-first, then review and verify. Produces a plan, incident report in `docs/incidents/`, implementation report, and review pass. |
-| [`workflow-refactor`](skills/workflow-refactor/SKILL.md) | Restructuring code while preserving behavior. | Establish a baseline, get approval for a plan, make small behavior-preserving changes, then review and verify. Produces a plan, implementation report, and review pass. |
+| [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) | Clarifying requirements and contracts before implementation. | Resolve requirements and acceptance criteria, then obtain approval of the specification plan in `.agents/plans/`. |
+| [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) | Changing externally observable behavior. | Clarify the change, obtain approval of the plan, implement test-first, then run an independent review and verification. Produces a plan, implementation report, and review pass. |
+| [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) | Investigating and repairing a bug or regression. | Record the symptom and diagnosis, approve the repair plan, reproduce and fix test-first, then review and verify. Produces a plan, incident report in `docs/incidents/`, implementation report, and review pass. |
+| [`workflow-refactor`](skills/workflow-refactor/SKILL.md) | Restructuring code while preserving behavior. | Establish a baseline, obtain approval of the plan, make small behavior-preserving changes, then review and verify. Produces a plan, implementation report, and review pass. |
 | [`workflow-review`](skills/workflow-review/SKILL.md) | Reviewing code or assessing risk. | An independent review records findings in a review pass; it does not make fixes unless you ask for them. |
 
-Planning workflows save approved plans under `.agents/plans/`. Implementation reports and review passes are saved under `.agents/implementation-reports/` and `.agents/code-reviews/` respectively. Bug-fixing workflows also keep a durable incident report under `docs/incidents/`.
+Planning workflows save user-approved plans under `.agents/plans/`. Implementation reports and review passes are saved under `.agents/implementation-reports/` and `.agents/code-reviews/` respectively. Bug-fixing workflows also keep a durable incident report under `docs/incidents/`.
 
 ### Engineering and Git
 
@@ -113,23 +113,25 @@ For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/referen
 
 Workflow skills define a consistent process for specification, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
 
-The specification, feature-development, bug-fixing, and refactoring workflows begin with `$grill-with-docs`, which resolves the task against project terminology and documentation. They then produce an approved plan under `.agents/plans/`. Get approval for that plan before implementation or repair begins. The review workflow is review-only and does not use this planning gate.
+The specification, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](.codex/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
+
+Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner defaults to `gpt-6-sol` with `high` reasoning; the other three agents default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test scripts/setup-agents.test.mjs` to check agent installation and rerun behavior.
 
 ### Feature specification
 
-Use [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) when requirements, acceptance criteria, or contracts need to be settled before coding. After the documentation grill, consolidate the resolved requirements, boundaries, decisions, and verification expectations into a specification plan. Once approved, that plan is the handoff for a later implementation task; this workflow does not implement the feature.
+Use [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) when requirements, acceptance criteria, or contracts need to be settled before coding. The planner produces a specification plan, which the user approves before it becomes the handoff for a later implementation task; this workflow does not implement the feature.
 
 ### Feature development
 
-Use [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) to change externally observable behavior. After the grill, inspect the relevant code and documentation and write a plan covering the behavior, scope, constraints, acceptance criteria, and verification. Wait for approval, then have the implementer work test-first and record the implementation and verification evidence. An independent reviewer checks the change against the plan. If the review blocks the change, address its concrete findings and repeat the relevant checks and review. Finish with focused verification, broader checks when the impact calls for them, and a final diff review.
+Use [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) to change externally observable behavior. After the user approves the planner's plan, the implementer works test-first and records implementation and verification evidence. An independent reviewer checks the change against the plan. If review blocks the change, address its findings and repeat the relevant checks and review. Finish with focused verification, broader checks when needed, and a final diff review.
 
 ### Bug fixing
 
-Use [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) for bugs, regressions, failing tests, or runtime and CI failures. After the documentation grill, investigate the affected code, callers, tests, and project context. Record the symptom, evidence, likely cause, impact, and proposed repair in an incident report and plan. Get approval before changing production or test code. Then reproduce the problem and repair it test-first, followed by an independent review and relevant broader verification. The reviewer finalizes the incident report from the confirmed evidence. If the repair would expand into feature behavior or contract work, stop and ask for direction instead of switching workflows automatically.
+Use [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) for bugs, regressions, failing tests, or runtime and CI failures. The planner and `bug-diagnostician` prepare the repair plan and incident report. Obtain explicit approval of the repair plan before changing production or test code, then reproduce the problem and repair it test-first, followed by an independent review and broader verification where needed. The reviewer finalizes the incident report. If the repair expands into feature behavior or contract work, stop and ask for direction.
 
 ### Refactoring
 
-Use [`workflow-refactor`](skills/workflow-refactor/SKILL.md) to restructure code while preserving its behavior and contracts. After the grill and code inspection, document what must remain unchanged, the scope, risks, and verification in a plan. Get approval, establish the test baseline, and make small changes while keeping focused checks green. The implementer records the baseline and verification; an independent reviewer checks for behavior drift, scope creep, and missing documentation or tests. If the work reveals a behavior change, stop and ask for direction rather than continuing as a refactor.
+Use [`workflow-refactor`](skills/workflow-refactor/SKILL.md) to restructure code while preserving its behavior and contracts. The planner records behavior to preserve, scope, risks, and verification; after user approval, the implementer establishes the test baseline and makes small changes while keeping focused checks green. An independent reviewer checks for behavior drift, scope creep, and missing documentation or tests. If the work reveals a behavior change, stop and ask for direction.
 
 ### Code review
 

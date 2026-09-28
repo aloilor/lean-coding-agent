@@ -48,6 +48,7 @@
   "skills/setup-lean-coding-agent/references/agents/bug-diagnostician.toml",
   "skills/setup-lean-coding-agent/references/agents/code-reviewer.toml",
   "skills/setup-lean-coding-agent/references/agents/implementer.toml",
+  "skills/setup-lean-coding-agent/references/agents/planner.toml",
   "skills/setup-lean-coding-agent/references/baseline/AGENTS.md",
   "skills/setup-lean-coding-agent/references/baseline/CLAUDE.md",
   "skills/setup-lean-coding-agent/references/config.toml",

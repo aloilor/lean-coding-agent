@@ -15,16 +15,16 @@ Run this skill after installing Lean Coding Agent to initialize the current proj
    - `gpt-6-sol` — designed for complex coding and agentic workflows; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
    - `gpt-6-luna` — efficient for focused, high-volume work; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
 
-   Tell the user the current defaults for all three subagents are `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults for all three, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's existing `model_reasoning_effort` setting.
+   Tell the user the current planner default is `gpt-6-sol` with `high` reasoning; `bug-diagnostician`, `implementer`, and `code-reviewer` default to `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's `model_reasoning_effort` setting.
 3. Run the bundled Node.js setup script from the target project, passing the selected models:
 
    ```text
-   node "<setup-skill>/scripts/setup-lean-coding-agent.mjs" "<target-project>" --bug-diagnostician-model <model-id> --implementer-model <model-id> --code-reviewer-model <model-id>
+   node "<setup-skill>/scripts/setup-lean-coding-agent.mjs" "<target-project>" --planner-model <model-id> --bug-diagnostician-model <model-id> --implementer-model <model-id> --code-reviewer-model <model-id>
    ```
 
    Locate `<setup-skill>` from this skill's installed directory. Do not ask the user to find or run the script. It uses Node.js and npm's `npx` on Windows, macOS, and Linux. If setup fails, report the failed command and stop; rerun only after resolving the reported environment or network issue.
 4. After setup completes, ask the user whether they want to run `$codebase-onboarding` to fill in project-specific `agent-context/` documentation. Run it only if they agree. If the skill is not available in the active thread, read `<target-project>/.agents/skills/codebase-onboarding/SKILL.md` and follow it directly after they agree.
-5. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/skills/`, `.codex/config.toml` with the bundled multi-agent defaults, `.codex/agents/` with all three model choices and their reasoning effort, `scripts/check-skill-updates.mjs`, `agent-context/skills-installed.json`, and the upstream skills. Summarize the installed skills, selected models and reasoning effort, and whether onboarding was run or deferred.
+5. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/skills/`, `.codex/config.toml` with the bundled multi-agent defaults, `.codex/agents/` with all four model choices and their reasoning effort, `scripts/check-skill-updates.mjs`, `agent-context/skills-installed.json`, and the upstream skills. Summarize the installed skills, selected models and reasoning effort, and whether onboarding was run or deferred.
 
 ## Managed Files And Effects
 
@@ -41,7 +41,7 @@ Run this skill after installing Lean Coding Agent to initialize the current proj
 
 The `references/` directory contains the baseline inputs needed after the plugin is installed and the original source repository is unavailable:
 
-- `references/agents/` contains the three native Codex subagent TOML templates.
+- `references/agents/` contains the four native Codex subagent TOML templates.
 - `references/config.toml` contains the baseline Codex project configuration copied when the target has no `.codex/config.toml`.
 - `references/baseline/` contains `AGENTS.md` and `CLAUDE.md`.
 - `references/docs/incidents/README.md` contains the incident report template.
