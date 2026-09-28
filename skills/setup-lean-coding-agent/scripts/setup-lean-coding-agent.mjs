@@ -61,8 +61,6 @@ const upstreamSkillGroups = [
     skills: [
       'create-readme',
       'refactor',
-      'sql-code-review',
-      'sql-optimization',
     ],
   },
 ];

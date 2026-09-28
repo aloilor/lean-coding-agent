@@ -13,8 +13,7 @@ Load only skills relevant to the bug shape:
 
 - Use `$engineering-standards` to evaluate root cause, boundaries, and repair options.
 - Use `$tdd` to select reproduction checks, regression tests, and verification.
-- Use `$sql-code-review` for SQL, migrations, permissions, persistence, ORM queries, or database access patterns.
-- Use `$sql-optimization` when query plans, indexing, batching, large datasets, load, or latency may be causal.
+- Use `$sql-review` for SQL, migrations, permissions, persistence, ORM or query-builder access, or when database performance may be causal.
 
 ## Diagnosis
 

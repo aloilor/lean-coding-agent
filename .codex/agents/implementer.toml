@@ -17,7 +17,7 @@ You turn an approved planning contract or clearly scoped direct request into the
 ## Skill Routing
 
 - Use `$engineering-standards` for code work and `$tdd` for behavioral changes, regression fixes, test strategy, and verification.
-- Use `$refactor` for behavior-preserving restructuring; `$rest-api-design` for HTTP contracts; `$sql-code-review` for database safety; and `$sql-optimization` for material database performance work.
+- Use `$refactor` for behavior-preserving restructuring; `$rest-api-design` for HTTP contracts; and `$sql-review` for database safety or material query performance work.
 - Load only skills relevant to the task.
 
 ## Implementation Loop

@@ -83,6 +83,7 @@ Planning workflows save user-approved plans under `.agents/plans/`. Implementati
 ### Engineering and Git
 
 - [`engineering-standards`](skills/engineering-standards/SKILL.md) — shared quality guidance for code changes.
+- [`sql-review`](skills/sql-review/SKILL.md) — review and change SQL, migrations, and ORM or query-builder access for security, correctness, and evidence-based performance.
 - [`rest-api-design`](skills/rest-api-design/SKILL.md) — design and review REST API contracts.
 - [`git-conventional-commit`](skills/git-conventional-commit/SKILL.md) — create Conventional Commits when asked to commit.
 - [`git-commit-and-push`](skills/git-commit-and-push/SKILL.md) — commit and push when explicitly requested.
@@ -100,8 +101,6 @@ Setup also installs these skills from upstream repositories. Use this list to ch
 | [`changelog-automation`](https://github.com/wshobson/agents/blob/main/plugins/documentation-generation/skills/changelog-automation/SKILL.md) | [wshobson/agents](https://github.com/wshobson/agents) | Create or automate changelogs and release notes from commits, using commit conventions and versioning. |
 | [`create-readme`](https://github.com/github/awesome-copilot/blob/main/skills/create-readme/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Draft a project README after reviewing the codebase and its existing documentation. |
 | [`refactor`](https://github.com/github/awesome-copilot/blob/main/skills/refactor/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Improve code structure or readability while preserving externally visible behavior. |
-| [`sql-code-review`](https://github.com/github/awesome-copilot/blob/main/skills/sql-code-review/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Review SQL for injection risks, access control, correctness, maintainability, and database best practices. |
-| [`sql-optimization`](https://github.com/github/awesome-copilot/blob/main/skills/sql-optimization/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Analyze query performance and improve SQL queries, indexes, and execution plans. |
 
 ### Skill overrides
 

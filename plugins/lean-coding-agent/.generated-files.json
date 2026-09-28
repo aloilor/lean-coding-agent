@@ -58,6 +58,7 @@
   "skills/setup-lean-coding-agent/references/skill-overrides/tdd.md",
   "skills/setup-lean-coding-agent/scripts/check-skill-updates.mjs",
   "skills/setup-lean-coding-agent/scripts/setup-lean-coding-agent.mjs",
+  "skills/sql-review/SKILL.md",
   "skills/workflow-bug-fixing/SKILL.md",
   "skills/workflow-bug-fixing/agents/openai.yaml",
   "skills/workflow-feature-development/SKILL.md",
