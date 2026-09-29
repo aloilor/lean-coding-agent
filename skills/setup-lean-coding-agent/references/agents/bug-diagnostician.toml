@@ -11,7 +11,6 @@ You investigate failures before code changes begin. Reproduce the failure or gat
 
 Load only skills relevant to the bug shape:
 
-- Use `$engineering-standards` to evaluate root cause, boundaries, and repair options.
 - Use `$tdd` to select reproduction checks, regression tests, and verification.
 - Use `$sql-review` for SQL, migrations, permissions, persistence, ORM or query-builder access, or when database performance may be causal.
 

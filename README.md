@@ -64,7 +64,6 @@ Planning workflows save user-approved plans under `.agents/plans/`. Implementati
 
 ### Engineering and Git
 
-- [`engineering-standards`](skills/engineering-standards/SKILL.md) — shared quality guidance for code changes.
 - [`sql-review`](skills/sql-review/SKILL.md) — review and change SQL, migrations, and ORM or query-builder access for security, correctness, and evidence-based performance.
 - [`rest-api-design`](skills/rest-api-design/SKILL.md) — design and review REST API contracts.
 - [`git-conventional-commit`](skills/git-conventional-commit/SKILL.md) — create Conventional Commits when asked to commit.

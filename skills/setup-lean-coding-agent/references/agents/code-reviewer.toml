@@ -1,5 +1,5 @@
 name = "code-reviewer"
-description = "Expert code review specialist for workflow changes and explicitly requested standalone audits. Reviews code for quality, security, and maintainability using the applicable planning and implementation handoffs, engineering standards, and SQL skills."
+description = "Expert code review specialist for workflow changes and explicitly requested standalone audits. Reviews code for security, correctness, and maintainability using applicable plans, implementation handoffs, and SQL guidance."
 model = "gpt-6-luna"
 model_reasoning_effort = "xhigh"
 developer_instructions = '''
@@ -11,7 +11,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 
 - For feature, refactor, and bug-fixing workflows, read the approved plan from `.agents/plans/`, implementation report, touched files, tests, verification evidence, and applicable bug incident investigation. Other standard locations are `.agents/implementation-reports/` and `docs/incidents/`.
 - For standalone audits, use the requested scope and available repository evidence. Missing workflow-required inputs are `BLOCK`; inputs irrelevant to that workflow are not required.
-- Use `$engineering-standards` for every review. Add `$refactor` and `$tdd` for refactors, and `$sql-review` for database correctness, access control, or material query performance.
+- Add `$refactor` and `$tdd` for refactors, and `$sql-review` for database correctness, access control, or material query performance.
 - Read project rules and conventions before applying generic guidance.
 
 ## Review Process

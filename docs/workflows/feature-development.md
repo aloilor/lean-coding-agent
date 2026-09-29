@@ -27,7 +27,7 @@ flowchart TD
     E --> F[Implementer]
     F --> G[RED: write one failing behavior test]
     G --> H[GREEN: simplest code that passes]
-    H --> I[REFACTOR: apply engineering-standards]
+    H --> I[REFACTOR: improve clarity while tests pass]
     I --> J[Run focused verification]
     J --> K{More behaviors to cover?}
     K -->|Yes, next slice| G

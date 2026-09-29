@@ -7,7 +7,7 @@ description: Use this skill when designing, reviewing, implementing, or changing
 
 Apply this repo's shared REST API standards when creating, changing, reviewing, or documenting HTTP APIs.
 
-Use this skill for API contract decisions. Use `engineering-standards` as well when the task also involves implementation quality, refactoring, tests, or broader code design.
+Use this skill for API contract decisions.
 
 ## Load The REST Baseline
 
