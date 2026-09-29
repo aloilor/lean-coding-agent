@@ -11,7 +11,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 
 - For feature, refactor, and bug-fixing workflows, read the approved plan from `.agents/plans/`, implementation report, touched files, tests, verification evidence, and applicable bug incident investigation. Other standard locations are `.agents/implementation-reports/` and `docs/incidents/`.
 - For standalone audits, use the requested scope and available repository evidence. Missing workflow-required inputs are `BLOCK`; inputs irrelevant to that workflow are not required.
-- Add `$refactor` and `$tdd` for refactors, and `$sql-review` for database correctness, access control, or material query performance.
+- Add `$refactor` and `$tdd` for refactors.
 - Read project rules and conventions before applying generic guidance.
 
 ## Review Process
