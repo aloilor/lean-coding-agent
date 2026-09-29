@@ -54,7 +54,7 @@ Workflows are opt-in: name the matching skill in your request to start one. They
 
 | Workflow | Use it for | Process and output |
 | --- | --- | --- |
-| [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) | Clarifying requirements and contracts before implementation. | Resolve requirements and acceptance criteria, then obtain approval of the specification plan in `.agents/plans/`. |
+| [`workflow-planning`](skills/workflow-planning/SKILL.md) | Planning requested work without implementing it. | Resolve scope, decisions, acceptance criteria, and verification expectations, then obtain approval of the plan in `.agents/plans/`. |
 | [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) | Changing externally observable behavior. | Clarify the change, obtain approval of the plan, implement test-first, then run an independent review and verification. Produces a plan, implementation report, and review pass. |
 | [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) | Investigating and repairing a bug or regression. | Record the symptom and diagnosis, approve the repair plan, reproduce and fix test-first, then review and verify. Produces a plan, incident report in `docs/incidents/`, implementation report, and review pass. |
 | [`workflow-refactor`](skills/workflow-refactor/SKILL.md) | Restructuring code while preserving behavior. | Establish a baseline, obtain approval of the plan, make small behavior-preserving changes, then review and verify. Produces a plan, implementation report, and review pass. |
@@ -92,15 +92,15 @@ For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/referen
 
 ## Workflow guide
 
-Workflow skills define a consistent process for specification, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
+Workflow skills define a consistent process for planning, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
 
-The specification, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](skills/setup-lean-coding-agent/references/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
+The planning, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](skills/setup-lean-coding-agent/references/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
 
 Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner defaults to `gpt-6-sol` with `high` reasoning; the other three agents default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
 
-### Feature specification
+### Planning only
 
-Use [`workflow-feature-specification`](skills/workflow-feature-specification/SKILL.md) when requirements, acceptance criteria, or contracts need to be settled before coding. The planner produces a specification plan, which the user approves before it becomes the handoff for a later implementation task; this workflow does not implement the feature.
+Use [`workflow-planning`](skills/workflow-planning/SKILL.md) when you want the work explored and documented as an approved plan without starting implementation. It can cover feature, bug-fix, refactoring, or other scoped work; the planner resolves open decisions, defines acceptance criteria and verification expectations, and records the plan for a later task.
 
 ### Feature development
 
