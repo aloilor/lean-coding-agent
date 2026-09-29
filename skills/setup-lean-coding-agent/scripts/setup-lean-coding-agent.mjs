@@ -63,6 +63,10 @@ const upstreamSkillGroups = [
       'refactor',
     ],
   },
+  {
+    source: 'https://github.com/anthropics/skills',
+    skills: ['skill-creator'],
+  },
 ];
 
 const packageManagerCommands = {

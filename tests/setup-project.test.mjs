@@ -99,7 +99,7 @@ test('setup initializes project files and preserves project-owned content on rer
   );
 
   const firstCommands = await loggedCommands(commandLog);
-  assert.deepEqual(firstCommands.map(({ command }) => command), ['pnpm', 'pnpm', 'npx', 'npx', 'npx', 'npx']);
+  assert.deepEqual(firstCommands.map(({ command }) => command), ['pnpm', 'pnpm', 'npx', 'npx', 'npx', 'npx', 'npx']);
   assert.deepEqual(firstCommands[0].args, ['add', '--save-dev', 'agent-browser@latest']);
   assert.deepEqual(firstCommands[1].args, ['exec', '--', 'agent-browser', 'install']);
   assert.deepEqual(firstCommands.slice(2).map(({ args }) => args), [
@@ -107,6 +107,7 @@ test('setup initializes project files and preserves project-owned content on rer
     ['skills', 'add', 'https://github.com/mattpocock/skills', '--skill', 'handoff', 'resolving-merge-conflicts', 'tdd', '--agent', 'codex', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/wshobson/agents', '--skill', 'changelog-automation', '--agent', 'codex', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'create-readme', 'refactor', '--agent', 'codex', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/anthropics/skills', '--skill', 'skill-creator', '--agent', 'codex', '--copy', '-y'],
   ]);
   assert.ok(firstCommands.every(({ cwd }) => cwd === project));
 
@@ -128,7 +129,7 @@ test('setup initializes project files and preserves project-owned content on rer
   );
   const ignoreRules = await fs.readFile(path.join(project, '.gitignore'), 'utf8');
   assert.equal((ignoreRules.match(/^node_modules\/$/gm) ?? []).length, 1);
-  assert.equal((await loggedCommands(commandLog)).length, 12);
+  assert.equal((await loggedCommands(commandLog)).length, 14);
 });
 
 test('setup reports installer failures and stops before later commands', async (t) => {

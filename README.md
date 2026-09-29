@@ -82,6 +82,7 @@ Setup also installs these skills from upstream repositories. Use this list to ch
 | [`changelog-automation`](https://github.com/wshobson/agents/blob/main/plugins/documentation-generation/skills/changelog-automation/SKILL.md) | [wshobson/agents](https://github.com/wshobson/agents) | Create or automate changelogs and release notes from commits, using commit conventions and versioning. |
 | [`create-readme`](https://github.com/github/awesome-copilot/blob/main/skills/create-readme/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Draft a project README after reviewing the codebase and its existing documentation. |
 | [`refactor`](https://github.com/github/awesome-copilot/blob/main/skills/refactor/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Improve code structure or readability while preserving externally visible behavior. |
+| [`skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) | [anthropics/skills](https://github.com/anthropics/skills) | Create, improve, and evaluate agent skills with structured test cases and benchmarks. |
 
 ### Skill overrides
 
