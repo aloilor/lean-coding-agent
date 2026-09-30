@@ -12,10 +12,11 @@ Run this skill after installing it with the Skills CLI to initialize the current
 1. Ask which existing project directory to initialize. Offer the current working directory as the recommended default, and let the user choose it or provide another path. Do not silently assume the current directory.
 2. Before asking about models, check the current official [OpenAI model catalog](https://developers.openai.com/api/docs/models) and [reasoning guide](https://developers.openai.com/api/docs/guides/reasoning). Show the latest generally available coding-capable model IDs and their supported reasoning-effort levels, with a short description of each model. Treat this list as a current reference; replace it with newer options if the official documentation has changed:
    - `gpt-6-astra` — most capable for complex reasoning and coding; supports `low`, `medium`, `high`, `xhigh`, and `max`.
+   - `gpt-6.1-sol` — near-Astra performance for complex work at a lower cost; supports `low`, `medium`, `high`, `xhigh`, and `max`.
    - `gpt-6-sol` — designed for complex coding and agentic workflows; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
    - `gpt-6-luna` — efficient for focused, high-volume work; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
 
-   Tell the user the current planner default is `gpt-6-sol` with `high` reasoning; `bug-diagnostician`, `implementer`, and `code-reviewer` default to `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's `model_reasoning_effort` setting.
+   Tell the user the current planner default is `gpt-6.1-sol` with `high` reasoning; `bug-diagnostician`, `implementer`, and `code-reviewer` default to `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's `model_reasoning_effort` setting.
 3. Run the bundled Node.js setup script from the target project, passing the selected models:
 
    ```text

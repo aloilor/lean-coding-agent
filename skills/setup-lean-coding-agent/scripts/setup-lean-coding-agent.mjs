@@ -18,7 +18,7 @@ const codebaseOnboardingReferencesDirectory = path.join(
 const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
 const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
 const defaultModel = 'gpt-6-luna';
-const defaultPlannerModel = 'gpt-6-sol';
+const defaultPlannerModel = 'gpt-6.1-sol';
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
 const modelAssignmentPattern = /^model\s*=\s*"[^"]*"\s*$/m;
 const manifestName = 'skills-installed.json';
