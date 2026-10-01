@@ -17,10 +17,34 @@ const codebaseOnboardingReferencesDirectory = path.join(
 );
 const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
 const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
-const defaultModel = 'gpt-6-luna';
-const defaultPlannerModel = 'gpt-6-luna';
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
-const modelAssignmentPattern = /^model\s*=\s*"[^"]*"\s*$/m;
+const agentTools = {
+  codex: {
+    label: 'Codex',
+    templateDirectory: 'codex',
+    targetDirectory: ['.codex', 'agents'],
+    extension: '.toml',
+    defaultModel: 'gpt-6-luna',
+    modelOptionPrefix: '',
+    modelAssignmentPattern: /^model\s*=\s*"[^"]*"\s*$/m,
+    modelAssignment: (modelId) => `model = "${modelId}"`,
+  },
+  'claude-code': {
+    label: 'Claude Code',
+    templateDirectory: 'claude-code',
+    targetDirectory: ['.claude', 'agents'],
+    extension: '.md',
+    defaultModel: 'sonnet',
+    modelOptionPrefix: 'claude-',
+    modelAssignmentPattern: /^model:\s*\S+\s*$/m,
+    modelAssignment: (modelId) => `model: ${modelId}`,
+  },
+};
+const toolSelections = {
+  codex: ['codex'],
+  'claude-code': ['claude-code'],
+  both: ['codex', 'claude-code'],
+};
 const manifestName = 'skills-installed.json';
 const agentContextDirectoryName = 'agent-context';
 const agentsDirectoryName = '.agents';
@@ -83,15 +107,23 @@ const agentBrowserInstallCommands = {
   bun: ['bun', 'run', 'agent-browser', 'install'],
 };
 
+function modelOptionName(tool, agentName) {
+  return `${agentTools[tool].modelOptionPrefix}${agentName}-model`;
+}
+
 function readOptions() {
+  const modelOptions = {};
+  for (const [tool, { defaultModel }] of Object.entries(agentTools)) {
+    for (const agentName of agentNames) {
+      modelOptions[modelOptionName(tool, agentName)] = { type: 'string', default: defaultModel };
+    }
+  }
   const { values, positionals } = parseArgs({
     allowPositionals: true,
     options: {
       help: { type: 'boolean', short: 'h' },
-      'planner-model': { type: 'string', default: defaultPlannerModel },
-      'bug-diagnostician-model': { type: 'string', default: defaultModel },
-      'implementer-model': { type: 'string', default: defaultModel },
-      'code-reviewer-model': { type: 'string', default: defaultModel },
+      tools: { type: 'string', default: 'codex' },
+      ...modelOptions,
     },
   });
 
@@ -101,11 +133,11 @@ function readOptions() {
         'Usage: node setup-lean-coding-agent.mjs [target-project] [options]',
         '',
         'Options:',
-        `  --planner-model <id>            Model for planner (default ${defaultPlannerModel})`,
-        `  --bug-diagnostician-model <id>  Model for bug-diagnostician (default ${defaultModel})`,
-        `  --implementer-model <id>        Model for implementer (default ${defaultModel})`,
-        `  --code-reviewer-model <id>      Model for code-reviewer (default ${defaultModel})`,
-        '  -h, --help                      Show this help',
+        '  --tools <codex|claude-code|both>   Coding agents to set up (default codex)',
+        `  --<agent>-model <id>               Codex model for planner, bug-diagnostician,`,
+        `                                     implementer, or code-reviewer (default ${agentTools.codex.defaultModel})`,
+        `  --claude-<agent>-model <id>        Claude Code model for the same agents (default ${agentTools['claude-code'].defaultModel})`,
+        '  -h, --help                         Show this help',
       ].join('\n'),
     );
     return null;
@@ -113,15 +145,21 @@ function readOptions() {
   if (positionals.length > 1) {
     throw new Error('Provide at most one target project directory.');
   }
+  if (!Object.hasOwn(toolSelections, values.tools)) {
+    throw new Error(`Invalid --tools value: use ${Object.keys(toolSelections).join(', ')}.`);
+  }
 
+  const tools = toolSelections[values.tools];
   return {
     targetProject: path.resolve(positionals[0] ?? process.cwd()),
-    models: {
-      planner: values['planner-model'],
-      'bug-diagnostician': values['bug-diagnostician-model'],
-      implementer: values['implementer-model'],
-      'code-reviewer': values['code-reviewer-model'],
-    },
+    tools,
+    models: Object.fromEntries(tools.map((tool) => [
+      tool,
+      Object.fromEntries(agentNames.map((agentName) => [
+        agentName,
+        values[modelOptionName(tool, agentName)],
+      ])),
+    ])),
   };
 }
 
@@ -178,11 +216,13 @@ async function readReleaseMetadata() {
 }
 
 function validateModels(models) {
-  for (const [agentName, modelId] of Object.entries(models)) {
-    if (!modelIdPattern.test(modelId)) {
-      throw new Error(
-        `Invalid model ID for ${agentName}: use letters, numbers, '.', '_', ':', '/', or '-'.`,
-      );
+  for (const [tool, toolModels] of Object.entries(models)) {
+    for (const [agentName, modelId] of Object.entries(toolModels)) {
+      if (!modelIdPattern.test(modelId)) {
+        throw new Error(
+          `Invalid ${agentTools[tool].label} model ID for ${agentName}: use letters, numbers, '.', '_', ':', '/', or '-'.`,
+        );
+      }
     }
   }
 }
@@ -268,22 +308,26 @@ async function ensureCodexConfig(targetProject) {
   return configPath;
 }
 
-export async function installCodexAgents(targetProject, models) {
-  const targetDirectory = path.join(targetProject, '.codex', 'agents');
+export async function installAgents(targetProject, tool, models) {
+  const {
+    templateDirectory,
+    targetDirectory: targetParts,
+    extension,
+    modelAssignmentPattern,
+    modelAssignment,
+  } = agentTools[tool];
+  const targetDirectory = path.join(targetProject, ...targetParts);
   const installedPaths = [];
   await fs.mkdir(targetDirectory, { recursive: true });
 
   for (const agentName of agentNames) {
-    const sourcePath = await requiredReference('agents', `${agentName}.toml`);
+    const sourcePath = await requiredReference('agents', templateDirectory, `${agentName}${extension}`);
     const contents = await fs.readFile(sourcePath, 'utf8');
     if (!modelAssignmentPattern.test(contents)) {
       throw new Error(`Expected a model setting in bundled agent template: ${sourcePath}`);
     }
-    const targetPath = path.join(targetDirectory, `${agentName}.toml`);
-    const updatedContents = contents.replace(
-      modelAssignmentPattern,
-      `model = "${models[agentName]}"`,
-    );
+    const targetPath = path.join(targetDirectory, `${agentName}${extension}`);
+    const updatedContents = contents.replace(modelAssignmentPattern, modelAssignment(models[agentName]));
     await fs.writeFile(targetPath, updatedContents, 'utf8');
     installedPaths.push(targetPath);
   }
@@ -685,12 +729,12 @@ async function installAgentBrowser(targetProject) {
   return `package installed and browser installed with ${managerName}`;
 }
 
-async function installUpstreamSkills(targetProject) {
+async function installUpstreamSkills(targetProject, tools) {
   const installedNames = [];
   for (const { source, skills } of upstreamSkillGroups) {
     await runCommand(
       'npx',
-      ['skills', 'add', source, '--skill', ...skills, '--agent', 'codex', '--copy', '-y'],
+      ['skills', 'add', source, '--skill', ...skills, '--agent', ...tools, '--copy', '-y'],
       targetProject,
       `Could not install upstream skills from ${source} with npx`,
     );
@@ -699,38 +743,41 @@ async function installUpstreamSkills(targetProject) {
   return installedNames;
 }
 
-async function initializeProject(targetProject, models) {
+async function initializeProject(targetProject, tools, models) {
   const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
   await fs.mkdir(agentContextDirectory, { recursive: true });
   const onboardingContextPaths = await ensureCodebaseOnboardingContextFiles(targetProject);
   const incidentReadme = await ensureIncidentsReadme(targetProject);
   const lessonsIndex = await ensureLessonsIndex(targetProject);
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
-  const agentPaths = await installCodexAgents(targetProject, models);
-  await ensureCodexConfig(targetProject);
+  const agentPaths = {};
+  for (const tool of tools) agentPaths[tool] = await installAgents(targetProject, tool, models[tool]);
+  const codexConfigPath = tools.includes('codex') ? await ensureCodexConfig(targetProject) : null;
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
   const skillResult = await syncInstalledSkills(targetProject);
   const updateChecker = await installUpdateChecker(targetProject);
   const agentBrowserStatus = await installAgentBrowser(targetProject);
-  const upstreamSkillNames = await installUpstreamSkills(targetProject);
+  const upstreamSkillNames = await installUpstreamSkills(targetProject, tools);
 
   console.log(`Initialized project repo: ${targetProject}`);
   console.log('Copied baseline files:');
   for (const filePath of baselinePaths) console.log(`- ${filePath}`);
   console.log('Ensured private local files:');
   for (const filePath of localPaths) console.log(`- ${filePath}`);
-  console.log('Installed Codex agents with selected models:');
-  agentNames.forEach((agentName, index) => {
-    console.log(`- ${agentPaths[index]}: ${models[agentName]}`);
-  });
+  for (const tool of tools) {
+    console.log(`Installed ${agentTools[tool].label} agents with selected models:`);
+    agentNames.forEach((agentName, index) => {
+      console.log(`- ${agentPaths[tool][index]}: ${models[tool][agentName]}`);
+    });
+  }
   console.log(`Agent Browser dependency: ${agentBrowserStatus}`);
   console.log(`Ensured incident reports file: ${incidentReadme}`);
   console.log(`Ensured shared lessons index: ${lessonsIndex}`);
   console.log(`Ensured skill overrides: ${path.join(targetProject, agentsDirectoryName, skillOverridesDirectoryName)}`);
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
-  console.log(`Ensured Codex config: ${path.join(targetProject, '.codex', 'config.toml')}`);
+  if (codexConfigPath) console.log(`Ensured Codex config: ${codexConfigPath}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} available skills into: ${skillResult.skillDirectory}`);
   console.log(`Installed skills update checker: ${updateChecker.checkerPath}`);
@@ -744,7 +791,7 @@ async function main() {
   if (options === null) return;
   validateModels(options.models);
   const targetProject = await requireDirectory(options.targetProject, 'Target project');
-  await initializeProject(targetProject, options.models);
+  await initializeProject(targetProject, options.tools, options.models);
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

@@ -1,6 +1,6 @@
 # Lean Coding Agent
 
-A collection of Codex skills for working on real codebases. It provides practical engineering guidance and repeatable ways to set up and understand a repository. `AGENTS.md` is the active baseline; the initializer also copies `CLAUDE.md` for compatibility but does not configure Claude Code.
+A collection of Codex and Claude Code skills for working on real codebases. It provides practical engineering guidance and repeatable ways to set up and understand a repository. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
 
 The skills are small and composable. Install the ones you want with the Skills CLI. The project setup skill installs the shared baseline and prepares the repository for day-to-day work.
 
@@ -12,21 +12,17 @@ Install skills from this repository:
 npx skills@latest add aloilor/lean-coding-agent
 ```
 
-In the installer, select Codex and the skills you want. Select `setup-lean-coding-agent` to initialize a project with the shared baseline.
+In the installer, select Codex, Claude Code, or both, and the skills you want. Select `setup-lean-coding-agent` to initialize a project with the shared baseline.
 
 ## Set up your project
 
-Open the target repository in Codex and run:
+Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Claude Code run `/setup-lean-coding-agent`.
 
-```text
-$setup-lean-coding-agent
-```
-
-The setup skill installs the shared project guidance, available skills, skill overrides, Codex subagents, and a cross-tool skills update checker that agents run at session start. It also installs Agent Browser and the upstream skills used by the baseline, then offers to run project-specific onboarding. Node.js is required for setup.
+The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents run at session start. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to run project-specific onboarding. Node.js is required for setup.
 
 ## Use the skills
 
-Ask Codex for help as usual, or call a skill by name when you want it. For example, use `$codebase-onboarding` to understand an unfamiliar repository or `$workflow-feature-development` to explicitly start that workflow.
+Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `codebase-onboarding` to understand an unfamiliar repository or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
 
 ## Updates
 
@@ -93,7 +89,7 @@ For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/referen
 
 Workflow skills define a consistent process for planning, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
 
-The planning, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](skills/setup-lean-coding-agent/references/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
+The planning, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the `planner` subagent ([Codex](skills/setup-lean-coding-agent/references/agents/codex/planner.toml), [Claude Code](skills/setup-lean-coding-agent/references/agents/claude-code/planner.md)). The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
 
 Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner and code reviewer default to `gpt-6-luna` with `max` reasoning; the bug diagnostician and implementer default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
 

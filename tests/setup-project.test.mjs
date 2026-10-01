@@ -60,10 +60,12 @@ test('setup initializes project files and preserves project-owned content on rer
   const options = [
     setupScript,
     project,
+    '--tools', 'both',
     '--planner-model', 'gpt-6-astra',
     '--bug-diagnostician-model', 'gpt-6-sol',
     '--implementer-model', 'gpt-6-astra',
     '--code-reviewer-model', 'gpt-6-sol',
+    '--claude-planner-model', 'opus',
   ];
   await runFile(process.execPath, options, { env });
 
@@ -80,6 +82,10 @@ test('setup initializes project files and preserves project-owned content on rer
     '.codex/agents/bug-diagnostician.toml',
     '.codex/agents/implementer.toml',
     '.codex/agents/code-reviewer.toml',
+    '.claude/agents/planner.md',
+    '.claude/agents/bug-diagnostician.md',
+    '.claude/agents/implementer.md',
+    '.claude/agents/code-reviewer.md',
     'docs/incidents/README.md',
     'agent-context/architecture.md',
     'agent-context/skills-installed.json',
@@ -93,6 +99,10 @@ test('setup initializes project files and preserves project-owned content on rer
   assert.match(planner, /^model_reasoning_effort = "max"$/m);
   assert.match(implementer, /^model = "gpt-6-astra"$/m);
   assert.match(implementer, /^model_reasoning_effort = "xhigh"$/m);
+  const claudePlanner = await fs.readFile(path.join(project, '.claude', 'agents', 'planner.md'), 'utf8');
+  const claudeImplementer = await fs.readFile(path.join(project, '.claude', 'agents', 'implementer.md'), 'utf8');
+  assert.match(claudePlanner, /^model: opus$/m);
+  assert.match(claudeImplementer, /^model: sonnet$/m);
   assert.equal(
     await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'),
     await fs.readFile(path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'config.toml'), 'utf8'),
@@ -103,11 +113,11 @@ test('setup initializes project files and preserves project-owned content on rer
   assert.deepEqual(firstCommands[0].args, ['add', '--save-dev', 'agent-browser@latest']);
   assert.deepEqual(firstCommands[1].args, ['exec', '--', 'agent-browser', 'install']);
   assert.deepEqual(firstCommands.slice(2).map(({ args }) => args), [
-    ['skills', 'add', 'https://github.com/vercel-labs/agent-browser', '--skill', 'agent-browser', '--agent', 'codex', '--copy', '-y'],
-    ['skills', 'add', 'https://github.com/mattpocock/skills', '--skill', 'handoff', 'resolving-merge-conflicts', 'tdd', '--agent', 'codex', '--copy', '-y'],
-    ['skills', 'add', 'https://github.com/wshobson/agents', '--skill', 'changelog-automation', '--agent', 'codex', '--copy', '-y'],
-    ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'create-readme', 'refactor', '--agent', 'codex', '--copy', '-y'],
-    ['skills', 'add', 'https://github.com/anthropics/skills', '--skill', 'skill-creator', '--agent', 'codex', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/vercel-labs/agent-browser', '--skill', 'agent-browser', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/mattpocock/skills', '--skill', 'handoff', 'resolving-merge-conflicts', 'tdd', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/wshobson/agents', '--skill', 'changelog-automation', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'create-readme', 'refactor', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/anthropics/skills', '--skill', 'skill-creator', '--agent', 'codex', 'claude-code', '--copy', '-y'],
   ]);
   assert.ok(firstCommands.every(({ cwd }) => cwd === project));
 
@@ -130,6 +140,23 @@ test('setup initializes project files and preserves project-owned content on rer
   const ignoreRules = await fs.readFile(path.join(project, '.gitignore'), 'utf8');
   assert.equal((ignoreRules.match(/^node_modules\/$/gm) ?? []).length, 1);
   assert.equal((await loggedCommands(commandLog)).length, 14);
+});
+
+test('setup for Claude Code only installs Claude Code agents and skills without Codex files', async (t) => {
+  const { project, commandLog, env } = await setupFixture(t);
+
+  await runFile(process.execPath, [setupScript, project, '--tools', 'claude-code'], { env });
+
+  for (const agentName of ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer']) {
+    const installed = await fs.readFile(path.join(project, '.claude', 'agents', `${agentName}.md`), 'utf8');
+    assert.match(installed, /^model: sonnet$/m);
+  }
+  await assert.rejects(fs.access(path.join(project, '.codex')), { code: 'ENOENT' });
+  const skillCommands = (await loggedCommands(commandLog)).filter(({ command }) => command === 'npx');
+  assert.equal(skillCommands.length, 5);
+  for (const { args } of skillCommands) {
+    assert.deepEqual(args.slice(args.indexOf('--agent')), ['--agent', 'claude-code', '--copy', '-y']);
+  }
 });
 
 test('setup reports installer failures and stops before later commands', async (t) => {

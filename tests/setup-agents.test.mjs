@@ -7,7 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import {
-  installCodexAgents,
+  installAgents,
   installUpdateChecker,
   syncInstalledSkills,
 } from '../skills/setup-lean-coding-agent/scripts/setup-lean-coding-agent.mjs';
@@ -38,10 +38,10 @@ test('agent installation assigns selected models and preserves reasoning effort 
     'code-reviewer': 'gpt-6-sol',
   };
 
-  await installCodexAgents(project, firstModels);
+  await installAgents(project, 'codex', firstModels);
   const customAgent = path.join(project, '.codex', 'agents', 'custom.toml');
   await fs.writeFile(customAgent, 'name = "custom"\n');
-  await installCodexAgents(project, selectedModels);
+  await installAgents(project, 'codex', selectedModels);
 
   for (const [agentName, model] of Object.entries(selectedModels)) {
     const installed = await fs.readFile(path.join(project, '.codex', 'agents', `${agentName}.toml`), 'utf8');
@@ -50,6 +50,57 @@ test('agent installation assigns selected models and preserves reasoning effort 
     assert.match(installed, new RegExp(`^model_reasoning_effort = "${expectedEffort}"$`, 'm'));
   }
   assert.equal(await fs.readFile(customAgent, 'utf8'), 'name = "custom"\n');
+});
+
+test('Claude Code agent installation assigns selected models and preserves effort and custom agents', async (t) => {
+  const project = await temporaryProject(t);
+  const selectedModels = {
+    planner: 'opus',
+    'bug-diagnostician': 'inherit',
+    implementer: 'sonnet',
+    'code-reviewer': 'claude-opus-5-5',
+  };
+  const customAgent = path.join(project, '.claude', 'agents', 'custom.md');
+  await fs.mkdir(path.dirname(customAgent), { recursive: true });
+  await fs.writeFile(customAgent, '---\nname: custom\n---\n');
+
+  await installAgents(project, 'claude-code', selectedModels);
+
+  for (const [agentName, model] of Object.entries(selectedModels)) {
+    const installed = await fs.readFile(path.join(project, '.claude', 'agents', `${agentName}.md`), 'utf8');
+    const expectedEffort = ['planner', 'code-reviewer'].includes(agentName) ? 'max' : 'xhigh';
+    assert.match(installed, new RegExp(`^---\r?\nname: ${agentName}\r?\n`));
+    assert.match(installed, new RegExp(`^model: ${model}$`, 'm'));
+    assert.match(installed, new RegExp(`^effort: ${expectedEffort}\r?$`, 'm'));
+    assert.doesNotMatch(installed, /`\$[A-Za-z0-9-]+`/);
+  }
+  assert.equal(await fs.readFile(customAgent, 'utf8'), '---\nname: custom\n---\n');
+});
+
+test('setup rejects an invalid Claude Code model before changing the target project', async (t) => {
+  const project = await temporaryProject(t);
+
+  await assert.rejects(
+    runFile(process.execPath, [setupScript, project, '--tools', 'both', '--claude-implementer-model', 'bad model']),
+    (error) => {
+      assert.match(error.stderr, /Invalid Claude Code model ID for implementer/);
+      return true;
+    },
+  );
+  assert.deepEqual(await fs.readdir(project), []);
+});
+
+test('setup rejects an unknown tool selection before changing the target project', async (t) => {
+  const project = await temporaryProject(t);
+
+  await assert.rejects(
+    runFile(process.execPath, [setupScript, project, '--tools', 'cursor']),
+    (error) => {
+      assert.match(error.stderr, /Invalid --tools value/);
+      return true;
+    },
+  );
+  assert.deepEqual(await fs.readdir(project), []);
 });
 
 test('installed skill sync refreshes managed copies and preserves project-owned skills on rerun', async (t) => {
@@ -134,7 +185,7 @@ test('setup rejects an invalid model before changing the target project', async 
   await assert.rejects(
     runFile(process.execPath, [setupScript, project, '--planner-model', 'invalid model']),
     (error) => {
-      assert.match(error.stderr, /Invalid model ID for planner/);
+      assert.match(error.stderr, /Invalid Codex model ID for planner/);
       return true;
     },
   );
