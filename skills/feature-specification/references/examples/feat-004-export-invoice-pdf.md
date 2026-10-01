@@ -95,16 +95,16 @@ After successful generation, the PDF shall be made available to the user as a do
 
 ## Business Rules
 
-**BR-1**
+**BR-1 — Invoice currency**
 All monetary values shall use the currency assigned to the invoice.
 
-**BR-2**
+**BR-2 — Consistent tax calculations**
 Tax calculations displayed in the PDF shall match the tax calculations displayed in the application.
 
-**BR-3**
+**BR-3 — Omit inapplicable values**
 If a value is not applicable, it may be omitted from the PDF rather than displayed as an empty field.
 
-**BR-4**
+**BR-4 — Authorization required**
 Users shall not be able to export invoices they are not authorized to view.
 
 ## Error Handling and Edge Cases

@@ -31,7 +31,7 @@ In the full variant, a section with genuinely nothing to say keeps its heading a
 - **Version:** `MAJOR.MINOR`, starting at `1.0`. Minor for clarifications, major for scope or behavior changes.
 - **Status:** one of `Draft` (open questions remain), `Proposed` (ready for client review), `Approved`, `Superseded`.
 - **ID prefixes:** `US-` user story, `FR-` functional requirement, `BR-` business rule, `EC-` edge case, `AC-` acceptance criterion, `NFR-` non-functional requirement, `OQ-` open question. Number sequentially from 1 within each prefix.
-- **Titles:** every FR, EC, AC, and NFR has a short title after an em dash: `FR-4 — File name`. Open questions use the question itself as the title. BRs and USs may omit titles.
+- **Titles:** every FR, BR, EC, AC, and NFR has a short descriptive title after an em dash, such as `FR-4 — File name` or `BR-1 — Unique email address`. Keep business-rule titles especially simple and easy to scan. Open questions use the question itself as the title. USs may omit titles.
 
 ## Template
 
@@ -101,10 +101,10 @@ The {output} shall include:
 
 ## Business Rules
 
-**BR-1**
+**BR-1 — {Title}**
 {Rule that constrains behavior regardless of screen or entry point.}
 
-**BR-2**
+**BR-2 — {Title}**
 {Rule.}
 
 ## Error Handling and Edge Cases

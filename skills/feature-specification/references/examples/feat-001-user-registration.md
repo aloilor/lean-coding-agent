@@ -99,16 +99,16 @@ Repeated submissions of the registration form for the same email address within 
 
 ## Business Rules
 
-**BR-1**
+**BR-1 — Unique email address**
 An email address shall belong to at most one account.
 
-**BR-2**
+**BR-2 — Verification link expiry**
 Verification links shall expire 24 hours after they are issued.
 
-**BR-3**
+**BR-3 — New link invalidates older links**
 Issuing a new verification link shall invalidate all previously issued links for that account.
 
-**BR-4**
+**BR-4 — Uniform registration responses**
 Responses to registration and resend requests shall not reveal whether an email address is registered.
 
 ## Error Handling and Edge Cases

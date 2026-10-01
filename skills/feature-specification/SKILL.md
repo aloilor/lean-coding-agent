@@ -74,6 +74,7 @@ Every open question carries a recommended answer, the reason for it, and the IDs
 Follow the template exactly. Writing rules:
 
 - **One behavior per requirement.** Split compound FRs so each can be accepted or rejected on its own.
+- **Give every business rule a concise title.** Put a plain-language description after the ID and em dash, like `FR-12 — Duplicate submissions` (for example, `BR-1 — Unique email address`).
 - **Use normative language consistently.** `shall` for mandatory behavior; `should` only for targets that may be missed without failing acceptance (typically NFRs); `may` for permitted but optional behavior.
 - **Be concrete and measurable.** Replace "fast", "user-friendly", "secure", "large" with numbers, formats, limits, and examples (e.g. `invoice-{invoiceNumber}.pdf`, "up to 1,000 line items", "within 3 seconds").
 - **Name things the way users see them.** Use exact action labels, screen names, and role names.
