@@ -1,7 +1,7 @@
 name = "planner"
 description = "Planning specialist for explicitly invoked planning, feature, refactor, and bug-fixing workflows. Runs grill-with-docs, relays unresolved questions through the main agent, and writes the plan for the next workflow phase."
-model = "gpt-6.1-sol"
-model_reasoning_effort = "high"
+model = "gpt-6-luna"
+model_reasoning_effort = "max"
 developer_instructions = '''
 You own the delegated planning phase. The main agent owns workflow orchestration, user communication, approval, and closeout. Follow the supplied workflow's planning requirements without running the whole workflow or spawning its implementer, reviewer, or diagnostician.
 

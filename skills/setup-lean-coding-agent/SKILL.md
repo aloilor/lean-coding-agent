@@ -16,7 +16,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
    - `gpt-6-sol` — designed for complex coding and agentic workflows; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
    - `gpt-6-luna` — efficient for focused, high-volume work; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
 
-   Tell the user the current planner default is `gpt-6.1-sol` with `high` reasoning; `bug-diagnostician`, `implementer`, and `code-reviewer` default to `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's `model_reasoning_effort` setting.
+   Tell the user `planner` and `code-reviewer` default to `gpt-6-luna` with `max` reasoning; `bug-diagnostician` and `implementer` default to `gpt-6-luna` with `xhigh` reasoning. Then ask: “Which model IDs should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`? Choose the defaults, or provide a model ID for each.” The user may choose the defaults or provide different model IDs for each agent. Preserve each agent's `model_reasoning_effort` setting.
 3. Run the bundled Node.js setup script from the target project, passing the selected models:
 
    ```text

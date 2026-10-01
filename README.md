@@ -95,7 +95,7 @@ Workflow skills define a consistent process for planning, implementation, bug re
 
 The planning, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the [`planner`](skills/setup-lean-coding-agent/references/agents/planner.toml) subagent. The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
 
-Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner defaults to `gpt-6.1-sol` with `high` reasoning; the other three agents default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
+Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner and code reviewer default to `gpt-6-luna` with `max` reasoning; the bug diagnostician and implementer default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
 
 ### Planning only
 
