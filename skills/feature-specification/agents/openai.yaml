@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Specification"
+  short_description: "Write a client-approvable feature spec"
+  default_prompt: "Use $feature-specification to write a FEAT-NNN Feature Specification for this feature, with requirements and acceptance criteria."
