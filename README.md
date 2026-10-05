@@ -59,6 +59,8 @@ Workflows are opt-in: name the matching skill in your request to start one. They
 
 Planning workflows save user-approved plans under `.agents/plans/`. Implementation reports and review passes are saved under `.agents/implementation-reports/` and `.agents/code-reviews/` respectively. Bug-fixing workflows also keep a durable incident report under `docs/incidents/`.
 
+Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates/plan.md) and [code-review](skills/setup-lean-coding-agent/references/templates/code-review.md) templates into `.agents/templates/`. Both Codex and Claude Code planners and reviewers use them, with stable core sections and detail proportional to the task. Setup refreshes the two bundled templates on reruns while preserving other project-owned templates.
+
 ### Engineering and Git
 
 - [`git-conventional-commit`](skills/git-conventional-commit/SKILL.md) — create Conventional Commits when asked to commit.

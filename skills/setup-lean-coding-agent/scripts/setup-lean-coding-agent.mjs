@@ -334,6 +334,18 @@ export async function installAgents(targetProject, tool, models) {
   return installedPaths;
 }
 
+async function syncArtifactTemplates(targetProject) {
+  const targetDirectory = path.join(targetProject, agentsDirectoryName, 'templates');
+  await fs.mkdir(targetDirectory, { recursive: true });
+  const installedPaths = [];
+  for (const name of ['plan.md', 'code-review.md']) {
+    const targetPath = path.join(targetDirectory, name);
+    await fs.copyFile(await requiredReference('templates', name), targetPath);
+    installedPaths.push(targetPath);
+  }
+  return installedPaths;
+}
+
 async function ensureIncidentsReadme(targetProject) {
   const targetDirectory = path.join(targetProject, 'docs', 'incidents');
   const readmePath = path.join(targetDirectory, 'README.md');
@@ -750,6 +762,7 @@ async function initializeProject(targetProject, tools, models) {
   const incidentReadme = await ensureIncidentsReadme(targetProject);
   const lessonsIndex = await ensureLessonsIndex(targetProject);
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
+  const templatePaths = await syncArtifactTemplates(targetProject);
   const agentPaths = {};
   for (const tool of tools) agentPaths[tool] = await installAgents(targetProject, tool, models[tool]);
   const codexConfigPath = tools.includes('codex') ? await ensureCodexConfig(targetProject) : null;
@@ -775,6 +788,8 @@ async function initializeProject(targetProject, tools, models) {
   console.log(`Agent Browser dependency: ${agentBrowserStatus}`);
   console.log(`Ensured incident reports file: ${incidentReadme}`);
   console.log(`Ensured shared lessons index: ${lessonsIndex}`);
+  console.log('Installed shared artifact templates:');
+  for (const filePath of templatePaths) console.log(`- ${filePath}`);
   console.log(`Ensured skill overrides: ${path.join(targetProject, agentsDirectoryName, skillOverridesDirectoryName)}`);
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
   if (codexConfigPath) console.log(`Ensured Codex config: ${codexConfigPath}`);

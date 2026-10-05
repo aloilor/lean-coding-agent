@@ -159,6 +159,43 @@ test('setup for Claude Code only installs Claude Code agents and skills without 
   }
 });
 
+test('setup installs shared artifact templates for each tool selection and refreshes only managed templates on rerun', async (t) => {
+  for (const tools of ['codex', 'claude-code', 'both']) {
+    const { project, env } = await setupFixture(t);
+    const options = [setupScript, project, '--tools', tools];
+    await runFile(process.execPath, options, { env });
+    const templateDirectory = path.join(project, '.agents', 'templates');
+    const installedNames = await fs.readdir(templateDirectory).catch((error) => {
+      if (error.code === 'ENOENT') return [];
+      throw error;
+    });
+    assert.deepEqual(installedNames.sort(), ['code-review.md', 'plan.md'], tools);
+
+    for (const name of installedNames) {
+      const source = path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'templates', name);
+      assert.equal(await fs.readFile(path.join(templateDirectory, name), 'utf8'), await fs.readFile(source, 'utf8'));
+      await fs.writeFile(path.join(templateDirectory, name), 'Outdated managed template\n');
+    }
+    await fs.writeFile(path.join(templateDirectory, 'project-template.md'), 'Project-owned template\n');
+    await runFile(process.execPath, options, { env });
+    for (const name of installedNames) {
+      const source = path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'templates', name);
+      assert.equal(await fs.readFile(path.join(templateDirectory, name), 'utf8'), await fs.readFile(source, 'utf8'));
+    }
+    assert.equal(await fs.readFile(path.join(templateDirectory, 'project-template.md'), 'utf8'), 'Project-owned template\n');
+
+    const selectedTools = tools === 'both' ? ['codex', 'claude-code'] : [tools];
+    for (const tool of selectedTools) {
+      const directory = tool === 'codex' ? '.codex' : '.claude';
+      const extension = tool === 'codex' ? '.toml' : '.md';
+      for (const [agent, template] of [['planner', 'plan'], ['code-reviewer', 'code-review']]) {
+        const contents = await fs.readFile(path.join(project, directory, 'agents', `${agent}${extension}`), 'utf8');
+        assert.ok(contents.includes(`.agents/templates/${template}.md`), `${tool} ${agent} references its installed template`);
+      }
+    }
+  }
+});
+
 test('setup reports installer failures and stops before later commands', async (t) => {
   const { project, commandLog, env } = await setupFixture(t);
   env.SETUP_FAIL_COMMAND = 'npm';
