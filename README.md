@@ -42,7 +42,7 @@ Run `node scripts/check-skill-updates.mjs` to compare this checkout's release me
 
 - [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the skill.
 - [`codebase-onboarding`](skills/codebase-onboarding/SKILL.md) — analyze a repository and write structured project context.
-- [`grill-with-docs`](skills/grill-with-docs/SKILL.md) — clarify a plan against project terminology and documented decisions.
+- [`grill-with-docs`](skills/grill-with-docs/SKILL.md) — a personal fork of Matt Pocock’s original skill, adapted to work with my setup; clarifies plans against project terminology and documented decisions.
 - [`feature-specification`](skills/feature-specification/SKILL.md) — write a client-approvable feature spec from a fixed template.
 
 ### Change workflows
