@@ -63,8 +63,7 @@ Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates
 
 ### Engineering and Git
 
-- [`git-conventional-commit`](skills/git-conventional-commit/SKILL.md) — create Conventional Commits when asked to commit.
-- [`git-commit-and-push`](skills/git-commit-and-push/SKILL.md) — commit and push when explicitly requested.
+- [`git-conventional-commit`](skills/git-conventional-commit/SKILL.md) — create Conventional Commits when asked to commit, and push when asked.
 
 ### Upstream skills installed by setup
 

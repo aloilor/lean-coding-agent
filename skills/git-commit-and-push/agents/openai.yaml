@@ -1,4 +1,0 @@
-interface:
-  display_name: "Git Commit And Push"
-  short_description: "Commit conventionally and push the branch"
-  default_prompt: "Use $git-commit-and-push to create a Conventional Commit with $git-conventional-commit, then push the current branch to its configured remote."
