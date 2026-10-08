@@ -2,13 +2,30 @@
 
 <!-- Keep the core headings and scale detail to the task. Replace placeholders
 and choices; remove drafting guidance from the completed review. Repeat the
-finding block for confirmed findings only; use "No findings" when appropriate.
-Use "Not applicable — <reason>" for conditional sections. Agent instructions
-govern evidence requirements, scope, blocking decisions, and verdicts. -->
+finding block for confirmed findings only. Finding IDs stay stable across
+passes: keep an earlier finding's ID and number new findings after the highest
+existing ID. Use "Not applicable — <reason>" for conditional sections. Agent
+instructions govern evidence requirements, scope, blocking decisions, and
+verdicts. -->
+
+## Verdict
+
+Verdict: APPROVE | WARNING | BLOCK
+Counts: CRITICAL <n>, HIGH <n>, MEDIUM <n>, LOW <n>
+Reason: <brief justification and any required next action>
+
+## Prior Findings
+
+Pass 1: "Not applicable — first pass." Later passes: list every finding from
+earlier passes.
+
+| ID | Title | Status |
+| --- | --- | --- |
+| F-1 | <title> | Resolved / Still open / Regressed / Withdrawn |
 
 ## Findings
 
-Order by severity. If there are none, state "No findings."
+New and still-open findings, ordered by severity, or "No findings."
 
 ### F-1: [<severity>] <title>
 
@@ -19,9 +36,7 @@ Order by severity. If there are none, state "No findings."
 - Fix direction: <smallest responsible correction>
 - Disposition: Blocking | Non-blocking
 - Scope basis: <requirement, approved plan, incident, or review scope>
-
-For HIGH or CRITICAL findings, include the relevant snippet without exposing
-secrets.
+- Snippet (HIGH or CRITICAL only): <relevant code without secrets>
 
 ## Scope And Inputs
 
@@ -33,13 +48,16 @@ secrets.
 
 ## Review Coverage
 
+Mark each audit Checked, Not applicable, or Incomplete. Explain every
+Incomplete audit here; do not repeat it elsewhere.
+
 ### Security
 
 Status: Checked | Not applicable | Incomplete
 
-Describe the applicable security checks, inspected paths and guards, and
-supporting evidence. Explain exclusions or incomplete checks and link any
-confirmed vulnerabilities to their finding IDs.
+- Checked: <classes inspected, with paths and guards>
+- Not applicable: <classes with reasons>
+- Findings: <IDs or None>
 
 ### Specification Fidelity
 
@@ -48,9 +66,10 @@ Status: Checked | Not applicable | Incomplete
 | Requirement | Implementation evidence | Verification evidence | Result |
 | --- | --- | --- | --- |
 | AC-1 | <location> | <test or check> | Satisfied / Gap / Unverified |
+| New dependencies | <manifest changes> | <plan line> | Approved / Unapproved / None |
+| Plan revisions | <deviations found> | <revision entry> | Approved / Unexplained / None |
 
 If no originating contract applies, explain why this section is not applicable.
-Link omissions, contradictions, or unexplained deviations to their finding IDs.
 
 ### Test-First And Refactor Evidence
 
@@ -64,29 +83,33 @@ exemptions and link any findings by ID.
 
 Status: Checked | Not applicable | Incomplete
 
-Describe the applicable design contracts and structural smells inspected,
-with evidence supporting the assessment. Explain exclusions or incomplete
-checks and link confirmed in-scope risks to their finding IDs.
+Describe the design contracts and structural smells inspected, with evidence.
 When the plan supplies an implementation design, compare actual responsibility
-ownership, contracts, dependencies, and main flow with it. Distinguish approved
-revisions from unexplained deviations; assess the resulting design independently.
+ownership, contracts, dependencies, and main flow with it, and assess the
+resulting design independently. Link confirmed in-scope risks by finding ID.
+
+### Documentation
+
+Status: Checked | Not applicable | Incomplete
+
+In-scope developer documentation created or updated, or missing and stale
+documents with finding IDs.
 
 ## Verification
 
 Distinguish checks run by the reviewer from supplied results.
 Record relevant outcomes and any verification gaps.
 
-## Remaining Risks And Limitations
+## Incident Finalization (conditional)
 
-State material uncertainty and relevant out-of-scope observations.
-Do not turn unrelated debt into required repairs.
+Bug-fixing workflows only: Finalized | Pending (verdict not APPROVE) | Blocked (draft missing)
+
+## Remaining Risks And Out-Of-Scope Observations
+
+Material uncertainty not captured as findings, and relevant observations about
+untouched code. Do not turn unrelated debt into required repairs.
 
 ## Did Not Do
 
-Explicit omissions, or "No meaningful omissions."
-
-## Verdict
-
-Counts: CRITICAL <n>, HIGH <n>, MEDIUM <n>, LOW <n>
-Verdict: APPROVE | WARNING | BLOCK
-Reason: <brief justification and any required next action>
+Review steps not performed that are not already marked Incomplete above, or
+"No meaningful omissions."

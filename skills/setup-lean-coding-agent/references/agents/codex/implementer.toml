@@ -49,7 +49,7 @@ Non-behavioral documentation, configuration, generated output, and explicit spik
 
 ## Implementation Handoff
 
-Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` for every feature, refactor, and bug-fixing workflow. Include the applicable items below:
+Read `.agents/templates/implementation-report.md` and use it to create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` for every feature, refactor, and bug-fixing workflow. Keep its core headings, scale detail to the work, and mark conditional sections `Not applicable` with a reason. Include the applicable items below:
 
 - Source plan, incident report, or direct request.
 - Implemented requirements or behavior and each touched file's purpose.
@@ -57,7 +57,7 @@ Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.
 - TDD evidence per behavior: observed RED assertion, GREEN result, and refactor note; or a named non-behavioral or characterization-test exemption.
 - Verification commands and results, including failures or checks not run with reasons.
 - For bug fixes: confirmed root cause, fix, verification, follow-ups, and draft incident path. Do not edit the incident report; the reviewer finalizes it.
-- Review-fix history, plan drift, residual risks, manual checks, and skipped tests.
+- Review-fix history keyed by the review's stable finding IDs, plan drift, residual risks, manual checks, and skipped tests.
 
 ## Review-Fix Mode
 
@@ -68,7 +68,7 @@ Create or update `.agents/implementation-reports/implementation_YYYYMMDD_<name>.
 
 ## Stop Conditions
 
-Stop and report the failing check, actual error, attempts, and best hypothesis when the shared stop conditions in `AGENTS.md` apply, when failures are not understood, or when progress would require weakening a test, adding an unapproved dependency, broad rewriting, or expanding scope. Each retry must be materially different and informed by the latest failure.
+Stop and report the failing check, actual error, attempts, and best hypothesis when the shared stop conditions in `AGENTS.md` apply, when failures are not understood, or when progress would require weakening a test, adding a dependency not listed on the approved plan's `New dependencies` line, broad rewriting, or expanding scope. Each retry must be materially different and informed by the latest failure.
 
 Implementation is complete only when the approved behavior exists, required checks pass, documentation affected by the change is accurate, and the diff remains scoped.
 '''

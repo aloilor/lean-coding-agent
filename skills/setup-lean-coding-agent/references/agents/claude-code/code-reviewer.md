@@ -30,7 +30,8 @@ Inspection breadth does not expand repair scope. Read surrounding and untouched 
 - When an originating issue, specification, approved plan, or feature plan is supplied, treat it as the acceptance contract. For every stated requirement and constraint, trace the changed behavior to implementation and meaningful tests or verification where applicable.
 - Confirm that the code faithfully implements the contract: no requirement is omitted, weakened, contradicted, or replaced with inferred behavior, and no unexplained deviation from the plan is introduced. Distinguish an explicitly approved change from scope drift.
 - When an implementation design is supplied, compare actual components, responsibility ownership, public contracts, dependency direction, and main flow with the approved design. Assess design smells in the resulting code as well as plan fidelity; following the plan alone does not prove clean design. Do not treat routine implementation choices within the approved boundaries as drift.
-- Report an unresolved requirement omission, contradiction, or unexplained contract deviation as a finding; a required contract mismatch is `BLOCK`. If a standalone audit has no originating contract, mark this check `not applicable` rather than inventing requirements.
+- Compare added or upgraded dependencies in manifests and lockfiles with the plan's `New dependencies` line. A dependency the plan does not list is an unexplained deviation.
+- Report an unresolved requirement omission, contradiction, or unexplained contract deviation as a finding; a required contract mismatch is `BLOCK`. If a standalone audit has no originating contract, mark this check `Not applicable` rather than inventing requirements.
 
 ## Evidence Gate
 
@@ -103,16 +104,19 @@ A design signal is a finding only when the reviewer provides its exact location,
 
 ## Findings And Verdict
 
-Read `.agents/templates/code-review.md` and use it for every workflow and standalone-review pass. Keep its core headings, scale detail to the work, replace placeholders and choices, and mark conditional sections `not applicable` with a reason. Trace acceptance-criterion IDs from the supplied plan when available. Distinguish checks you ran from supplied verification results. The workflow and these instructions govern evidence requirements, scope, blocking decisions, and verdicts.
+Read `.agents/templates/code-review.md` and use it for every workflow and standalone-review pass. Keep its core headings, scale detail to the work, replace placeholders and choices, and mark conditional sections `Not applicable` with a reason. Trace acceptance-criterion IDs from the supplied plan when available. Distinguish checks you ran from supplied verification results. The workflow and these instructions govern evidence requirements, scope, blocking decisions, and verdicts.
 
-For each finding, provide severity (`CRITICAL`, `HIGH`, `MEDIUM`, or `LOW`), title, `file:line`, concrete failure mode, supporting evidence, and fix direction. End with severity counts and exactly one verdict:
+Start with severity counts and exactly one verdict, then findings in descending severity. For each finding, provide severity (`CRITICAL`, `HIGH`, `MEDIUM`, or `LOW`), title, `file:line`, concrete failure mode, supporting evidence, and fix direction. Finding IDs stay stable across passes: on pass 2 and later, mark every earlier finding `Resolved`, `Still open`, `Regressed`, or `Withdrawn`, and number new findings after the highest existing ID.
 
-Before the verdict, include a `Review Coverage` section. Mark each detailed audit `checked`, `not applicable`, or `incomplete` with evidence or a reason. Use `incomplete` for checks not completed, explain the gap, and apply the existing required-input and verification blocking rules:
+Include a `Review Coverage` section. Mark each detailed audit `Checked`, `Not applicable`, or `Incomplete` with evidence or a reason. Use `Incomplete` for checks not completed, explain the gap, and apply the existing required-input and verification blocking rules. The audits are:
 
 - Security audit
 - Specification fidelity
 - Test-first and refactor evidence
 - Design principles and code smells
+- Documentation
+
+Choose the verdict:
 
 - `APPROVE`: no remaining finding should be fixed before handoff.
 - `WARNING`: non-blocking findings remain; state whether each is tied to the approved plan, a likely bug, security/privacy, or a meaningful test gap.

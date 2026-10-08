@@ -169,7 +169,7 @@ test('setup installs shared artifact templates for each tool selection and refre
       if (error.code === 'ENOENT') return [];
       throw error;
     });
-    assert.deepEqual(installedNames.sort(), ['code-review.md', 'plan.md'], tools);
+    assert.deepEqual(installedNames.sort(), ['code-review.md', 'implementation-report.md', 'plan.md'], tools);
 
     for (const name of installedNames) {
       const source = path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'templates', name);
@@ -188,7 +188,7 @@ test('setup installs shared artifact templates for each tool selection and refre
     for (const tool of selectedTools) {
       const directory = tool === 'codex' ? '.codex' : '.claude';
       const extension = tool === 'codex' ? '.toml' : '.md';
-      for (const [agent, template] of [['planner', 'plan'], ['code-reviewer', 'code-review']]) {
+      for (const [agent, template] of [['planner', 'plan'], ['implementer', 'implementation-report'], ['code-reviewer', 'code-review']]) {
         const contents = await fs.readFile(path.join(project, directory, 'agents', `${agent}${extension}`), 'utf8');
         assert.ok(contents.includes(`.agents/templates/${template}.md`), `${tool} ${agent} references its installed template`);
       }

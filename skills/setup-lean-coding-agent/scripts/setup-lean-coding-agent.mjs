@@ -335,7 +335,7 @@ async function syncArtifactTemplates(targetProject) {
   const targetDirectory = path.join(targetProject, agentsDirectoryName, 'templates');
   await fs.mkdir(targetDirectory, { recursive: true });
   const installedPaths = [];
-  for (const name of ['plan.md', 'code-review.md']) {
+  for (const name of ['plan.md', 'implementation-report.md', 'code-review.md']) {
     const targetPath = path.join(targetDirectory, name);
     await fs.copyFile(await requiredReference('templates', name), targetPath);
     installedPaths.push(targetPath);
