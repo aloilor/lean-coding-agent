@@ -77,15 +77,12 @@ const upstreamSkillGroups = [
     skills: ['handoff', 'resolving-merge-conflicts', 'tdd'],
   },
   {
-    source: 'https://github.com/wshobson/agents',
-    skills: ['changelog-automation'],
+    source: 'https://github.com/github/awesome-copilot',
+    skills: ['refactor'],
   },
   {
-    source: 'https://github.com/github/awesome-copilot',
-    skills: [
-      'create-readme',
-      'refactor',
-    ],
+    source: 'https://github.com/anthropics/claude-plugins-community',
+    skills: ['eli5'],
   },
   {
     source: 'https://github.com/anthropics/skills',

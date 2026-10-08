@@ -115,8 +115,8 @@ test('setup initializes project files and preserves project-owned content on rer
   assert.deepEqual(firstCommands.slice(2).map(({ args }) => args), [
     ['skills', 'add', 'https://github.com/vercel-labs/agent-browser', '--skill', 'agent-browser', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/mattpocock/skills', '--skill', 'handoff', 'resolving-merge-conflicts', 'tdd', '--agent', 'codex', 'claude-code', '--copy', '-y'],
-    ['skills', 'add', 'https://github.com/wshobson/agents', '--skill', 'changelog-automation', '--agent', 'codex', 'claude-code', '--copy', '-y'],
-    ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'create-readme', 'refactor', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'refactor', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/anthropics/claude-plugins-community', '--skill', 'eli5', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/anthropics/skills', '--skill', 'skill-creator', '--agent', 'codex', 'claude-code', '--copy', '-y'],
   ]);
   assert.ok(firstCommands.every(({ cwd }) => cwd === project));
