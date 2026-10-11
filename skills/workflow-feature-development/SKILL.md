@@ -1,6 +1,7 @@
 ---
 name: workflow-feature-development
 description: Workflow for feature and change requests, from small changes through complex externally observable behavior.
+disable-model-invocation: true
 ---
 
 # Feature Development Workflow

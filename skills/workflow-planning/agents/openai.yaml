@@ -2,3 +2,6 @@ interface:
   display_name: "Planning Workflow"
   short_description: "Plan requested work without implementing it"
   default_prompt: "Use $workflow-planning to explore the request, resolve open decisions with me, and prepare an approved plan. Stop before implementation."
+
+policy:
+  allow_implicit_invocation: false

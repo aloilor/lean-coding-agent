@@ -1,6 +1,7 @@
 ---
 name: workflow-planning
 description: Orchestration workflow for planning requested work without implementing it.
+disable-model-invocation: true
 ---
 
 # Planning Workflow

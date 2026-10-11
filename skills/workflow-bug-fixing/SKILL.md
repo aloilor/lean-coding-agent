@@ -1,6 +1,7 @@
 ---
 name: workflow-bug-fixing
 description: Workflow for bugs, failing tests, CI failures, runtime errors, and regressions, from local repairs through consequential investigations.
+disable-model-invocation: true
 ---
 
 # Bug Fixing Workflow

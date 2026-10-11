@@ -1,6 +1,7 @@
 ---
 name: workflow-refactor
 description: Workflow for behavior-preserving restructuring, from local cleanup through complex refactors.
+disable-model-invocation: true
 ---
 
 # Code Refactoring Workflow

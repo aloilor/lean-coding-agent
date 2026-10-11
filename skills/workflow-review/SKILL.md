@@ -1,6 +1,7 @@
 ---
 name: workflow-review
 description: Orchestration workflow for code reviews, audits, or risk assessments.
+disable-model-invocation: true
 ---
 
 # Code Review Workflow
