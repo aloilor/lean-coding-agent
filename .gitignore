@@ -5,7 +5,7 @@
 .agents/refactor-briefs/
 .agents/implementation-plans/
 .agents/implementation-reports/
-AGENTS.local.md
+AGENTS.override.md
 node_modules/
 __pycache__/
 *.py[cod]

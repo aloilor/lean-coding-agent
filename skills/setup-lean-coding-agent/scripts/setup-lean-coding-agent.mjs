@@ -56,7 +56,7 @@ const legacyProjectUpdateHookScripts = [
   '.codex/hooks/lean-coding-agent/check-skill-updates.mjs',
   '.codex/hooks/lean-coding-agent/check_skill_updates.mjs',
 ];
-const localFiles = ['AGENTS.local.md'];
+const localFiles = ['AGENTS.override.md'];
 const ignoredAgentFiles = [
   '.agents/code-reviews/',
   '.agents/plans/',
@@ -242,7 +242,7 @@ function validateModels(models) {
 }
 
 function baselineGuardBlock(filename) {
-  const localFilename = filename.replace('.md', '.local.md');
+  const localFilename = 'AGENTS.override.md';
   return [
     '',
     '---',
@@ -279,6 +279,8 @@ async function copyBaselineFiles(targetProject) {
 function localFileContent(filename) {
   return [
     `# ${filename}`,
+    '',
+    'Read `AGENTS.md` in this directory and follow its shared baseline instructions before applying the local instructions below.',
     '',
     'Local private notes for this project.',
     '',

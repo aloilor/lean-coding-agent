@@ -49,7 +49,7 @@ async function loggedCommands(commandLog) {
 test('setup initializes project files and preserves project-owned content on rerun', async (t) => {
   const { project, commandLog, env } = await setupFixture(t);
   await fs.writeFile(path.join(project, 'package.json'), '{"packageManager":"pnpm@9.0.0"}\n');
-  await fs.writeFile(path.join(project, 'AGENTS.local.md'), 'Private notes\n');
+  await fs.writeFile(path.join(project, 'AGENTS.override.md'), 'Private notes\n');
   await fs.writeFile(path.join(project, '.gitignore'), '# Existing rules\nnode_modules/\n');
   await fs.mkdir(path.join(project, 'agent-context'));
   await fs.writeFile(path.join(project, 'agent-context', 'testing.md'), 'Project testing guidance\n');
@@ -72,7 +72,7 @@ test('setup initializes project files and preserves project-owned content on rer
   for (const relativePath of [
     'AGENTS.md',
     'CLAUDE.md',
-    'AGENTS.local.md',
+    'AGENTS.override.md',
     '.agents/lessons/LESSONS.md',
     '.agents/skill-overrides/tdd.md',
     '.agents/skills/setup-lean-coding-agent/SKILL.md',
@@ -128,7 +128,7 @@ test('setup initializes project files and preserves project-owned content on rer
   await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
 
   assert.match(await fs.readFile(path.join(project, 'AGENTS.md'), 'utf8'), /## Do Not Edit This Baseline File/);
-  assert.equal(await fs.readFile(path.join(project, 'AGENTS.local.md'), 'utf8'), 'Private notes\n');
+  assert.equal(await fs.readFile(path.join(project, 'AGENTS.override.md'), 'utf8'), 'Private notes\n');
   assert.equal(await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'), 'model = "project-choice"\n');
   assert.equal(await fs.readFile(path.join(project, 'agent-context', 'testing.md'), 'utf8'), 'Project testing guidance\n');
   const overrideIndex = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
@@ -139,6 +139,7 @@ test('setup initializes project files and preserves project-owned content on rer
     await fs.readFile(path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'skill-overrides', 'tdd.md'), 'utf8'),
   );
   const ignoreRules = await fs.readFile(path.join(project, '.gitignore'), 'utf8');
+  assert.match(ignoreRules, /^AGENTS\.override\.md$/m);
   assert.equal((ignoreRules.match(/^node_modules\/$/gm) ?? []).length, 1);
   assert.equal((await loggedCommands(commandLog)).length, 14);
 });
@@ -244,6 +245,10 @@ test('setup without --docs-dir does not add a grill-with-docs override', async (
   const { project, env } = await setupFixture(t);
 
   await runFile(process.execPath, [setupScript, project], { env });
+
+  const localInstructions = await fs.readFile(path.join(project, 'AGENTS.override.md'), 'utf8');
+  assert.match(localInstructions, /Read `AGENTS\.md` in this directory/);
+  await assert.rejects(fs.access(path.join(project, 'AGENTS.local.md')), { code: 'ENOENT' });
 
   const overrideDirectory = path.join(project, '.agents', 'skill-overrides');
   await assert.rejects(fs.access(path.join(overrideDirectory, 'grill-with-docs.md')), { code: 'ENOENT' });
