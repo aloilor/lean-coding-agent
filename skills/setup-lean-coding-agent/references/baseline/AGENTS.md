@@ -33,10 +33,10 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Self-Improvement
 
-- First put a user correction in its authoritative prompt, workflow, guideline, or project context.
+- When the user corrects your behavior, before ending that turn, put the correction in its authoritative prompt, workflow, guideline, or project context, or add a lesson, and state which you updated.
 - Add a lesson only for a reusable agent-behavior mistake with no better canonical owner; never record one-off details or duplicate existing policy.
 - Store one short rule per `.agents/lessons/<descriptive-name>.md`, and add a clickable one-line entry to `.agents/lessons/LESSONS.md`.
-- Review the lessons index and relevant linked lessons at the start of each session; refine lessons until the mistake rate drops.
+- Review the lessons index and relevant linked lessons at the start of each session.
 
 ## Context And Skills
 
@@ -45,7 +45,6 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 - Read the relevant `docs/conventions/` files (`CODING-STANDARDS.md`, `TESTING.md`, `WORKFLOWS.md`) only when the task involves inspecting, developing, debugging, reviewing, or otherwise working on that codebase. Do not load them for unrelated conversation or general tasks.
 - Read `.agents/lessons/LESSONS.md` and local-private, git-ignored `AGENTS.local.md` or `CLAUDE.local.md` content when present.
 - Before using a skill, check `.agents/skill-overrides/INDEX.md`. Apply a listed `<skill-name>.md` override before the skill and keep the index synchronized when adding overrides.
-- Also apply `tdd` to test strategy and red-green-refactor work, and `refactor` to behavior-preserving restructuring.
 
 ## Workflows
 
