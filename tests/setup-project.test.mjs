@@ -72,7 +72,7 @@ test('setup initializes project files and preserves project-owned content on rer
   for (const relativePath of [
     'AGENTS.md',
     'CLAUDE.md',
-    'CLAUDE.local.md',
+    'AGENTS.local.md',
     '.agents/lessons/LESSONS.md',
     '.agents/skill-overrides/tdd.md',
     '.agents/skills/setup-lean-coding-agent/SKILL.md',

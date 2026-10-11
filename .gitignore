@@ -6,7 +6,6 @@
 .agents/implementation-plans/
 .agents/implementation-reports/
 AGENTS.local.md
-CLAUDE.local.md
 node_modules/
 __pycache__/
 *.py[cod]

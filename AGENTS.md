@@ -43,7 +43,7 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 - This file is the shared baseline. Put project-specific shared rules in `docs/conventions/`.
 - At the start of every session, run `node scripts/check-skill-updates.mjs`; if `.agents/skills-installed.json` exists, add `--project --manifest .agents/skills-installed.json`. Report its complete output. If the installed Lean Coding Agent skills are behind the latest release, recommend `npx skills update -p` and rerunning setup. If upstream skill copies are outdated, recommend `npx skills update -p`; if copies are missing, recommend rerunning setup. Do not run updates automatically.
 - Read the relevant `docs/conventions/` files (`CODING-STANDARDS.md`, `TESTING.md`, `WORKFLOWS.md`) only when the task involves inspecting, developing, debugging, reviewing, or otherwise working on that codebase. Do not load them for unrelated conversation or general tasks.
-- Read `.agents/lessons/LESSONS.md` and local-private, git-ignored `AGENTS.local.md` or `CLAUDE.local.md` content when present.
+- Read `.agents/lessons/LESSONS.md` when present, and follow @AGENTS.local.md when it exists (local, private, git-ignored).
 - Before using a skill, check `.agents/skill-overrides/INDEX.md`. Apply a listed `<skill-name>.md` override before the skill and keep the index synchronized when adding overrides.
 
 ## Workflows

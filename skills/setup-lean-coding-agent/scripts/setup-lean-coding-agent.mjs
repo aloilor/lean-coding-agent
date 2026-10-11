@@ -56,7 +56,7 @@ const legacyProjectUpdateHookScripts = [
   '.codex/hooks/lean-coding-agent/check-skill-updates.mjs',
   '.codex/hooks/lean-coding-agent/check_skill_updates.mjs',
 ];
-const localFiles = ['AGENTS.local.md', 'CLAUDE.local.md'];
+const localFiles = ['AGENTS.local.md'];
 const ignoredAgentFiles = [
   '.agents/code-reviews/',
   '.agents/plans/',
