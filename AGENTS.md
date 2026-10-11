@@ -49,8 +49,6 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Workflows
 
-Workflow skills are opt-in only. Invoke a `workflow-*` skill only when the user explicitly names or calls that workflow in the current request. Never infer, recommend-and-start, or automatically invoke a workflow from the request type, size, risk, complexity, or a skill-description match. When no workflow is explicitly called, handle the request through normal direct execution appropriate to its scope and risk.
-
 ### Always Spawn The Named Subagents
 
 For every explicitly invoked planning, feature, refactor, or bug-fixing workflow, the main agent **MUST spawn `planner` before code changes begin**. The planner's agent definition owns the grill and planning procedure and writes a draft plan at `.agents/plans/plan_YYYYMMDD_<name>.md` with the workflow's requirements, decisions, acceptance criteria, implementation or repair approach, and verification. The main agent presents the completed plan to the user and obtains explicit approval before implementation. Send requested plan changes back to the planner. If the planner is unavailable, stop and report the missing requirement.
