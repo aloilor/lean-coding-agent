@@ -34,7 +34,7 @@ Do not force every requirement into "As a [user], I want…". Permissions, valid
 Collect the feature request, any PRD, ticket, mockup, or prior spec the user provides. When working inside a repository, also:
 
 - Look for an existing specs location (`docs/specs/`, `docs/features/`, `specs/`, or similar) and existing `FEAT-NNN` IDs.
-- Read `agent-context/domain.md` or equivalent glossary when present, and use the project's own names for roles, entities, and screens.
+- Read `docs/GLOSSARY.md` or an equivalent glossary when present, and use the project's own names for roles, entities, and screens.
 - Inspect relevant code only to ground terminology, existing permissions, and current behavior. Do not let implementation details leak into the spec.
 
 ### 2. Pick the variant
