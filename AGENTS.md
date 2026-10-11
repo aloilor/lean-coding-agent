@@ -49,13 +49,9 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Workflows
 
-### Always Spawn The Named Subagents
+### Workflow Delegation
 
-For every explicitly invoked planning, feature, refactor, or bug-fixing workflow, the main agent **MUST spawn `planner` before code changes begin**. The planner's agent definition owns the grill and planning procedure and writes a draft plan at `.agents/plans/plan_YYYYMMDD_<name>.md` with the workflow's requirements, decisions, acceptance criteria, implementation or repair approach, and verification. The main agent presents the completed plan to the user and obtains explicit approval before implementation. Send requested plan changes back to the planner. If the planner is unavailable, stop and report the missing requirement.
-
-The main agent must spawn `implementer` and `code-reviewer` for every feature, refactor, and bug-fixing workflow, and must not perform their assigned work. Bug-fixing workflows also spawn `bug-diagnostician` for the incident investigation. Planning workflows produce an approved plan without implementation; review workflows produce a code-review artifact.
-
-The main agent relays questions, answers, plans, and handoffs, enforces applicable approval gates, runs broader final verification, and handles requests that are not assigned to a workflow.
+In workflows, spawn subagents as directed by the selected `workflow-*` skill. If a required agent is unavailable, stop and report it. Use the shared artifact paths and stop conditions below.
 
 ### Standard Artifacts
 

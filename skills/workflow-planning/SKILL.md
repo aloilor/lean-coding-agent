@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Use this workflow when the user wants to explore and approve a plan before work starts. It can cover feature work, bug fixes, refactoring, or another scoped change. It ends with an approved plan and does not implement the work.
 
-The main agent orchestrates this workflow and owns user communication. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions**.
+The main agent orchestrates this workflow and owns user communication. Follow the shared scaffolding in `AGENTS.md` — **Workflow Delegation**, **Standard Artifacts**, and **Shared Stop Conditions**.
 
 ## Steps
 

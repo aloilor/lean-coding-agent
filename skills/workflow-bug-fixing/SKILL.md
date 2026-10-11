@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Use this workflow for clearly understood local bugs and failures that need investigation before repair. Every run produces a user-approved plan, a durable incident report, an implementation report, and review-pass artifacts. The plan records the symptom, evidence, likely root cause, impact, proposed repair, verification, and non-goals in proportion to the failure's consequences.
 
-The main agent orchestrates this workflow and owns user communication, repair approval, and closeout; `bug-diagnostician` owns investigation. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions**.
+The main agent orchestrates this workflow and owns user communication, repair approval, and closeout; `bug-diagnostician` owns investigation. Follow the shared scaffolding in `AGENTS.md` — **Workflow Delegation**, **Standard Artifacts**, and **Shared Stop Conditions**.
 
 ## Steps
 

@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Use this workflow for clear, small changes and complex or cross-cutting features. The approved plan records the requirements, scope, constraints, acceptance criteria, risks, and verification needed for the work. Every run produces the standard durable plan, implementation report, and review pass artifacts.
 
-The main agent orchestrates this workflow and owns user communication and closeout. Follow the shared scaffolding in `AGENTS.md` — **Always Spawn The Named Subagents**, **Standard Artifacts**, and **Shared Stop Conditions**.
+The main agent orchestrates this workflow and owns user communication and closeout. Follow the shared scaffolding in `AGENTS.md` — **Workflow Delegation**, **Standard Artifacts**, and **Shared Stop Conditions**.
 
 ## Steps
 
