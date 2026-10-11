@@ -1,6 +1,7 @@
 ---
 name: feature-specification
 description: Write a client-approvable Feature Specification for one software feature using a fixed template — objective, user stories, scope, functional requirements, business rules, edge cases, Given/When/Then acceptance criteria, open questions, and approval. Use whenever the user wants to spec, specify, define, scope, or write requirements or acceptance criteria for a feature before development, turn a feature idea, ticket, PRD section, or client request into a precise spec, or produce a FEAT-NNN document for client or stakeholder sign-off, even if they just say "spec this out" or "write the requirements for X". Not for implementation plans, PRDs covering a whole product, or code changes.
+disable-model-invocation: true
 ---
 
 # Feature Specification
