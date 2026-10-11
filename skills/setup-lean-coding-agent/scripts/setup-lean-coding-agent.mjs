@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { constants as fsConstants, promises as fs } from 'node:fs';
+import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
@@ -10,11 +10,6 @@ const skillDirectory = path.resolve(scriptDirectory, '..');
 const siblingSkillsDirectory = path.resolve(skillDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
 const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
-const codebaseOnboardingReferencesDirectory = path.join(
-  siblingSkillsDirectory,
-  'codebase-onboarding',
-  'references',
-);
 const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
 const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
@@ -46,7 +41,7 @@ const toolSelections = {
   both: ['codex', 'claude-code'],
 };
 const manifestName = 'skills-installed.json';
-const agentContextDirectoryName = 'agent-context';
+const legacyAgentContextDirectoryName = 'agent-context';
 const agentsDirectoryName = '.agents';
 const skillOverridesDirectoryName = 'skill-overrides';
 const skillOverridesIndexName = 'INDEX.md';
@@ -256,7 +251,7 @@ function baselineGuardBlock(filename) {
     '',
     `**Under no circumstances edit \`${filename}\` or the other baseline file in this project.** These files are the shared agents baseline, copied in from the upstream agents repo, and any edits here are overwritten on the next sync.`,
     '',
-    '- For project-specific rules that should be shared and committed, use `agent-context/`.',
+    '- For project-specific rules that should be shared and committed, use `docs/conventions/`.',
     `- For local, private, machine-specific notes, use \`${localFilename}\` (git-ignored).`,
     '',
     'Change the baseline itself only in the upstream agents repo, not here.',
@@ -549,7 +544,16 @@ export async function syncInstalledSkills(targetProject) {
   }
   await fs.mkdir(skillsDirectory, { recursive: true });
 
+  const manifestPath = path.join(agentsDirectory, manifestName);
+  const legacyManifestPath = path.join(targetProject, legacyAgentContextDirectoryName, manifestName);
+  const previousManifest = await readPreviousManifest(manifestPath, legacyManifestPath);
   const sourceDirectories = await discoverSiblingSkills();
+  const sourceNames = new Set(sourceDirectories.map((directory) => path.basename(directory)));
+  for (const { installed_as: installedAs } of previousManifest?.skills ?? []) {
+    if (typeof installedAs !== 'string' || path.basename(installedAs) !== installedAs) continue;
+    if (installedAs === '.' || installedAs === '..' || sourceNames.has(installedAs)) continue;
+    await removeManagedSkill(path.join(skillsDirectory, installedAs));
+  }
   for (const sourceDirectory of sourceDirectories) {
     const destination = path.join(skillsDirectory, path.basename(sourceDirectory));
     if (path.resolve(sourceDirectory) === path.resolve(destination)) continue;
@@ -574,10 +578,35 @@ export async function syncInstalledSkills(targetProject) {
       installed_as: path.basename(directory),
     })),
   };
-  const manifestPath = path.join(targetProject, agentContextDirectoryName, manifestName);
   await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  await removeLegacyManifest(legacyManifestPath);
 
   return { skillDirectory: skillsDirectory, skillCount: sourceDirectories.length };
+}
+
+async function readPreviousManifest(...manifestPaths) {
+  for (const manifestPath of manifestPaths) {
+    try {
+      return JSON.parse(await fs.readFile(manifestPath, 'utf8'));
+    } catch (error) {
+      if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error;
+    }
+  }
+  return null;
+}
+
+async function removeLegacyManifest(legacyManifestPath) {
+  try {
+    await fs.unlink(legacyManifestPath);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    return;
+  }
+  try {
+    await fs.rmdir(path.dirname(legacyManifestPath));
+  } catch (error) {
+    if (!['ENOTEMPTY', 'EEXIST', 'ENOENT'].includes(error.code)) throw error;
+  }
 }
 
 async function ensureRegularDirectory(directoryPath) {
@@ -590,52 +619,6 @@ async function ensureRegularDirectory(directoryPath) {
     if (error.code !== 'ENOENT') throw error;
     await fs.mkdir(directoryPath);
   }
-}
-
-async function ensureCodebaseOnboardingContextFiles(targetProject) {
-  let sourceDetails;
-  try {
-    sourceDetails = await fs.stat(codebaseOnboardingReferencesDirectory);
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      throw new Error(
-        `Bundled codebase-onboarding references are missing: ${codebaseOnboardingReferencesDirectory}`,
-      );
-    }
-    throw error;
-  }
-  if (!sourceDetails.isDirectory()) {
-    throw new Error(
-      `Bundled codebase-onboarding references are not a directory: ${codebaseOnboardingReferencesDirectory}`,
-    );
-  }
-
-  const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
-  await ensureRegularDirectory(agentContextDirectory);
-
-  async function copyMissingFiles(sourceDirectory, destinationDirectory) {
-    const createdPaths = [];
-    const entries = await fs.readdir(sourceDirectory, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.name === '.git' || entry.name === '__pycache__') continue;
-      const sourcePath = path.join(sourceDirectory, entry.name);
-      const destinationPath = path.join(destinationDirectory, entry.name);
-      if (entry.isDirectory()) {
-        await ensureRegularDirectory(destinationPath);
-        createdPaths.push(...await copyMissingFiles(sourcePath, destinationPath));
-      } else if (entry.isFile()) {
-        try {
-          await fs.copyFile(sourcePath, destinationPath, fsConstants.COPYFILE_EXCL);
-          createdPaths.push(destinationPath);
-        } catch (error) {
-          if (error.code !== 'EEXIST') throw error;
-        }
-      }
-    }
-    return createdPaths;
-  }
-
-  return copyMissingFiles(codebaseOnboardingReferencesDirectory, agentContextDirectory);
 }
 
 function isLegacyProjectUpdateHook(handler) {
@@ -828,9 +811,6 @@ async function installUpstreamSkills(targetProject, tools) {
 }
 
 async function initializeProject(targetProject, tools, models, docsDirectory) {
-  const agentContextDirectory = path.join(targetProject, agentContextDirectoryName);
-  await fs.mkdir(agentContextDirectory, { recursive: true });
-  const onboardingContextPaths = await ensureCodebaseOnboardingContextFiles(targetProject);
   const incidentReadme = await ensureIncidentsReadme(targetProject);
   const lessonsIndex = await ensureLessonsIndex(targetProject);
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
@@ -871,8 +851,12 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} available skills into: ${skillResult.skillDirectory}`);
   console.log(`Installed skills update checker: ${updateChecker.checkerPath}`);
-  console.log(`Seeded codebase-onboarding context files in: ${path.join(targetProject, agentContextDirectoryName)}`);
-  for (const filePath of onboardingContextPaths) console.log(`- ${filePath}`);
+  const legacyAgentContextDirectory = path.join(targetProject, legacyAgentContextDirectoryName);
+  if (await pathExists(legacyAgentContextDirectory)) {
+    console.log(
+      `Legacy project context found in ${legacyAgentContextDirectory}; run project-conventions to migrate it into docs/conventions/, then delete it.`,
+    );
+  }
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
 }
 

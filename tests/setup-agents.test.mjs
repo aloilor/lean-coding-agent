@@ -105,7 +105,6 @@ test('setup rejects an unknown tool selection before changing the target project
 
 test('installed skill sync refreshes managed copies and preserves project-owned skills on rerun', async (t) => {
   const project = await temporaryProject(t);
-  await fs.mkdir(path.join(project, 'agent-context'));
 
   const firstSync = await syncInstalledSkills(project);
   const installedSkill = path.join(firstSync.skillDirectory, 'setup-lean-coding-agent', 'SKILL.md');
@@ -116,7 +115,7 @@ test('installed skill sync refreshes managed copies and preserves project-owned 
   await fs.writeFile(installedSkill, 'Local edit to a managed skill\n');
 
   const secondSync = await syncInstalledSkills(project);
-  const manifest = JSON.parse(await fs.readFile(path.join(project, 'agent-context', 'skills-installed.json'), 'utf8'));
+  const manifest = JSON.parse(await fs.readFile(path.join(project, '.agents', 'skills-installed.json'), 'utf8'));
   const release = JSON.parse(await fs.readFile(path.join(skillRoot, 'references', 'release.json'), 'utf8'));
 
   assert.equal(await fs.readFile(installedSkill, 'utf8'), await fs.readFile(sourceSkill, 'utf8'));
@@ -126,6 +125,32 @@ test('installed skill sync refreshes managed copies and preserves project-owned 
   assert.equal(manifest.repository, release.repository);
   assert.ok(manifest.skills.some(({ installed_as }) => installed_as === 'setup-lean-coding-agent'));
   assert.ok(!manifest.skills.some(({ installed_as }) => installed_as === 'project-skill'));
+});
+
+test('installed skill sync moves a legacy manifest and removes managed skills no longer shipped', async (t) => {
+  const project = await temporaryProject(t);
+  const legacyDirectory = path.join(project, 'agent-context');
+  const skillsDirectory = path.join(project, '.agents', 'skills');
+  await fs.mkdir(legacyDirectory);
+  await fs.writeFile(path.join(legacyDirectory, 'skills-installed.json'), JSON.stringify({
+    skills: [
+      { source: 'retired-skill', installed_as: 'retired-skill' },
+      { source: 'escape', installed_as: '../outside' },
+    ],
+  }));
+  await fs.mkdir(path.join(skillsDirectory, 'retired-skill'), { recursive: true });
+  await fs.writeFile(path.join(skillsDirectory, 'retired-skill', 'SKILL.md'), 'Retired managed skill\n');
+  await fs.mkdir(path.join(skillsDirectory, 'project-skill'));
+  await fs.writeFile(path.join(skillsDirectory, 'project-skill', 'SKILL.md'), 'Project-owned skill\n');
+  await fs.mkdir(path.join(project, '.agents', 'outside'));
+
+  await syncInstalledSkills(project);
+
+  await assert.rejects(fs.stat(path.join(skillsDirectory, 'retired-skill')), { code: 'ENOENT' });
+  await assert.rejects(fs.stat(legacyDirectory), { code: 'ENOENT' });
+  assert.ok((await fs.stat(path.join(skillsDirectory, 'project-skill', 'SKILL.md'))).isFile());
+  assert.ok((await fs.stat(path.join(project, '.agents', 'outside'))).isDirectory());
+  assert.ok((await fs.stat(path.join(project, '.agents', 'skills-installed.json'))).isFile());
 });
 
 test('update checker installation removes legacy hooks and preserves unrelated hooks on rerun', async (t) => {

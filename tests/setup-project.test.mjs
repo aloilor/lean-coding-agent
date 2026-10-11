@@ -87,8 +87,7 @@ test('setup initializes project files and preserves project-owned content on rer
     '.claude/agents/implementer.md',
     '.claude/agents/code-reviewer.md',
     'docs/incidents/README.md',
-    'agent-context/architecture.md',
-    'agent-context/skills-installed.json',
+    '.agents/skills-installed.json',
   ]) {
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
   }
@@ -124,7 +123,9 @@ test('setup initializes project files and preserves project-owned content on rer
   await fs.writeFile(path.join(project, 'AGENTS.md'), 'Outdated managed baseline\n');
   await fs.writeFile(path.join(project, '.codex', 'config.toml'), 'model = "project-choice"\n');
   await fs.writeFile(path.join(overrideDirectory, 'tdd.md'), 'Outdated managed override\n');
-  await runFile(process.execPath, options, { env });
+  const { stdout: rerunOutput } = await runFile(process.execPath, options, { env });
+  assert.match(rerunOutput, /Legacy project context found in .*agent-context; run project-conventions/);
+  await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
 
   assert.match(await fs.readFile(path.join(project, 'AGENTS.md'), 'utf8'), /## Do Not Edit This Baseline File/);
   assert.equal(await fs.readFile(path.join(project, 'AGENTS.local.md'), 'utf8'), 'Private notes\n');

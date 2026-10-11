@@ -18,11 +18,11 @@ In the installer, select Codex, Claude Code, or both, and the skills you want. S
 
 Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Claude Code run `/setup-lean-coding-agent`.
 
-The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents run at session start. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to run project-specific onboarding. Node.js is required for setup.
+The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents run at session start. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup.
 
 ## Use the skills
 
-Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `codebase-onboarding` to understand an unfamiliar repository or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
+Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `project-conventions` to capture what agents get wrong in a repository or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
 
 ## Updates
 
@@ -34,14 +34,14 @@ npx skills update -p
 
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-Run `node scripts/check-skill-updates.mjs` to compare this checkout's release metadata with the latest stable GitHub Release and check GitHub-backed skill copies tracked in `skills-lock.json`. Initialized projects also receive the checker; their `AGENTS.md` tells agents to pass `--project --manifest agent-context/skills-installed.json` when that manifest exists. The checker does not change installed files.
+Run `node scripts/check-skill-updates.mjs` to compare this checkout's release metadata with the latest stable GitHub Release and check GitHub-backed skill copies tracked in `skills-lock.json`. Initialized projects also receive the checker; their `AGENTS.md` tells agents to pass `--project --manifest .agents/skills-installed.json` when that manifest exists. The checker does not change installed files.
 
 ## Skill reference
 
 ### Setup and project context
 
 - [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the skill.
-- [`codebase-onboarding`](skills/codebase-onboarding/SKILL.md) — analyze a repository and write structured project context.
+- [`project-conventions`](skills/project-conventions/SKILL.md) — capture the non-obvious conventions agents would otherwise get wrong in `docs/conventions/` ([why](docs/project-conventions.md)).
 - [`grill-with-docs`](skills/grill-with-docs/SKILL.md) — a personal fork of Matt Pocock’s original skill, adapted to work with my setup; clarifies plans against project terminology and documented decisions.
 - [`feature-specification`](skills/feature-specification/SKILL.md) — write a client-approvable feature spec from a fixed template.
 

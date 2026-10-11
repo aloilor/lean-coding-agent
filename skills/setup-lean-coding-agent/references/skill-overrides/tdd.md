@@ -12,7 +12,7 @@ Create or update tests when behavior changes, a bug needs reproduction before it
 
 ## Before RED
 
-- Read `agent-context/testing.md` first when it exists.
+- Read `docs/conventions/TESTING.md` first when it exists.
 - Inspect the repo to confirm the test framework, runner, focused test command, file layout, naming convention, assertion style, fixtures, builders, factories, and mocking approach.
 - Match the existing setup. Do not introduce a new framework, layout, naming pattern, or helper style unless the task explicitly requires it.
 - Reuse existing builders, factories, fixtures, and test helpers before creating new ones.
