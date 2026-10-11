@@ -1,80 +1,44 @@
 ---
 name: grill-with-docs
-description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation in agent-context/domain.md and ADRs inline as decisions crystallize. Use when the user wants to stress-test a plan against their project's language and documented decisions.
+description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation in GLOSSARY.md and ADRs inline as decisions crystallize. Use when the user is creating or refining a plan or design and wants it grilled against their project's language and documented decisions.
 ---
 
-Interview me relentlessly about every aspect of this plan until we reach a shared understanding. Walk down each branch of the design tree, resolving dependencies between decisions one-by-one. For each question, provide your recommended answer.
+Interview the user relentlessly until you reach a shared understanding. Map this as a **design tree**: every decision branches into the decisions that hang off it.
 
-Ask the questions one at a time, waiting for feedback on each question before continuing.
+Work the tree in **rounds**. The **frontier** is every decision whose prerequisites are already settled: the questions you can ask _now_ without guessing at answers you haven't heard yet. A question that depends on another question still open belongs to a later round. Ask the whole frontier in one round, numbering each question and giving your recommended answer, then wait for the user's answers. Recompute the frontier from the settled decisions and ask the next round.
 
-If a question can be answered by exploring the codebase, explore the codebase instead.
+Format each question like so, separating questions with `---`:
 
-## Domain awareness
+```
+❓ **Q1** - **<question title>**: <question body, might be multiple paragraphs, including multiple choices>
 
-During codebase exploration, also look for existing documentation under `agent-context/`.
-
-### File structure
-
-Most repos have a single context:
-
-```text
-/
-|-- agent-context/
-|   |-- domain.md
-|   `-- adr/
-|       |-- 0001-event-sourced-orders.md
-|       `-- 0002-postgres-for-write-model.md
-`-- src/
+➡️ <your recommended answer>
 ```
 
-If an `agent-context/context-map.md` exists, the repo has multiple contexts. Each context lives in its own subfolder under `agent-context/`, and the map points to where each one is:
+Word each question so "yes" accepts your recommended answer.
 
-```text
-/
-|-- agent-context/
-|   |-- context-map.md
-|   |-- adr/                          <- system-wide decisions
-|   |-- ordering/
-|   |   |-- domain.md
-|   |   `-- adr/                      <- context-specific decisions
-|   `-- billing/
-|       |-- domain.md
-|       `-- adr/
-`-- src/
-```
+Finding _facts_ is your job, never the user's. When a frontier question needs a fact from the environment (filesystem, tools, etc.), dispatch a sub-agent to find it; don't ask the user for anything you could look up yourself. Don't block on it: a running exploration is an unsettled prerequisite, so only the questions downstream of it wait for the sub-agent to report; ask the rest of the frontier now. The _decisions_ are the user's: put each to them and wait.
 
-Create files lazily - only when you have something to write. If no `agent-context/domain.md` exists, create one when the first term is resolved. If no `agent-context/adr/` exists, create it when the first ADR is needed.
+The session is done when the frontier is empty: every branch of the design tree visited, nothing left silently assumed. Do not act on it until the user confirms you have reached a shared understanding.
 
-## During the session
+# Domain Modeling
 
-### Challenge against the glossary
+Actively build and sharpen the project's domain model as you design: challenge terms, invent edge-case scenarios, and write the glossary and decisions down the moment they crystallise.
 
-When the user uses a term that conflicts with the existing language in `agent-context/domain.md`, call it out immediately. "Your glossary defines 'cancellation' as X, but you seem to mean Y - which is it?"
+For where `GLOSSARY.md` and ADRs live, and how to tell single- from multi-context repos, see [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md) and [ADR-FORMAT.md](./ADR-FORMAT.md). Create files lazily: only when you have something to write.
 
-### Sharpen fuzzy language
+During the session:
 
-When the user uses vague or overloaded terms, propose a precise canonical term. "You're saying 'account' - do you mean the Customer or the User? Those are different things."
+- **Challenge against the glossary.** When a term conflicts with `GLOSSARY.md`, call it out immediately: "Your glossary defines 'cancellation' as X, but you seem to mean Y. Which is it?"
+- **Sharpen fuzzy language.** Propose a precise canonical term for vague or overloaded ones: "By 'account', do you mean the Customer or the User?"
+- **Discuss concrete scenarios.** Stress-test domain relationships with invented edge cases that force precise boundaries between concepts.
+- **Cross-reference with code.** When the user states how something works, check the code and surface contradictions: "Your code cancels entire Orders, but you just said partial cancellation is possible. Which is right?"
+- **Update `GLOSSARY.md` inline.** Record each term as soon as it's resolved, using [GLOSSARY-FORMAT.md](./GLOSSARY-FORMAT.md). No implementation details: it's a glossary, not a spec.
 
-### Discuss concrete scenarios
+Offer an ADR only when the decision is all three:
 
-When domain relationships are being discussed, stress-test them with specific scenarios. Invent scenarios that probe edge cases and force the user to be precise about the boundaries between concepts.
+1. **Hard to reverse**: changing your mind later is costly
+2. **Surprising without context**: a future reader will wonder "why did they do it this way?"
+3. **The result of a real trade-off**: there were genuine alternatives and you picked one for specific reasons
 
-### Cross-reference with code
-
-When the user states how something works, check whether the code agrees. If you find a contradiction, surface it: "Your code cancels entire Orders, but you just said partial cancellation is possible - which is right?"
-
-### Update agent-context/domain.md inline
-
-When a term is resolved, update `agent-context/domain.md` right there. Don't batch these up - capture them as they happen. Use the format in [DOMAIN-FORMAT.md](./DOMAIN-FORMAT.md).
-
-`agent-context/domain.md` should be totally devoid of implementation details. Do not treat `agent-context/domain.md` as a spec, a scratch pad, or a repository for implementation decisions. It is a glossary and nothing else.
-
-### Offer ADRs sparingly
-
-Only offer to create an ADR when all three are true:
-
-1. **Hard to reverse** - the cost of changing your mind later is meaningful
-2. **Surprising without context** - a future reader will wonder "why did they do it this way?"
-3. **The result of a real trade-off** - there were genuine alternatives and you picked one for specific reasons
-
-If any of the three is missing, skip the ADR. Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).
+Use the format in [ADR-FORMAT.md](./ADR-FORMAT.md).

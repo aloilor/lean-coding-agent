@@ -1,4 +1,4 @@
-# domain.md Format
+# GLOSSARY.md Format
 
 ## Structure
 
@@ -31,30 +31,30 @@ _Avoid_: Client, buyer, account
 
 ## Single vs multi-context repos
 
-**Single context (most repos):** One `agent-context/domain.md`.
+**Single context (most repos):** One `GLOSSARY.md` at the repo root.
 
-**Multiple contexts:** Each context lives in its own subfolder under `agent-context/` (e.g. `agent-context/ordering/domain.md`). An `agent-context/context-map.md` lists the contexts, where they live, and how they relate to each other:
+**Multiple contexts:** A `GLOSSARY-MAP.md` at the repo root lists the contexts, where they live, and how they relate to each other:
 
 ```md
-# Context Map
+# Glossary Map
 
 ## Contexts
 
-- [Ordering](ordering/domain.md) - receives and tracks customer orders
-- [Billing](billing/domain.md) - generates invoices and processes payments
-- [Fulfillment](fulfillment/domain.md) - manages warehouse picking and shipping
+- [Ordering](./src/ordering/GLOSSARY.md): receives and tracks customer orders
+- [Billing](./src/billing/GLOSSARY.md): generates invoices and processes payments
+- [Fulfillment](./src/fulfillment/GLOSSARY.md): manages warehouse picking and shipping
 
 ## Relationships
 
-- **Ordering -> Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
-- **Fulfillment -> Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
-- **Ordering <-> Billing**: Shared types for `CustomerId` and `Money`
+- **Ordering → Fulfillment**: Ordering emits `OrderPlaced` events; Fulfillment consumes them to start picking
+- **Fulfillment → Billing**: Fulfillment emits `ShipmentDispatched` events; Billing consumes them to generate invoices
+- **Ordering ↔ Billing**: Shared types for `CustomerId` and `Money`
 ```
 
 The skill infers which structure applies:
 
-- If `agent-context/context-map.md` exists, read it to find contexts.
-- If only `agent-context/domain.md` exists, single context.
-- If neither exists, create `agent-context/domain.md` lazily when the first term is resolved.
+- If `GLOSSARY-MAP.md` exists, read it to find contexts
+- If only a root `GLOSSARY.md` exists, single context
+- If neither exists, create a root `GLOSSARY.md` lazily when the first term is resolved
 
 When multiple contexts exist, infer which one the current topic relates to. If unclear, ask.
