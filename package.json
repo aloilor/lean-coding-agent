@@ -11,7 +11,9 @@
   "scripts": {
     "changeset": "changeset",
     "version": "changeset version && node scripts/sync-release-version.mjs",
-    "check-release-version": "node scripts/sync-release-version.mjs --check"
+    "check-release-version": "node scripts/sync-release-version.mjs --check",
+    "sync-skill-overrides": "node scripts/sync-skill-overrides.mjs",
+    "check-skill-overrides": "node scripts/sync-skill-overrides.mjs --check"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.7.0",

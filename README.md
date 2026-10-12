@@ -123,6 +123,8 @@ Plans use `.agents/plans/plan_YYYYMMDD_<name>.md`. Implementations use `.agents/
 
 The [`skills/`](skills/) directory contains the source skills. The setup skill's `references/` directory contains baseline snapshots it needs when installed on its own; update those copies when their source files change.
 
+Edit skill overrides in [`skills/skill-overrides/`](skills/skill-overrides/) only. Enable the repository hooks once with `git config core.hooksPath .githooks`; the pre-commit hook then mirrors staged override changes into the setup skill's `references/skill-overrides/` and stages the copies. Run `npm run sync-skill-overrides` to sync manually, or `npm run check-skill-overrides` to check for drift.
+
 The root [`package.json`](package.json) is the release version source; the setup skill's [`release.json`](skills/setup-lean-coding-agent/references/release.json) is synchronized from it so initialized projects can check for newer skill releases. This repository uses Changesets to version the skills collection and prepare GitHub releases. Install the development dependencies with `npm ci`, then add a changeset for each user-facing change:
 
 ```sh
