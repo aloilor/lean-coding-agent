@@ -19,7 +19,7 @@ Studies of repository context files found that generated codebase overviews do n
 | `docs/conventions/TESTING.md` | Exact verification commands, what to run per change type, test traps. | `references/TESTING.md` |
 | `docs/conventions/WORKFLOWS.md` | Non-default commands, setup and CI traps, generated files, review and release rules. | `references/WORKFLOWS.md` |
 
-Project terms belong in `docs/GLOSSARY.md` and decisions in `docs/adr/`, both owned by `grill-with-docs`. Do not duplicate them here.
+Project terms belong in `docs/conventions/GLOSSARY.md` and decisions in `docs/conventions/adr/`, both owned by `grill-with-docs`. Do not duplicate them here.
 
 ## The Inclusion Test
 
@@ -33,7 +33,7 @@ Leave out directory maps, tech-stack and dependency tables, architecture overvie
 
 ## Process
 
-1. **Read what exists.** Read `docs/conventions/`, `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, the README, and `docs/` (including `docs/GLOSSARY.md`). If a legacy `agent-context/` folder exists, treat its content as candidates and tell the user it can be deleted once migrated.
+1. **Read what exists.** Read `docs/conventions/`, `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, the README, and `docs/` (including `docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`). If a legacy `agent-context/` folder exists, treat its content as candidates and tell the user it can be deleted once migrated.
 2. **Collect candidates from evidence.** Use `rg --files`, `rg`, and targeted reads. Do not read every file. Look for:
    - Commands that differ from the stack default or need flags, env vars, services, or a specific order (manifests, Makefiles, CI).
    - CI checks that local defaults skip.

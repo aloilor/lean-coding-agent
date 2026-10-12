@@ -85,7 +85,7 @@ Overrides add project guidance to an installed skill without changing the skill 
 
 For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md) applies the baseline's testing guidance whenever tests are planned, written, or reviewed. To add project-specific guidance for another skill, create a matching Markdown file in `.agents/skill-overrides/` and add a link for it to `INDEX.md`. Setup refreshes bundled override files while preserving project-owned entries in the index.
 
-To keep `grill-with-docs` documentation somewhere other than the default `docs/GLOSSARY.md` and `docs/adr/`, choose a folder during setup (`--docs-dir docs/domain`). Setup generates a `grill-with-docs` override that stores `GLOSSARY.md` and `adr/` in that folder. You can also write that override yourself in `.agents/skill-overrides/grill-with-docs.md`.
+To keep `grill-with-docs` documentation somewhere other than the default `docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`, choose a folder during setup (`--docs-dir docs/domain`). Setup generates a `grill-with-docs` override that stores `GLOSSARY.md` and `adr/` in that folder. You can also write that override yourself in `.agents/skill-overrides/grill-with-docs.md`.
 
 ## Workflow guide
 

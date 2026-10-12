@@ -220,13 +220,13 @@ test('setup with --docs-dir points grill-with-docs at the chosen folder and upda
   await runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs\\domain/'], { env });
 
   const override = await fs.readFile(overridePath, 'utf8');
-  assert.ok(override.includes('`docs/domain/GLOSSARY.md` replaces `docs/GLOSSARY.md`'));
-  assert.ok(override.includes('`docs/domain/GLOSSARY-MAP.md` replaces `docs/GLOSSARY-MAP.md`'));
-  assert.ok(override.includes('`docs/domain/adr/` replaces `docs/adr/`'));
+  assert.ok(override.includes('`docs/domain/GLOSSARY.md` replaces `docs/conventions/GLOSSARY.md`'));
+  assert.ok(override.includes('`docs/domain/GLOSSARY-MAP.md` replaces `docs/conventions/GLOSSARY-MAP.md`'));
+  assert.ok(override.includes('`docs/domain/adr/` replaces `docs/conventions/adr/`'));
 
   await runFile(process.execPath, [setupScript, project, '--docs-dir', 'knowledge'], { env });
 
-  assert.ok((await fs.readFile(overridePath, 'utf8')).includes('`knowledge/adr/` replaces `docs/adr/`'));
+  assert.ok((await fs.readFile(overridePath, 'utf8')).includes('`knowledge/adr/` replaces `docs/conventions/adr/`'));
   const index = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
   assert.equal((index.match(/^- \[grill-with-docs\]\(grill-with-docs\.md\)/gm) ?? []).length, 1);
   assert.match(index, /^- \[tdd\]\(tdd\.md\)/m);
@@ -234,7 +234,7 @@ test('setup with --docs-dir points grill-with-docs at the chosen folder and upda
   await runFile(process.execPath, [setupScript, project], { env });
   assert.ok((await fs.readFile(overridePath, 'utf8')).includes('`knowledge/adr/`'), 'rerun without --docs-dir keeps the folder');
 
-  await runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs/'], { env });
+  await runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs/conventions/'], { env });
   await assert.rejects(fs.access(overridePath), { code: 'ENOENT' });
   const restoredIndex = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
   assert.doesNotMatch(restoredIndex, /grill-with-docs/);

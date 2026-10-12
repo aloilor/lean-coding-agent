@@ -20,7 +20,7 @@ Enforced by tooling: `eslint`, `prettier`, `tsc --strict` (see their config). Ru
 ## Rules
 
 - Rule an agent would otherwise break. Source: `path`, doc, or maintainer.
-- `module-a` must not import from `module-b`. Source: `docs/adr/0003-boundaries.md`.
+- `module-a` must not import from `module-b`. Source: `docs/conventions/adr/0003-boundaries.md`.
 
 ## Never
 
