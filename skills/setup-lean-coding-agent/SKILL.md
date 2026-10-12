@@ -25,7 +25,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
    - `fable` (`claude-fable-5-1`) — for demanding reasoning and long-horizon agentic work; slowest and most expensive.
    - `opus` (`claude-opus-5-5`) — for long-running agentic coding and knowledge work.
    - `sonnet` (`claude-sonnet-5-5`) — the best combination of speed and intelligence.
-   - `haiku` (`claude-haiku-4-5`) — fastest; does not support the `effort` setting, so the agent's effort level is ignored.
+   - `haiku` (`claude-haiku-5-5`) — fastest.
 
    Claude Code subagents default to `sonnet`.
 
@@ -61,14 +61,4 @@ Run this skill after installing it with the Skills CLI to initialize the current
 
 ## Bundled References
 
-The `references/` directory contains the baseline inputs needed when this skill runs outside the source repository:
-
-- `references/agents/codex/` contains the four native Codex subagent TOML templates, and `references/agents/claude-code/` contains the matching Claude Code subagent Markdown templates. Keep their instructions synchronized; the Claude Code copies name skills in neutral wording instead of Codex `$skill` mentions.
-- [`references/templates/plan.md`](references/templates/plan.md), [`references/templates/implementation-report.md`](references/templates/implementation-report.md), and [`references/templates/code-review.md`](references/templates/code-review.md) are the canonical shared artifact templates copied into `.agents/templates/`. Their core sections stay fixed while detail scales to the work; workflow and agent instructions retain ownership of approval gates and review rules.
-- `references/config.toml` contains the baseline Codex project configuration copied when the target has no `.codex/config.toml`.
-- `references/baseline/` contains `AGENTS.md` and `CLAUDE.md`.
-- `references/docs/incidents/README.md` contains the incident report template.
-- `references/skill-overrides/` contains the baseline override index and override files copied into `.agents/skill-overrides/`.
-- Sibling skill directories provide the additional skills copied into initialized projects when they are installed alongside this setup skill.
-
-These files are snapshots of canonical sources in this repository. Keep their matching copies synchronized when those sources change.
+See [references/README.md](references/README.md) for what each bundled file is and which source it snapshots.
