@@ -19,7 +19,7 @@ Studies of repository context files found that generated codebase overviews do n
 | `docs/conventions/TESTING.md` | Exact verification commands, what to run per change type, test traps. | `references/TESTING.md` |
 | `docs/conventions/WORKFLOWS.md` | Non-default commands, setup and CI traps, generated files, review and release rules. | `references/WORKFLOWS.md` |
 
-Project terms belong in `docs/conventions/GLOSSARY.md` and decisions in `docs/conventions/adr/`, both owned by `grill-with-docs`. Do not duplicate them here.
+Project terms belong in `docs/conventions/GLOSSARY.md` and decisions in `docs/conventions/adr/`, both owned by `lean-grill-with-docs`. Do not duplicate them here.
 
 ## The Inclusion Test
 

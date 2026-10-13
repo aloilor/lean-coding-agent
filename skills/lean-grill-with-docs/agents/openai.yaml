@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lean Grill With Docs"
+  short_description: "Shape and grill plans against domain docs"
+  default_prompt: "Use $lean-grill-with-docs to grill my plan or design against GLOSSARY.md and related docs."

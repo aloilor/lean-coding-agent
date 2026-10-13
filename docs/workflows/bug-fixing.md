@@ -4,7 +4,7 @@ Use this workflow for bugs, regressions, failing tests, CI failures, and runtime
 
 ## Process
 
-1. Run `grill-with-docs` before diagnosing or planning. Inspect relevant code, callers, tests, project context, and documentation.
+1. Run `lean-grill-with-docs` before diagnosing or planning. Inspect relevant code, callers, tests, project context, and documentation.
 2. Have the bug diagnostician investigate and draft `docs/incidents/incident_YYYYMMDD_<name>.md`. The main agent uses the evidence to write a plan at `.agents/plans/plan_YYYYMMDD_<name>.md`.
 3. Present the symptom, evidence or likely cause, impact, proposed repair, and verification plan. Get explicit approval before changing production or test code.
 4. After approval, have the implementer reproduce the failure and fix the root cause test-first. Record evidence in `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md`.
@@ -22,7 +22,7 @@ Use this workflow for bugs, regressions, failing tests, CI failures, and runtime
 
 ```mermaid
 flowchart TD
-    A[Bug report] --> B[grill-with-docs]
+    A[Bug report] --> B[lean-grill-with-docs]
     B --> C[Bug diagnostician]
     C --> D[Draft incident report and repair plan]
     D --> E[User approval]

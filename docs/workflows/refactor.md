@@ -4,7 +4,7 @@ Use this workflow to restructure code while preserving its behavior and contract
 
 ## Process
 
-1. Run `grill-with-docs`, inspect the code area, callers, tests, and project documentation, then plan the preserved behavior, scope, risks, documentation impact, and verification.
+1. Run `lean-grill-with-docs`, inspect the code area, callers, tests, and project documentation, then plan the preserved behavior, scope, risks, documentation impact, and verification.
 2. Save the plan as `.agents/plans/plan_YYYYMMDD_<name>.md` and get explicit user approval before implementation. If inspection reveals a behavior change, stop and ask for direction.
 3. After approval, establish focused test baselines and add characterization tests when needed. Have the implementer make one small behavior-preserving change at a time, rerunning focused tests after meaningful steps.
 4. Record evidence in `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md`. Have the code reviewer check for behavior drift, scope creep, missed tests, unnecessary abstraction, and stale documentation; record each pass under `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`.
@@ -21,7 +21,7 @@ Use this workflow to restructure code while preserving its behavior and contract
 ```mermaid
 flowchart TD
     A[Refactor request] --> B[Planner]
-    B --> C[grill-with-docs]
+    B --> C[lean-grill-with-docs]
     C --> D[Plan behavior to preserve, scope, and verification]
     D --> E[User approval]
     E --> F[Implementer]

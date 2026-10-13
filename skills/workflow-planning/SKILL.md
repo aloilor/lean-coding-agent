@@ -12,7 +12,7 @@ The main agent orchestrates this workflow and owns user communication. Follow th
 
 ## Steps
 
-1. **Prepare the plan.** Spawn `planner` with the request and the planning requirements. The planner runs `$grill-with-docs`, examines relevant project context, and drafts `.agents/plans/plan_YYYYMMDD_<name>.md`. Relay material questions to the user and return answers to the planner.
+1. **Prepare the plan.** Spawn `planner` with the request and the planning requirements. The planner runs `$lean-grill-with-docs`, examines relevant project context, and drafts `.agents/plans/plan_YYYYMMDD_<name>.md`. Relay material questions to the user and return answers to the planner.
 2. **Review and approve the plan.** Present the completed plan to the user and obtain explicit approval. Send requested revisions to the same planner and present the updated plan.
 3. **Stop at the plan.** Once approved, return the plan as the durable handoff for a later task. Do not spawn implementation or review agents and do not begin implementation.
 

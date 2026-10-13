@@ -4,7 +4,7 @@ Use this workflow for a feature or behavior change, from a small change through 
 
 ## Process
 
-1. Run `grill-with-docs`, inspect the relevant code and documentation, then write a plan at `.agents/plans/plan_YYYYMMDD_<name>.md`. Get explicit user approval before implementation.
+1. Run `lean-grill-with-docs`, inspect the relevant code and documentation, then write a plan at `.agents/plans/plan_YYYYMMDD_<name>.md`. Get explicit user approval before implementation.
 2. After approval, have the implementer work test-first through RED, GREEN, and REFACTOR. Record implementation and verification evidence in `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md`.
 3. Have the code reviewer assess the change independently and record each pass at `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`.
 4. Resolve concrete `BLOCK` findings with the implementer and repeat focused checks and review. Address `WARNING` findings when they identify a plan issue, likely bug, security or privacy risk, or meaningful test gap.
@@ -21,7 +21,7 @@ Use this workflow for a feature or behavior change, from a small change through 
 ```mermaid
 flowchart TD
     A[Feature request] --> B[Planner]
-    B --> C[grill-with-docs]
+    B --> C[lean-grill-with-docs]
     C --> D[Implementation plan]
     D --> E[User approval]
     E --> F[Implementer]
