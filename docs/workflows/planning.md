@@ -4,7 +4,7 @@ Use this workflow when work should be explored and documented before implementat
 
 ## Process
 
-1. Run `grill-with-docs` and inspect relevant project context.
+1. Run `lean-grill-with-docs` and inspect relevant project context.
 2. Resolve material questions with the user; define scope, decisions, non-goals, acceptance criteria, risks, and verification expectations.
 3. Save the draft to `.agents/plans/plan_YYYYMMDD_<name>.md` and obtain the user's approval.
 4. Hand off the approved plan for a later task. Do not implement the work or start an implementation review in this workflow.
@@ -17,7 +17,7 @@ The approved `.agents/plans/plan_YYYYMMDD_<name>.md` is the durable handoff. Inc
 
 ```mermaid
 flowchart TD
-    A[Work request] --> B[grill-with-docs]
+    A[Work request] --> B[lean-grill-with-docs]
     B --> C[Resolve scope and decisions]
     C --> D[Draft plan]
     D --> E[User approval]

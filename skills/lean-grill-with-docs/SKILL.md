@@ -1,5 +1,5 @@
 ---
-name: grill-with-docs
+name: lean-grill-with-docs
 description: Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation in GLOSSARY.md and ADRs inline as decisions crystallize. Use when the user is creating or refining a plan or design and wants it grilled against their project's language and documented decisions.
 ---
 

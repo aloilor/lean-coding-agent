@@ -90,6 +90,7 @@ test('setup initializes project files and preserves project-owned content on rer
     '.agents/lessons/LESSONS.md',
     '.agents/skill-overrides/tdd.md',
     '.agents/skills/setup-lean-coding-agent/SKILL.md',
+    '.agents/skills/lean-grill-with-docs/SKILL.md',
     'scripts/check-skill-updates.mjs',
     '.codex/config.toml',
     '.codex/agents/planner.toml',
@@ -105,6 +106,7 @@ test('setup initializes project files and preserves project-owned content on rer
   ]) {
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
   }
+  await assert.rejects(fs.access(path.join(project, '.agents', 'skills', 'grill-with-docs')), { code: 'ENOENT' });
 
   const planner = await fs.readFile(path.join(project, '.codex', 'agents', 'planner.toml'), 'utf8');
   const implementer = await fs.readFile(path.join(project, '.codex', 'agents', 'implementer.toml'), 'utf8');
@@ -228,36 +230,36 @@ test('setup reports installer failures and stops before later commands', async (
   assert.deepEqual((await loggedCommands(commandLog)).map(({ command }) => command), ['npm']);
 });
 
-test('setup with --docs-dir points grill-with-docs at the chosen folder and updates it on rerun', async (t) => {
+test('setup with --docs-dir points lean-grill-with-docs at the chosen folder and updates it on rerun', async (t) => {
   const { project, env } = await setupFixture(t);
   const overrideDirectory = path.join(project, '.agents', 'skill-overrides');
-  const overridePath = path.join(overrideDirectory, 'grill-with-docs.md');
+  const overridePath = path.join(overrideDirectory, 'lean-grill-with-docs.md');
 
   await runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs\\domain/'], { env });
 
   const override = await fs.readFile(overridePath, 'utf8');
-  assert.ok(override.includes('`docs/domain/GLOSSARY.md` replaces `docs/GLOSSARY.md`'));
-  assert.ok(override.includes('`docs/domain/GLOSSARY-MAP.md` replaces `docs/GLOSSARY-MAP.md`'));
-  assert.ok(override.includes('`docs/domain/adr/` replaces `docs/adr/`'));
+  assert.ok(override.includes('`docs/domain/GLOSSARY.md` replaces `docs/conventions/GLOSSARY.md`'));
+  assert.ok(override.includes('`docs/domain/GLOSSARY-MAP.md` replaces `docs/conventions/GLOSSARY-MAP.md`'));
+  assert.ok(override.includes('`docs/domain/adr/` replaces `docs/conventions/adr/`'));
 
   await runFile(process.execPath, [setupScript, project, '--docs-dir', 'knowledge'], { env });
 
-  assert.ok((await fs.readFile(overridePath, 'utf8')).includes('`knowledge/adr/` replaces `docs/adr/`'));
+  assert.ok((await fs.readFile(overridePath, 'utf8')).includes('`knowledge/adr/` replaces `docs/conventions/adr/`'));
   const index = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
-  assert.equal((index.match(/^- \[grill-with-docs\]\(grill-with-docs\.md\)/gm) ?? []).length, 1);
+  assert.equal((index.match(/^- \[lean-grill-with-docs\]\(lean-grill-with-docs\.md\)/gm) ?? []).length, 1);
   assert.match(index, /^- \[tdd\]\(tdd\.md\)/m);
 
   await runFile(process.execPath, [setupScript, project], { env });
   assert.ok((await fs.readFile(overridePath, 'utf8')).includes('`knowledge/adr/`'), 'rerun without --docs-dir keeps the folder');
 
-  await runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs/'], { env });
+  await runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs/conventions/'], { env });
   await assert.rejects(fs.access(overridePath), { code: 'ENOENT' });
   const restoredIndex = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
-  assert.doesNotMatch(restoredIndex, /grill-with-docs/);
+  assert.doesNotMatch(restoredIndex, /lean-grill-with-docs/);
   assert.match(restoredIndex, /^- \[tdd\]\(tdd\.md\)/m);
 });
 
-test('setup without --docs-dir does not add a grill-with-docs override', async (t) => {
+test('setup without --docs-dir does not add a lean-grill-with-docs override', async (t) => {
   const { project, env } = await setupFixture(t);
 
   await runFile(process.execPath, [setupScript, project], { env });
@@ -267,24 +269,24 @@ test('setup without --docs-dir does not add a grill-with-docs override', async (
   await assert.rejects(fs.access(path.join(project, 'AGENTS.local.md')), { code: 'ENOENT' });
 
   const overrideDirectory = path.join(project, '.agents', 'skill-overrides');
-  await assert.rejects(fs.access(path.join(overrideDirectory, 'grill-with-docs.md')), { code: 'ENOENT' });
-  assert.doesNotMatch(await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8'), /grill-with-docs/);
+  await assert.rejects(fs.access(path.join(overrideDirectory, 'lean-grill-with-docs.md')), { code: 'ENOENT' });
+  assert.doesNotMatch(await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8'), /lean-grill-with-docs/);
 });
 
-test('setup with --docs-dir preserves a project-owned grill-with-docs override', async (t) => {
+test('setup with --docs-dir preserves a project-owned lean-grill-with-docs override', async (t) => {
   const { project, env } = await setupFixture(t);
   const overrideDirectory = path.join(project, '.agents', 'skill-overrides');
   await fs.mkdir(overrideDirectory, { recursive: true });
-  await fs.writeFile(path.join(overrideDirectory, 'grill-with-docs.md'), 'Project-owned override\n');
+  await fs.writeFile(path.join(overrideDirectory, 'lean-grill-with-docs.md'), 'Project-owned override\n');
 
   await assert.rejects(
     runFile(process.execPath, [setupScript, project, '--docs-dir', 'docs/domain'], { env }),
     (error) => {
-      assert.match(error.stderr, /grill-with-docs\.md is project-owned/);
+      assert.match(error.stderr, /lean-grill-with-docs\.md is project-owned/);
       return true;
     },
   );
-  assert.equal(await fs.readFile(path.join(overrideDirectory, 'grill-with-docs.md'), 'utf8'), 'Project-owned override\n');
+  assert.equal(await fs.readFile(path.join(overrideDirectory, 'lean-grill-with-docs.md'), 'utf8'), 'Project-owned override\n');
 });
 
 test('setup rejects a --docs-dir outside the target project before changing it', async (t) => {

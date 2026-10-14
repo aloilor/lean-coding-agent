@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 Orchestrated by the main agent. Follow the shared scaffolding in `AGENTS.md` — **Workflow Delegation**, **Standard Artifacts**, and **Shared Stop Conditions** — and never run this workflow from a subagent.
 
-This is a review-only workflow. It does not draft a plan or run `$grill-with-docs`; the mandatory grill gate applies to the planning, feature, refactor, and bug-fixing workflows.
+This is a review-only workflow. It does not draft a plan or run `$lean-grill-with-docs`; the mandatory grill gate applies to the planning, feature, refactor, and bug-fixing workflows.
 
 Every review run produces a durable pass artifact at `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`.
 

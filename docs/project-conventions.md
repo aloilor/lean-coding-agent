@@ -65,8 +65,8 @@ Lulla et al. ([arXiv:2601.20404](https://arxiv.org/abs/2601.20404)) compared pai
 | Conventions tooling does not enforce, boundaries, invariants, API, data, and security rules | `docs/conventions/CODING-STANDARDS.md` | `project-conventions` |
 | Exact verification commands, what to run per change type, test traps | `docs/conventions/TESTING.md` | `project-conventions` |
 | Non-default commands, setup and CI traps, generated files, review and release rules | `docs/conventions/WORKFLOWS.md` | `project-conventions` |
-| Project terms and preferred names | `docs/GLOSSARY.md` | `grill-with-docs` |
-| Decisions and their reasons | `docs/adr/` | `grill-with-docs` |
+| Project terms and preferred names | `docs/conventions/GLOSSARY.md` | `lean-grill-with-docs` |
+| Decisions and their reasons | `docs/conventions/adr/` | `lean-grill-with-docs` |
 | Directory maps, stack overviews, skill indexes | Nowhere; agents rebuild them, and harnesses already load skill descriptions | — |
 
 The files live under `docs/` rather than in a hidden folder so humans see and maintain them; stale convention docs are worse than none.

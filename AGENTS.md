@@ -33,7 +33,7 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ## Self-Improvement
 
-- When the user corrects your behavior, before ending that turn, put the correction in its authoritative prompt, workflow, guideline, or project context, or add a lesson, and state which you updated.
+- When the user corrects your behavior, suggest updating its authoritative prompt, workflow, guideline, or project context, or creating a lesson when appropriate. Ask for approval before saving the correction (for example, "Do you want to create this lesson?"). If the user already explicitly requested the update, proceed and state which you updated.
 - Add a lesson only for a reusable agent-behavior mistake with no better canonical owner; never record one-off details or duplicate existing policy.
 - Store one short rule per `.agents/lessons/<descriptive-name>.md`, and add a clickable one-line entry to `.agents/lessons/LESSONS.md`.
 - Review the lessons index and relevant linked lessons at the start of each session.

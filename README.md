@@ -42,7 +42,7 @@ Run `node scripts/check-skill-updates.mjs` to compare this checkout's release me
 
 - [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the skill.
 - [`project-conventions`](skills/project-conventions/SKILL.md) — capture the non-obvious conventions agents would otherwise get wrong in `docs/conventions/` ([why](docs/project-conventions.md)).
-- [`grill-with-docs`](skills/grill-with-docs/SKILL.md) — a personal fork of Matt Pocock’s original skill, adapted to work with my setup; clarifies plans against project terminology and documented decisions.
+- [`lean-grill-with-docs`](skills/lean-grill-with-docs/SKILL.md) — a personal fork of Matt Pocock’s original skill, adapted to work with my setup; clarifies plans against project terminology and documented decisions.
 - [`feature-specification`](skills/feature-specification/SKILL.md) — write a client-approvable feature spec from a fixed template.
 
 ### Change workflows
@@ -85,7 +85,7 @@ Overrides add project guidance to an installed skill without changing the skill 
 
 For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md) applies the baseline's testing guidance whenever tests are planned, written, or reviewed. To add project-specific guidance for another skill, create a matching Markdown file in `.agents/skill-overrides/` and add a link for it to `INDEX.md`. Setup refreshes bundled override files while preserving project-owned entries in the index.
 
-To keep `grill-with-docs` documentation somewhere other than the default `docs/GLOSSARY.md` and `docs/adr/`, choose a folder during setup (`--docs-dir docs/domain`). Setup generates a `grill-with-docs` override that stores `GLOSSARY.md` and `adr/` in that folder. You can also write that override yourself in `.agents/skill-overrides/grill-with-docs.md`.
+To keep `lean-grill-with-docs` documentation somewhere other than the default `docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`, choose a folder during setup (`--docs-dir docs/domain`). Setup generates a `lean-grill-with-docs` override that stores `GLOSSARY.md` and `adr/` in that folder. You can also write that override yourself in `.agents/skill-overrides/lean-grill-with-docs.md`.
 
 ## Workflow guide
 

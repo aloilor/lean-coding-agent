@@ -25,4 +25,4 @@ flowchart TD
     E -->|Yes| G[Start separate repair task]
 ```
 
-This workflow does not run `grill-with-docs` or create a plan. Canonical instructions: [workflow-review](../../skills/workflow-review/SKILL.md).
+This workflow does not run `lean-grill-with-docs` or create a plan. Canonical instructions: [workflow-review](../../skills/workflow-review/SKILL.md).
