@@ -1,6 +1,6 @@
 ---
 name: init-conventions
-description: Initialize or refresh docs/conventions/CODING-STANDARDS.md, TESTING.md, and WORKFLOWS.md with repo-specific facts an agent needs to work correctly: verified commands, example files to follow, boundaries, forbidden operations, generated files, and traps. Gathers evidence from the repo, runs the commands it records, and interviews the user for what the repo cannot show. Use whenever the user wants to create, fill, initialize, update, or refresh project conventions, coding standards, testing docs, or docs/conventions/, or after setting up the Lean Coding Agent baseline in a project.
+description: "Initialize or refresh docs/conventions/CODING-STANDARDS.md, TESTING.md, and WORKFLOWS.md with repo-specific facts an agent needs to work correctly: verified commands, example files to follow, boundaries, forbidden operations, generated files, and traps. Gathers evidence from the repo, runs the commands it records, and interviews the user for what the repo cannot show. Use whenever the user wants to create, fill, initialize, update, or refresh project conventions, coding standards, testing docs, or docs/conventions/, or after setting up the Lean Coding Agent baseline in a project."
 ---
 
 # Init Conventions
