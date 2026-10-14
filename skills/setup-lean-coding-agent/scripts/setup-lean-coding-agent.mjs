@@ -73,7 +73,7 @@ const upstreamSkillGroups = [
   },
   {
     source: 'https://github.com/mattpocock/skills',
-    skills: ['handoff', 'resolving-merge-conflicts', 'tdd'],
+    skills: ['handoff', 'tdd'],
   },
   {
     source: 'https://github.com/github/awesome-copilot',
