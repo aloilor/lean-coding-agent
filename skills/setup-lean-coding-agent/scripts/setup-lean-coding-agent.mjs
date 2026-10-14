@@ -241,36 +241,13 @@ function validateModels(models) {
   }
 }
 
-function baselineGuardBlock(filename) {
-  const localFilename = 'AGENTS.override.md';
-  return [
-    '',
-    '---',
-    '',
-    '## Do Not Edit This Baseline File',
-    '',
-    `**Under no circumstances edit \`${filename}\` or the other baseline file in this project.** These files are the shared agents baseline, copied in from the upstream agents repo, and any edits here are overwritten on the next sync.`,
-    '',
-    '- For project-specific rules that should be shared and committed, use `docs/conventions/`.',
-    `- For local, private, machine-specific notes, use \`${localFilename}\` (git-ignored).`,
-    '',
-    'Change the baseline itself only in the upstream agents repo, not here.',
-    '',
-  ].join('\n');
-}
-
 async function copyBaselineFiles(targetProject) {
   const copiedPaths = [];
   for (const filename of ['AGENTS.md', 'CLAUDE.md']) {
     const sourcePath = await requiredReference('baseline', filename);
     const targetPath = path.join(targetProject, filename);
     const baselineText = await fs.readFile(sourcePath, 'utf8');
-    const separator = baselineText.endsWith('\n') ? '' : '\n';
-    await fs.writeFile(
-      targetPath,
-      `${baselineText}${separator}${baselineGuardBlock(filename)}`,
-      'utf8',
-    );
+    await fs.writeFile(targetPath, baselineText, 'utf8');
     copiedPaths.push(targetPath);
   }
   return copiedPaths;

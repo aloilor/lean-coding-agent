@@ -46,6 +46,18 @@ async function loggedCommands(commandLog) {
   return (await fs.readFile(commandLog, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
 }
 
+async function assertBaselinesMatchBundledReferences(project) {
+  for (const filename of ['AGENTS.md', 'CLAUDE.md']) {
+    const installed = await fs.readFile(path.join(project, filename), 'utf8');
+    const bundled = await fs.readFile(
+      path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'baseline', filename),
+      'utf8',
+    );
+    assert.equal(installed, bundled, `${filename} matches the bundled baseline`);
+    assert.doesNotMatch(installed, /Do Not Edit This Baseline File|Under no circumstances edit/);
+  }
+}
+
 test('setup initializes project files and preserves project-owned content on rerun', async (t) => {
   const { project, commandLog, env } = await setupFixture(t);
   await fs.writeFile(path.join(project, 'package.json'), '{"packageManager":"pnpm@9.0.0"}\n');
@@ -68,6 +80,8 @@ test('setup initializes project files and preserves project-owned content on rer
     '--claude-planner-model', 'opus',
   ];
   await runFile(process.execPath, options, { env });
+
+  await assertBaselinesMatchBundledReferences(project);
 
   for (const relativePath of [
     'AGENTS.md',
@@ -121,13 +135,14 @@ test('setup initializes project files and preserves project-owned content on rer
   assert.ok(firstCommands.every(({ cwd }) => cwd === project));
 
   await fs.writeFile(path.join(project, 'AGENTS.md'), 'Outdated managed baseline\n');
+  await fs.writeFile(path.join(project, 'CLAUDE.md'), 'Outdated managed baseline\n');
   await fs.writeFile(path.join(project, '.codex', 'config.toml'), 'model = "project-choice"\n');
   await fs.writeFile(path.join(overrideDirectory, 'tdd.md'), 'Outdated managed override\n');
   const { stdout: rerunOutput } = await runFile(process.execPath, options, { env });
   assert.match(rerunOutput, /Legacy project context found in .*agent-context; run project-conventions/);
   await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
 
-  assert.match(await fs.readFile(path.join(project, 'AGENTS.md'), 'utf8'), /## Do Not Edit This Baseline File/);
+  await assertBaselinesMatchBundledReferences(project);
   assert.equal(await fs.readFile(path.join(project, 'AGENTS.override.md'), 'utf8'), 'Private notes\n');
   assert.equal(await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'), 'model = "project-choice"\n');
   assert.equal(await fs.readFile(path.join(project, 'agent-context', 'testing.md'), 'utf8'), 'Project testing guidance\n');
@@ -166,6 +181,7 @@ test('setup installs shared artifact templates for each tool selection and refre
     const { project, env } = await setupFixture(t);
     const options = [setupScript, project, '--tools', tools];
     await runFile(process.execPath, options, { env });
+    await assertBaselinesMatchBundledReferences(project);
     const templateDirectory = path.join(project, '.agents', 'templates');
     const installedNames = await fs.readdir(templateDirectory).catch((error) => {
       if (error.code === 'ENOENT') return [];
