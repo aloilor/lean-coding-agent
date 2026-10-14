@@ -1,4 +1,0 @@
-interface:
-  display_name: "Project Conventions"
-  short_description: "Capture non-obvious project conventions"
-  default_prompt: "Use $project-conventions to capture the non-obvious conventions agents would get wrong in docs/conventions/."

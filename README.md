@@ -22,7 +22,7 @@ The setup skill asks whether to set up Codex, Claude Code, or both, and which mo
 
 ## Use the skills
 
-Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `project-conventions` to capture what agents get wrong in a repository or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
+Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `init-conventions` to record a repository's verified conventions or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
 
 ## Updates
 
@@ -41,7 +41,7 @@ Run `node scripts/check-skill-updates.mjs` to compare this checkout's release me
 ### Setup and project context
 
 - [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the skill.
-- [`project-conventions`](skills/project-conventions/SKILL.md) — capture the non-obvious conventions agents would otherwise get wrong in `docs/conventions/` ([why](docs/project-conventions.md)).
+- [`init-conventions`](skills/init-conventions/SKILL.md) — initialize or refresh `docs/conventions/` with repo-specific, verified commands, examples to follow, boundaries, and traps.
 - [`lean-grill-with-docs`](skills/lean-grill-with-docs/SKILL.md) — a personal fork of Matt Pocock’s original skill, adapted to work with my setup; clarifies plans against project terminology and documented decisions.
 - [`feature-specification`](skills/feature-specification/SKILL.md) — write a client-approvable feature spec from a fixed template.
 

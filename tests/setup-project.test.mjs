@@ -141,7 +141,7 @@ test('setup initializes project files and preserves project-owned content on rer
   await fs.writeFile(path.join(project, '.codex', 'config.toml'), 'model = "project-choice"\n');
   await fs.writeFile(path.join(overrideDirectory, 'tdd.md'), 'Outdated managed override\n');
   const { stdout: rerunOutput } = await runFile(process.execPath, options, { env });
-  assert.match(rerunOutput, /Legacy project context found in .*agent-context; run project-conventions/);
+  assert.match(rerunOutput, /Legacy project context found in .*agent-context; run init-conventions/);
   await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
 
   await assertBaselinesMatchBundledReferences(project);

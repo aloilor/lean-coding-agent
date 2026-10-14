@@ -833,7 +833,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const legacyAgentContextDirectory = path.join(targetProject, legacyAgentContextDirectoryName);
   if (await pathExists(legacyAgentContextDirectory)) {
     console.log(
-      `Legacy project context found in ${legacyAgentContextDirectory}; run project-conventions to migrate it into docs/conventions/, then delete it.`,
+      `Legacy project context found in ${legacyAgentContextDirectory}; run init-conventions to migrate it into docs/conventions/, then delete it.`,
     );
   }
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
