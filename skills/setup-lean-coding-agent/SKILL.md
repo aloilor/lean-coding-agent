@@ -1,6 +1,6 @@
 ---
 name: setup-lean-coding-agent
-description: Initialize the current project with the Lean Coding Agent baseline for Codex, Claude Code, or both after installing its skills, including project guidance, available skills, skill overrides, configurable subagents, and release and upstream skill update checks.
+description: Initialize the current project with the Lean Coding Agent baseline for Codex, Claude Code, or both after installing its skills, including project guidance, available skills, skill overrides, configurable subagents, and a manually run release and upstream skill update checker.
 ---
 
 # Setup Lean Coding Agent
@@ -56,7 +56,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
 - It copies the shared plan, implementation-report, and code-review templates into `.agents/templates/` for every selected coding agent. The planner, implementer, and code reviewer read these templates when writing their artifacts. Setup refreshes `plan.md`, `implementation-report.md`, and `code-review.md` on every run while preserving other project-owned templates.
 - It records the installed Lean Coding Agent release in `.agents/skills-installed.json`, moves a legacy `agent-context/skills-installed.json` there, removes managed skills that the release no longer ships, and copies the version checker into `scripts/check-skill-updates.mjs`. On reruns, it removes old checker hooks while preserving unrelated hooks.
 - `references/release.json` records the skills release version and repository. The checker compares that release with GitHub Releases and checks GitHub-backed upstream skills listed in `skills-lock.json`.
-- The baseline `AGENTS.md` asks agents to run the checker at session start and recommends `npx skills update -p` when skill updates are available.
+- The checker is available as a manual command; the baseline does not ask agents to run it at session start.
 - The agent-browser setup installs a development dependency with the detected package manager and installs its browser runtime. Upstream skills are installed through `npx skills add` for the selected coding agents and require network access.
 - The Node.js script is the single cross-platform entry point for both project setup and skill installation.
 
