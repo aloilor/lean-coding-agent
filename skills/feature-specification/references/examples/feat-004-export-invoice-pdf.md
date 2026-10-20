@@ -201,13 +201,4 @@ Recommended: wrap in full, because truncation can hide billing details the custo
 **OQ-4 — Is a specific PDF layout legally or commercially required?**
 Recommended: no specific layout beyond the fields listed in FR-3; the client confirms with their accountant that those fields meet local invoicing rules. Affects: FR-3, Dependencies and Assumptions.
 
-All open questions must be resolved before the feature is considered approved for development.
-
-## Approval
-
-By approving this specification, the client confirms that the scope, expected behavior, and acceptance criteria described above represent the agreed requirements for FEAT-004 — Export Invoice as PDF.
-
-- **Client representative:** ______________________
-- **Date:** ______________________
-- **Approved version:** ______________________
-- **Signature / Approval reference:** ______________________
+Resolve all open questions before the feature is considered ready for implementation.

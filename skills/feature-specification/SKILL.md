@@ -1,12 +1,12 @@
 ---
 name: feature-specification
-description: "Write a client-approvable FEAT-NNN Feature Specification for one software feature: user stories, scope, functional requirements, business rules, edge cases, Given/When/Then acceptance criteria, and open questions."
+description: "Write a client-reviewable FEAT-NNN Feature Specification for one software feature: user stories, scope, functional requirements, business rules, edge cases, Given/When/Then acceptance criteria, and open questions."
 disable-model-invocation: true
 ---
 
 # Feature Specification
 
-Produce one Feature Specification per feature: a document a client can read and approve, developers can build against, and QA can test against. It defines *what the feature must do*, not how to implement it.
+Produce one Feature Specification per feature: a document a client can review, developers can build against, and QA can test against. It defines *what the feature must do*, not how to implement it.
 
 ## Concepts To Keep Distinct
 
@@ -33,13 +33,13 @@ Do not force every requirement into "As a [user], I want…". Permissions, valid
 
 Collect the feature request, any PRD, ticket, mockup, or prior spec the user provides. When working inside a repository, also:
 
-- Look for an existing specs location (`docs/specs/`, `docs/features/`, `specs/`, or similar) and existing `FEAT-NNN` IDs.
+- Look for existing `FEAT-NNN` IDs in the repository so the next ID is unique.
 - Read `docs/conventions/GLOSSARY.md` or an equivalent glossary when present, and use the project's own names for roles, entities, and screens.
 - Inspect relevant code only to ground terminology, existing permissions, and current behavior. Do not let implementation details leak into the spec.
 
 ### 2. Pick the variant
 
-The **lean** variant keeps only Feature, Objective, User Stories, Scope, Out of Scope, Functional Requirements, Acceptance Criteria, Open Questions, Approval. The **full** variant keeps every section.
+The **lean** variant keeps only Feature, Objective, User Stories, Scope, Out of Scope, Functional Requirements, Acceptance Criteria, and Open Questions. The **full** variant keeps every section.
 
 Decide in this order:
 
@@ -82,7 +82,7 @@ Follow the template exactly. Writing rules:
 - **Write acceptance criteria in Given / When / Then.** Cover the main success path, every permission boundary, each business-relevant edge case, and failure behavior. Reference FRs by ID when a criterion verifies a list or rule defined there.
 - **Keep user stories to 1–5**, near the top, for the people who matter most.
 - **Stay implementation-agnostic.** No database tables, class names, or libraries unless the client explicitly requires a technology; those belong in a technical plan.
-- **Number IDs sequentially within each prefix** (`US-1`, `FR-1`, `BR-1`, `EC-1`, `AC-1`, `NFR-1`, `OQ-1`) and never reuse or renumber IDs in a later version; mark removed items as `(Removed in vX.Y)` so approvals stay traceable.
+- **Number IDs sequentially within each prefix** (`US-1`, `FR-1`, `BR-1`, `EC-1`, `AC-1`, `NFR-1`, `OQ-1`) and never reuse or renumber IDs in a later version; mark removed items as `(Removed in vX.Y)` so version history stays traceable.
 
 ### 5. Self-check before delivering
 
@@ -96,10 +96,10 @@ Follow the template exactly. Writing rules:
 
 ### 6. Save and report
 
-Save to the project's existing specs location; if none exists, use `docs/specs/FEAT-NNN-<kebab-case-name>.md`. Choose the next free `FEAT-NNN` unless the user supplies an ID. If you are not working in a repository, return the spec in the response.
+In a repository, save the specification at `specs/FEAT-NNN-<kebab-case-name>/FEAT-NNN-<kebab-case-name>.md`, creating the feature directory as needed. Choose the next free `FEAT-NNN` unless the user supplies an ID. If you are not working in a repository, return the spec in the response.
 
-Report the file path, the variant used and why, the assumptions you made, and the open questions the client must answer before approval with your recommendation for each.
+Report the file path, the variant used and why, the assumptions you made, and any open questions the client should resolve, with your recommendation for each.
 
 ## Updating An Existing Spec
 
-Bump the version (`1.0` → `1.1` for clarifications, `2.0` for scope changes), keep existing IDs stable, reset Status to `Draft` or `Proposed`, and clear the Approval fields, because the client approved the previous version, not this one.
+Bump the version (`1.0` → `1.1` for clarifications, `2.0` for scope changes), keep existing IDs stable, and reset Status to `Draft` or `Proposed` to reflect the current state of the updated specification.

@@ -99,13 +99,4 @@ Recommended: no, because the carrier is not always known when the status changes
 **OQ-2 — For split shipments, should the customer be notified for every package?**
 Recommended: only for the first package, to avoid repeated notifications for one order; the order detail screen lists every package. Affects: FR-6.
 
-All open questions must be resolved before the feature is considered approved for development.
-
-## Approval
-
-By approving this specification, the client confirms that the scope, expected behavior, and acceptance criteria described above represent the agreed requirements for FEAT-012 — Order Shipped Push Notification.
-
-- **Client representative:** ______________________
-- **Date:** ______________________
-- **Approved version:** ______________________
-- **Signature / Approval reference:** ______________________
+Resolve all open questions before the feature is considered ready for implementation.

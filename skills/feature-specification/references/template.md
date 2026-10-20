@@ -1,6 +1,6 @@
 # Feature Specification Template
 
-Copy the template below. Keep every section heading, the section order, and the ID prefixes exactly as written so that all specifications in a project share one shape and can be compared, reviewed, and approved consistently.
+Copy the template below. Keep every section heading, the section order, and the ID prefixes exactly as written so that all specifications in a project share one shape and can be compared and reviewed consistently.
 
 ## Variants
 
@@ -21,7 +21,6 @@ Copy the template below. Keep every section heading, the section order, and the 
 | Non-Functional Requirements | Required | Omit |
 | Dependencies and Assumptions | Required | Omit |
 | Open Questions | Required | Required |
-| Approval | Required | Required |
 
 In the full variant, a section with genuinely nothing to say keeps its heading and states `None.` with a one-line reason, so the reader knows it was considered. In the lean variant, fold the most important rules or edge cases into Functional Requirements instead of adding sections.
 
@@ -29,7 +28,7 @@ In the full variant, a section with genuinely nothing to say keeps its heading a
 
 - **ID:** `FEAT-NNN`, zero-padded to three digits, unique within the project.
 - **Version:** `MAJOR.MINOR`, starting at `1.0`. Minor for clarifications, major for scope or behavior changes.
-- **Status:** one of `Draft` (open questions remain), `Proposed` (ready for client review), `Approved`, `Superseded`.
+- **Status:** one of `Draft` (open questions remain), `Proposed` (ready for client review), `Superseded`.
 - **ID prefixes:** `US-` user story, `FR-` functional requirement, `BR-` business rule, `EC-` edge case, `AC-` acceptance criterion, `NFR-` non-functional requirement, `OQ-` open question. Number sequentially from 1 within each prefix.
 - **Titles:** every FR, BR, EC, AC, and NFR has a short descriptive title after an em dash, such as `FR-4 — File name` or `BR-1 — Unique email address`. Keep business-rule titles especially simple and easy to scan. Open questions use the question itself as the title. USs may omit titles.
 
@@ -160,16 +159,7 @@ Recommended: {the answer this spec is written for}, because {reason}. Affects: {
 **OQ-2 — {Decision?}**
 Recommended: {answer}, because {reason}. Affects: {IDs}.
 
-All open questions must be resolved before the feature is considered approved for development.
-
-## Approval
-
-By approving this specification, the client confirms that the scope, expected behavior, and acceptance criteria described above represent the agreed requirements for FEAT-{NNN} — {Feature Name}.
-
-- **Client representative:** ______________________
-- **Date:** ______________________
-- **Approved version:** ______________________
-- **Signature / Approval reference:** ______________________
+Resolve all open questions before the feature is considered ready for implementation.
 ````
 
 ## Section Guidance
@@ -186,4 +176,3 @@ By approving this specification, the client confirms that the scope, expected be
 - **Non-Functional Requirements** — measurable targets. `should` is acceptable for performance targets; security requirements use `shall`.
 - **Dependencies and Assumptions** — what must already exist, and assumptions the client should confirm.
 - **Open Questions** — client decisions only, each with a recommended answer, the reason, and the IDs it affects. The rest of the spec is written as if every recommendation is accepted, so the client confirms or overrides rather than designs. When none remain, write `None.` and say how earlier questions were resolved. While any remain, Status stays `Draft`.
-- **Approval** — keep the wording; it is what makes the document a sign-off artifact.

@@ -238,13 +238,4 @@ Account creation and email verification events shall be recorded in the existing
 
 None. All questions raised in version 1.0 (password policy, link expiry, rate limit) were resolved with the client on 2026-09-28 and are reflected in FR-4, BR-2, and EC-5.
 
-All open questions must be resolved before the feature is considered approved for development.
-
-## Approval
-
-By approving this specification, the client confirms that the scope, expected behavior, and acceptance criteria described above represent the agreed requirements for FEAT-001 — User Registration with Email Verification.
-
-- **Client representative:** ______________________
-- **Date:** ______________________
-- **Approved version:** ______________________
-- **Signature / Approval reference:** ______________________
+Resolve all open questions before the feature is considered ready for implementation.
