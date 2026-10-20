@@ -96,7 +96,7 @@ Follow the template exactly. Writing rules:
 
 ### 6. Save and report
 
-In a repository, save the specification at `specs/FEAT-NNN-<kebab-case-name>/FEAT-NNN-<kebab-case-name>.md`, creating the feature directory as needed. Choose the next free `FEAT-NNN` unless the user supplies an ID. If you are not working in a repository, return the spec in the response.
+In a repository, save the specification at `docs/specs/FEAT-NNN-<kebab-case-name>/FEAT-NNN-<kebab-case-name>.md`, creating the feature directory as needed. Choose the next free `FEAT-NNN` unless the user supplies an ID. If you are not working in a repository, return the spec in the response.
 
 Report the file path, the variant used and why, the assumptions you made, and any open questions the client should resolve, with your recommendation for each.
 
