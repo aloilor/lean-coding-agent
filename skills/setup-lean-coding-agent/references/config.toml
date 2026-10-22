@@ -3,3 +3,6 @@ enabled = true
 hide_spawn_agent_metadata = false
 tool_namespace = "agents"
 usage_hint_enabled = true
+
+[tui]
+status_line = ["model-with-reasoning", "thread-name", "project-name", "git-branch", "context-window-size", "used-tokens"]
