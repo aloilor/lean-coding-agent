@@ -5,4 +5,4 @@ tool_namespace = "agents"
 usage_hint_enabled = true
 
 [tui]
-status_line = ["model-with-reasoning", "thread-name", "project-name", "git-branch", "context-window-size", "used-tokens"]
+status_line = ["model-with-reasoning", "project-name", "git-branch", "context-window-size", "used-tokens"]
