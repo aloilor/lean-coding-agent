@@ -20,6 +20,8 @@ Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Cl
 
 The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents can run manually. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup.
 
+For Codex, setup creates `.codex/config.toml` when it is missing, with multi-agent defaults and a status line showing the model and reasoning level, project name, Git branch, context window size, and used tokens. Existing config files are preserved.
+
 ## Use the skills
 
 Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `init-conventions` to record a repository's verified conventions or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
@@ -91,9 +93,11 @@ To keep `lean-grill-with-docs` documentation somewhere other than the default `d
 
 Workflow skills define a consistent process for planning, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
 
+See the [workflow guides](docs/workflows/README.md) for process diagrams and detailed overviews of [planning](docs/workflows/planning.md), [feature development](docs/workflows/feature-development.md), [bug fixing](docs/workflows/bug-fixing.md), [refactoring](docs/workflows/refactor.md), and [code review](docs/workflows/review.md). The linked skills remain the canonical instructions.
+
 The planning, feature-development, bug-fixing, and refactoring workflows delegate plan creation to the `planner` subagent ([Codex](skills/setup-lean-coding-agent/references/agents/codex/planner.toml), [Claude Code](skills/setup-lean-coding-agent/references/agents/claude-code/planner.md)). The main agent obtains explicit user approval of the completed plan before implementation or repair. The review workflow does not use a planner.
 
-Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. The planner and code reviewer default to `gpt-6-luna` with `max` reasoning; the bug diagnostician and implementer default to `gpt-6-luna` with `xhigh` reasoning. Setup accepts a separate model choice for each, including `--planner-model`. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
+Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. Codex subagents default to `gpt-6-luna`; Claude Code subagents default to `sonnet`. In both tools, the planner and code reviewer use `max` reasoning effort, and the bug diagnostician and implementer use `xhigh`. Setup accepts a separate model choice for each agent and tool, such as `--planner-model` for Codex and `--claude-planner-model` for Claude Code. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
 
 ### Planning only
 
