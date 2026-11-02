@@ -64,6 +64,7 @@ Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates
 ### Engineering and Git
 
 - [`git-conventional-commit`](skills/git-conventional-commit/SKILL.md) — create Conventional Commits when asked to commit, and push when asked.
+- [`maintain-changelog`](skills/maintain-changelog/SKILL.md) — inspect Git history in any commit format and curate released or unreleased changes using Keep a Changelog and Semantic Versioning.
 
 ### Upstream skills installed by setup
 

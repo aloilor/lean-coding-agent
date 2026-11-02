@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Changelog"
+  short_description: "Curate Git changes into a human-readable changelog"
+  default_prompt: "Use $maintain-changelog to inspect every commit from the latest release date inclusively and carefully reconcile CHANGELOG.md. Treat changes as unreleased unless I explicitly confirm they shipped."
