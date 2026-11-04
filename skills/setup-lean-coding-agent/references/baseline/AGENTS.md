@@ -41,7 +41,7 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 ## Context And Skills
 
 - This file is the shared baseline. Put project-specific shared rules in `docs/conventions/`.
-- Read the relevant `docs/conventions/` files (`CODING-STANDARDS.md`, `TESTING.md`, `WORKFLOWS.md`) only when the task involves inspecting, developing, debugging, reviewing, or otherwise working on that codebase. Do not load them for unrelated conversation or general tasks.
+- For any task involving the codebase (including inspecting, developing, debugging, reviewing, or otherwise working on it), read every file under `docs/conventions/`, including nested directories. These files contain project-specific guidance that cannot be inferred from the code alone. Do not load them for unrelated conversation or general tasks.
 - Read `.agents/lessons/LESSONS.md` when present, and follow `AGENTS.override.md` when it exists (local, private, git-ignored).
 - Before using a skill, check `.agents/skill-overrides/INDEX.md`. Apply a listed `<skill-name>.md` override before the skill and keep the index synchronized when adding overrides.
 
