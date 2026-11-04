@@ -1,6 +1,7 @@
 ---
 name: maintain-changelog
-description: Curate a hand-maintained CHANGELOG.md from Git history by reading the actual commits and diffs, whatever the commit message style. Use whenever the user wants to update, write, reconcile, or catch up a changelog — "update the changelog", "add this to Unreleased", "what changed since 1.4.0?", "prepare the 1.5.0 changelog section", "record that 2.0.0 shipped", or "start a changelog for this repo". Also use to propose the next Semantic Versioning bump from those changes. Not for GitHub release notes or announcements, and not for changelogs a release tool generates (changesets, release-please, semantic-release, git-cliff): there it explains and offers the tool's own input instead.
+description: >-
+  Curate a hand-maintained CHANGELOG.md from Git history by reading the actual commits and diffs, whatever the commit message style. Use whenever the user wants to update, write, reconcile, or catch up a changelog — "update the changelog", "add this to Unreleased", "what changed since 1.4.0?", "prepare the 1.5.0 changelog section", "record that 2.0.0 shipped", or "start a changelog for this repo". Also use to propose the next Semantic Versioning bump from those changes. Not for GitHub release notes or announcements, and not for changelogs a release tool generates (changesets, release-please, semantic-release, git-cliff): there it explains and offers the tool's own input instead.
 compatibility: Requires read access to local Git history, Node.js for the bundled script, and file editing tools. No GitHub integration or Conventional Commits required.
 ---
 
