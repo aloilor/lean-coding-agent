@@ -2,7 +2,7 @@
   "name": "lean-coding-agent",
   "version": "0.3.0",
   "private": true,
-  "description": "Coding agent skills, shared guidance, workflows, and project setup for Codex and Claude Code.",
+  "description": "Engineering discipline for your coding agent, without the bloat. Opt-in plan, act, review workflows and small, composable skills for Codex and Claude Code.",
   "repository": {
     "type": "git",
     "url": "https://github.com/aloilor/lean-coding-agent"
