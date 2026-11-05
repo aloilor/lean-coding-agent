@@ -1,9 +1,24 @@
 # Lean Coding Agent
 
-A collection of Codex and Claude Code skills for working on real codebases. It provides practical engineering guidance and repeatable ways to set up and understand a repository. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
+**Engineering discipline for your coding agent, without the bloat.**
 
-The skills are small and composable. Install the ones you want with the Skills CLI. The project setup skill installs the shared baseline and prepares the repository for day-to-day work.
+Small, composable skills for Codex and Claude Code, built for real codebases. Install the skills, run `setup-lean-coding-agent` once in your project, and your agent is ready for day-to-day work.
 
+## Why Lean Coding Agent?
+
+Lean Coding Agent gives your coding agent a rigorous plan, act, review loop when a change deserves it, and a direct answer when it doesn't. Many frameworks are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn. This one keeps the loop and drops the rest.
+
+Process is opt-in. Ordinary requests are handled directly, and a workflow starts only when you name it: both Codex and Claude Code are configured to stop the agent from starting one itself. Each workflow is a short list of steps that only orchestrates, so it stays slim and easy to follow. Planning, implementation, and review instructions stay in dedicated subagents, which leaves the main session's context for your work.
+
+The review loop is bounded. Feature, bug-fix, and refactor workflows repeat implementation and independent review until the change is approved. If the same problem survives three fix attempts, or success would mean weakening a test or expanding scope, the agent stops and reports back.
+
+Workflows fit the work. Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
+
+Files carry the task's memory. The plan, implementation report, review passes, and incident report are saved to disk, so scope, decisions, verification results, and omissions outlast auto-compaction and the session. Plans, reports, and reviews are git-ignored by default, while incident reports in `docs/incidents/` can be committed.
+
+Project context stays small and verified. [`AGENTS.md`](AGENTS.md) holds only the essential rules, and conventions an agent shouldn't have to guess live in modular files under `docs/conventions/`, loaded on demand. [`init-conventions`](skills/init-conventions/SKILL.md) records only repo-specific facts and runs commands before writing them down. [See why](docs/init-conventions-rationale.md).
+
+Skills adapt without forking. [Skill overrides](#skill-overrides) add project guidance to an installed skill from a separate file and take precedence when the two conflict. The skill itself stays unchanged, so it can keep updating from upstream.
 ## Installation
 
 Install skills from this repository:
@@ -18,7 +33,7 @@ In the installer, select Codex, Claude Code, or both, and the skills you want. S
 
 Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Claude Code run `/setup-lean-coding-agent`.
 
-The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents can run manually. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup.
+The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents can run manually. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
 
 For Codex, setup creates `.codex/config.toml` when it is missing, with multi-agent defaults and a status line showing the model and reasoning level, project name, Git branch, context window size, and used tokens. Existing config files are preserved.
 
