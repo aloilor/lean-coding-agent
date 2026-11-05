@@ -49,7 +49,7 @@ Run `node scripts/check-skill-updates.mjs` when you want to compare this checkou
 
 ### Change workflows
 
-Workflows are opt-in: name the matching skill in your request to start one. They provide a defined process and durable records for work that benefits from planning, diagnosis, or independent review.
+Workflows are user-invoked only. Name the specific workflow skill in your request to start one; the assistant must not select or start one based on the task type or inferred usefulness. Ordinary requests are handled directly. The Claude Code skills set `disable-model-invocation: true`, and Codex skills set `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
 
 | Workflow | Use it for | Process and output |
 | --- | --- | --- |
@@ -91,7 +91,7 @@ To keep `lean-grill-with-docs` documentation somewhere other than the default `d
 
 ## Workflow guide
 
-Workflow skills define a consistent process for planning, implementation, bug repair, refactoring, and review. In this repository, they are opt-in: ask Codex to run the relevant skill, such as `$workflow-feature-development`. A request to make a change does not start a workflow by itself.
+Workflow skills define a consistent process for planning, implementation, bug repair, refactoring, and review. In this repository, only the user can start one by explicitly requesting its skill, such as `$workflow-feature-development`. The assistant must not choose or start a workflow on the user's behalf, even when a request matches its scope.
 
 See the [workflow guides](docs/workflows/README.md) for process diagrams and detailed overviews of [planning](docs/workflows/planning.md), [feature development](docs/workflows/feature-development.md), [bug fixing](docs/workflows/bug-fixing.md), [refactoring](docs/workflows/refactor.md), and [code review](docs/workflows/review.md). The linked skills remain the canonical instructions.
 
