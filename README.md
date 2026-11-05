@@ -8,17 +8,13 @@ Small, composable skills for Codex and Claude Code, built for real codebases. In
 
 Lean Coding Agent gives your coding agent a rigorous plan, act, review loop when a change deserves it, and a direct answer when it doesn't. Many frameworks are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn. This one keeps the loop and drops the rest.
 
-Process is opt-in. Ordinary requests are handled directly, and a workflow starts only when you name it: both Codex and Claude Code are configured to stop the agent from starting one itself. Each workflow is a short list of steps that only orchestrates, so it stays slim and easy to follow. Planning, implementation, and review instructions stay in dedicated subagents, which leaves the main session's context for your work.
-
-The review loop is bounded. Feature, bug-fix, and refactor workflows repeat implementation and independent review until the change is approved. If the same problem survives three fix attempts, or success would mean weakening a test or expanding scope, the agent stops and reports back.
-
-Workflows fit the work. Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
-
-Files carry the task's memory. The plan, implementation report, review passes, and incident report are saved to disk, so scope, decisions, verification results, and omissions outlast auto-compaction and the session. Plans, reports, and reviews are git-ignored by default, while incident reports in `docs/incidents/` can be committed.
-
-Project context stays small and verified. [`AGENTS.md`](AGENTS.md) holds only the essential rules, and conventions an agent shouldn't have to guess live in modular files under `docs/conventions/`, loaded on demand. [`init-conventions`](skills/init-conventions/SKILL.md) records only repo-specific facts and runs commands before writing them down. [See why](docs/init-conventions-rationale.md).
-
-Skills adapt without forking. [Skill overrides](#skill-overrides) add project guidance to an installed skill from a separate file and take precedence when the two conflict. The skill itself stays unchanged, so it can keep updating from upstream.
+- **Opt-in process.** Ordinary requests are handled directly. A workflow starts only when you name it, and both Codex and Claude Code are configured to stop the agent from starting one itself.
+- **Slim workflows.** Each one is a short list of steps that only orchestrates. Detailed instructions stay in dedicated subagents, leaving the main session's context for your work.
+- **A bounded review loop.** Feature, bug-fix, and refactor workflows repeat implementation and independent review until the change is approved. After three failed fixes for the same problem, or if success would mean weakening a test or expanding scope, the agent stops and reports back.
+- **Workflows that fit the work.** Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
+- **Task memory in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session. Incident reports in `docs/incidents/` can be committed; the rest are git-ignored by default.
+- **Small, verified project context.** [`AGENTS.md`](AGENTS.md) holds only the essential rules. Conventions live in modular files under `docs/conventions/`, loaded on demand, and [`init-conventions`](skills/init-conventions/SKILL.md) runs commands before recording them. [See why](docs/init-conventions-rationale.md).
+- **Skills that adapt without forking.** [Skill overrides](#skill-overrides) add project guidance from a separate file, so the installed skill stays unchanged and can keep updating from upstream.
 ## Installation
 
 Install skills from this repository:
