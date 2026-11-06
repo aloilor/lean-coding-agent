@@ -4,4 +4,4 @@
 
 ### Minor Changes
 
-- [`aa52626`](https://github.com/aloilor/lean-coding-agent/commit/aa5262615dd8315ad50a7504c5087b8de2ffb351) Thanks [@aloilor](https://github.com/aloilor)! - Install a session-start release check with the plugin.
+- [`814d83b`](https://github.com/aloilor/lean-coding-agent/commit/814d83b2f1506f95bb8c7683d27aff3e1688755b) Thanks [@aloilor](https://github.com/aloilor)! - Install a session-start release check with the plugin.
