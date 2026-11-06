@@ -19,7 +19,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
    - `gpt-6-sol` — designed for complex coding and agentic workflows; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
    - `gpt-6-luna` — efficient for focused, high-volume work; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
 
-   Codex subagents default to `gpt-6.1-sol` for `planner` and `code-reviewer`, and `gpt-6-luna` for `bug-diagnostician` and `implementer`.
+   Codex subagents default to `gpt-6.1-sol` for `planner` and `code-reviewer`, and `gpt-6-luna` for `bug-diagnostician`, `implementer`, and `explorer`.
 
    **Claude Code.** Check the official [Claude models overview](https://platform.claude.com/docs/en/about-claude/models/overview) and [subagent documentation](https://code.claude.com/docs/en/sub-agents). Subagents accept an alias (`fable`, `opus`, `sonnet`, `haiku`), a full model ID, or `inherit` to use the main conversation's model:
    - `fable` (`claude-fable-5-1`) — for demanding reasoning and long-horizon agentic work; slowest and most expensive.
@@ -27,22 +27,22 @@ Run this skill after installing it with the Skills CLI to initialize the current
    - `sonnet` (`claude-sonnet-5-5`) — the best combination of speed and intelligence.
    - `haiku` (`claude-haiku-5-5`) — fastest.
 
-   Claude Code subagents default to `opus` for `planner` and `code-reviewer`, and `haiku` for `bug-diagnostician` and `implementer`.
+   Claude Code subagents default to `opus` for `planner` and `code-reviewer`, and `haiku` for `bug-diagnostician`, `implementer`, and `explorer`.
 
-   Codex `planner` and `code-reviewer` use `low` reasoning effort, `bug-diagnostician` uses `max`, and `implementer` uses `xhigh`. Claude Code `planner` and `code-reviewer` use `low` effort and `bug-diagnostician` and `implementer` use `xhigh`. Then ask: “Which models should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer` for each selected coding agent? Choose the defaults, or provide a model for each.” Preserve each agent's reasoning-effort setting.
+   Codex `planner` and `code-reviewer` use `low` reasoning effort, `bug-diagnostician` uses `max`, `implementer` uses `xhigh`, and `explorer` uses `high`. Claude Code `planner` and `code-reviewer` use `low` effort, `bug-diagnostician` and `implementer` use `xhigh`, and `explorer` uses `high`. Then ask: “Which models should setup assign to `planner`, `bug-diagnostician`, `implementer`, `code-reviewer`, and `explorer` for each selected coding agent? Choose the defaults, or provide a model for each.” Preserve each agent's reasoning-effort setting.
 4. Ask where `lean-grill-with-docs` should keep the project's `GLOSSARY.md` and ADRs. Recommend the skill's default, `docs/conventions/` (`docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`), or let the user give a folder path relative to the project root, such as `docs/domain`. Always pass the answer as `--docs-dir`, including `--docs-dir docs/conventions` for the default; that value removes a folder override from an earlier run.
 5. Run the bundled Node.js setup script from the target project, passing the selected coding agents and only the model options that apply to them:
 
    ```text
    node "<setup-skill>/scripts/setup-lean-coding-agent.mjs" "<target-project>" --tools <codex|claude-code|both> \
-     --planner-model <codex-model> --bug-diagnostician-model <codex-model> --implementer-model <codex-model> --code-reviewer-model <codex-model> \
-     --claude-planner-model <claude-model> --claude-bug-diagnostician-model <claude-model> --claude-implementer-model <claude-model> --claude-code-reviewer-model <claude-model> \
+     --planner-model <codex-model> --bug-diagnostician-model <codex-model> --implementer-model <codex-model> --code-reviewer-model <codex-model> --explorer-model <codex-model> \
+     --claude-planner-model <claude-model> --claude-bug-diagnostician-model <claude-model> --claude-implementer-model <claude-model> --claude-code-reviewer-model <claude-model> --claude-explorer-model <claude-model> \
      [--docs-dir <folder>]
    ```
 
    Locate `<setup-skill>` from this skill's installed directory. Do not ask the user to find or run the script. It uses Node.js and npm's `npx` on Windows, macOS, and Linux. If setup fails, report the failed command and stop; rerun only after resolving the reported environment or network issue.
 6. After setup completes, ask the user whether they want to run the `init-conventions` skill to capture project conventions in `docs/conventions/`. Run it only if they agree. If the skill is not available in the active session, read `<target-project>/.agents/skills/init-conventions/SKILL.md` and follow it directly after they agree.
-7. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/templates/plan.md`, `.agents/templates/implementation-report.md`, `.agents/templates/code-review.md`, `.agents/skills/`, and the upstream skills. For Codex, also confirm `.codex/config.toml` with the bundled multi-agent defaults and `.codex/agents/` with all four agents. For Claude Code, confirm `.claude/agents/` with all four agents. Summarize the selected coding agents, installed skills, selected models and reasoning effort, the `lean-grill-with-docs` documentation folder, and whether `init-conventions` was run or deferred.
+7. Confirm the project contains the baseline files, `.agents/skill-overrides/` and its index, `.agents/templates/plan.md`, `.agents/templates/implementation-report.md`, `.agents/templates/code-review.md`, `.agents/skills/`, and the upstream skills. For Codex, also confirm `.codex/config.toml` with the bundled multi-agent defaults and `.codex/agents/` with all five agents. For Claude Code, confirm `.claude/agents/` with all five agents. Summarize the selected coding agents, installed skills, selected models and reasoning effort, the `lean-grill-with-docs` documentation folder, and whether `init-conventions` was run or deferred.
 
 ## Managed Files And Effects
 

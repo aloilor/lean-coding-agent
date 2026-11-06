@@ -92,10 +92,12 @@ test('setup initializes project files and preserves project-owned content on rer
     '.codex/agents/bug-diagnostician.toml',
     '.codex/agents/implementer.toml',
     '.codex/agents/code-reviewer.toml',
+    '.codex/agents/explorer.toml',
     '.claude/agents/planner.md',
     '.claude/agents/bug-diagnostician.md',
     '.claude/agents/implementer.md',
     '.claude/agents/code-reviewer.md',
+    '.claude/agents/explorer.md',
     'docs/incidents/README.md',
   ]) {
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
@@ -183,7 +185,7 @@ test('setup for Claude Code only installs Claude Code agents and skills without 
 
   await runFile(process.execPath, [setupScript, project, '--tools', 'claude-code'], { env });
 
-  for (const agentName of ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer']) {
+  for (const agentName of ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer', 'explorer']) {
     const installed = await fs.readFile(path.join(project, '.claude', 'agents', `${agentName}.md`), 'utf8');
     const expectedModel = ['planner', 'code-reviewer'].includes(agentName) ? 'opus' : 'haiku';
     assert.match(installed, new RegExp(`^model: ${expectedModel}$`, 'm'));

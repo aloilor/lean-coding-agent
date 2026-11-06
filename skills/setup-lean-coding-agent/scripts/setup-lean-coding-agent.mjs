@@ -8,7 +8,7 @@ import { parseArgs } from 'node:util';
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const skillDirectory = path.resolve(scriptDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
-const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
+const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer', 'explorer'];
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
 const agentTools = {
   codex: {
@@ -21,6 +21,7 @@ const agentTools = {
       'bug-diagnostician': 'gpt-6-luna',
       implementer: 'gpt-6-luna',
       'code-reviewer': 'gpt-6.1-sol',
+      explorer: 'gpt-6-luna',
     },
     modelOptionPrefix: '',
     modelAssignmentPattern: /^model\s*=\s*"[^"]*"\s*$/m,
@@ -36,6 +37,7 @@ const agentTools = {
       'bug-diagnostician': 'haiku',
       implementer: 'haiku',
       'code-reviewer': 'opus',
+      explorer: 'haiku',
     },
     modelOptionPrefix: 'claude-',
     modelAssignmentPattern: /^model:\s*\S+\s*$/m,
@@ -131,11 +133,11 @@ function readOptions() {
         'Options:',
         '  --tools <codex|claude-code|both>   Coding agents to set up (default codex)',
         `  --<agent>-model <id>               Codex model for planner, bug-diagnostician,`,
-        `                                     implementer, or code-reviewer`,
+        `                                     implementer, code-reviewer, or explorer`,
         `                                     defaults: planner/code-reviewer ${agentTools.codex.defaultModels.planner};`,
-        `                                     bug-diagnostician/implementer ${agentTools.codex.defaultModels.implementer}`,
+        `                                     bug-diagnostician/implementer/explorer ${agentTools.codex.defaultModels.implementer}`,
         '  --claude-<agent>-model <id>        Claude Code model for the same agents (default opus for planner and',
-        '                                     code-reviewer; haiku for bug-diagnostician and implementer)',
+        '                                     code-reviewer; haiku for bug-diagnostician, implementer, and explorer)',
         '  --docs-dir <path>                  Project folder for lean-grill-with-docs GLOSSARY.md and adr/',
         '  -h, --help                         Show this help',
       ].join('\n'),

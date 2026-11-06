@@ -26,12 +26,14 @@ test('agent installation assigns selected models and preserves reasoning effort 
     'bug-diagnostician': 'gpt-6-luna',
     implementer: 'gpt-6-luna',
     'code-reviewer': 'gpt-6-luna',
+    explorer: 'gpt-6-luna',
   };
   const selectedModels = {
     planner: 'gpt-6-astra',
     'bug-diagnostician': 'gpt-6-sol',
     implementer: 'gpt-6-astra',
     'code-reviewer': 'gpt-6-sol',
+    explorer: 'gpt-6-sol',
   };
 
   await installAgents(project, 'codex', firstModels);
@@ -46,6 +48,7 @@ test('agent installation assigns selected models and preserves reasoning effort 
       'bug-diagnostician': 'max',
       implementer: 'xhigh',
       'code-reviewer': 'low',
+      explorer: 'high',
     }[agentName];
     assert.match(installed, new RegExp(`^model = "${model}"$`, 'm'));
     assert.match(installed, new RegExp(`^model_reasoning_effort = "${expectedEffort}"$`, 'm'));
@@ -60,6 +63,7 @@ test('Claude Code agent installation assigns selected models and preserves effor
     'bug-diagnostician': 'inherit',
     implementer: 'sonnet',
     'code-reviewer': 'claude-opus-5-5',
+    explorer: 'haiku',
   };
   const customAgent = path.join(project, '.claude', 'agents', 'custom.md');
   await fs.mkdir(path.dirname(customAgent), { recursive: true });
@@ -69,7 +73,13 @@ test('Claude Code agent installation assigns selected models and preserves effor
 
   for (const [agentName, model] of Object.entries(selectedModels)) {
     const installed = await fs.readFile(path.join(project, '.claude', 'agents', `${agentName}.md`), 'utf8');
-    const expectedEffort = ['planner', 'code-reviewer'].includes(agentName) ? 'low' : 'xhigh';
+    const expectedEffort = {
+      planner: 'low',
+      'bug-diagnostician': 'xhigh',
+      implementer: 'xhigh',
+      'code-reviewer': 'low',
+      explorer: 'high',
+    }[agentName];
     assert.match(installed, new RegExp(`^---\r?\nname: ${agentName}\r?\n`));
     assert.match(installed, new RegExp(`^model: ${model}$`, 'm'));
     assert.match(installed, new RegExp(`^effort: ${expectedEffort}\r?$`, 'm'));
