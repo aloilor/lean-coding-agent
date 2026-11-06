@@ -1,5 +1,5 @@
 ---
-"lean-coding-agent": minor
+"lean-coding-agent": patch
 ---
 
-Check installed GitHub-backed skills for upstream updates.
+Remove the custom release and skill update checker in favor of `npx skills check`. Setup removes previously installed checker scripts and legacy hooks on rerun.

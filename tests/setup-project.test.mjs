@@ -82,6 +82,7 @@ test('setup initializes project files and preserves project-owned content on rer
   await runFile(process.execPath, options, { env });
 
   await assertBaselinesMatchBundledReferences(project);
+  await assert.rejects(fs.access(path.join(project, 'scripts', 'check-skill-updates.mjs')), { code: 'ENOENT' });
 
   for (const relativePath of [
     'AGENTS.md',
@@ -91,7 +92,6 @@ test('setup initializes project files and preserves project-owned content on rer
     '.agents/skill-overrides/tdd.md',
     '.agents/skills/setup-lean-coding-agent/SKILL.md',
     '.agents/skills/lean-grill-with-docs/SKILL.md',
-    'scripts/check-skill-updates.mjs',
     '.codex/config.toml',
     '.codex/agents/planner.toml',
     '.codex/agents/bug-diagnostician.toml',
@@ -140,11 +140,14 @@ test('setup initializes project files and preserves project-owned content on rer
   await fs.writeFile(path.join(project, 'CLAUDE.md'), 'Outdated managed baseline\n');
   await fs.writeFile(path.join(project, '.codex', 'config.toml'), 'model = "project-choice"\n');
   await fs.writeFile(path.join(overrideDirectory, 'tdd.md'), 'Outdated managed override\n');
+  await fs.mkdir(path.join(project, 'scripts'));
+  await fs.writeFile(path.join(project, 'scripts', 'check-skill-updates.mjs'), 'old checker\n');
   const { stdout: rerunOutput } = await runFile(process.execPath, options, { env });
   assert.match(rerunOutput, /Legacy project context found in .*agent-context; run init-conventions/);
   await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
 
   await assertBaselinesMatchBundledReferences(project);
+  await assert.rejects(fs.access(path.join(project, 'scripts', 'check-skill-updates.mjs')), { code: 'ENOENT' });
   assert.equal(await fs.readFile(path.join(project, 'AGENTS.override.md'), 'utf8'), 'Private notes\n');
   assert.equal(await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'), 'model = "project-choice"\n');
   assert.equal(await fs.readFile(path.join(project, 'agent-context', 'testing.md'), 'utf8'), 'Project testing guidance\n');

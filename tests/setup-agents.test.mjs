@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import {
   installAgents,
-  installUpdateChecker,
+  removeUpdateChecker,
   syncInstalledSkills,
 } from '../skills/setup-lean-coding-agent/scripts/setup-lean-coding-agent.mjs';
 
@@ -153,7 +153,7 @@ test('installed skill sync moves a legacy manifest and removes managed skills no
   assert.ok((await fs.stat(path.join(project, '.agents', 'skills-installed.json'))).isFile());
 });
 
-test('update checker installation removes legacy hooks and preserves unrelated hooks on rerun', async (t) => {
+test('checker removal deletes installed scripts and legacy hooks while preserving unrelated files on rerun', async (t) => {
   const project = await temporaryProject(t);
   const codexDirectory = path.join(project, '.codex');
   const legacyDirectory = path.join(codexDirectory, 'hooks', 'lean-coding-agent');
@@ -185,15 +185,20 @@ test('update checker installation removes legacy hooks and preserves unrelated h
     '',
   ].join('\n'));
 
-  const firstInstall = await installUpdateChecker(project);
+  const scriptsDirectory = path.join(project, 'scripts');
+  await fs.mkdir(scriptsDirectory);
+  const checkerPath = path.join(scriptsDirectory, 'check-skill-updates.mjs');
+  const unrelatedScript = path.join(scriptsDirectory, 'unrelated-check.mjs');
+  await fs.writeFile(checkerPath, 'old checker\n');
+  await fs.writeFile(unrelatedScript, 'project script\n');
+
+  await removeUpdateChecker(project);
   const firstHooks = await fs.readFile(hooksPath, 'utf8');
   const firstConfig = await fs.readFile(configPath, 'utf8');
-  await installUpdateChecker(project);
+  await removeUpdateChecker(project);
 
-  assert.equal(
-    await fs.readFile(firstInstall.checkerPath, 'utf8'),
-    await fs.readFile(path.join(skillRoot, 'scripts', 'check-skill-updates.mjs'), 'utf8'),
-  );
+  await assert.rejects(fs.access(checkerPath), { code: 'ENOENT' });
+  assert.equal(await fs.readFile(unrelatedScript, 'utf8'), 'project script\n');
   assert.deepEqual(JSON.parse(firstHooks).hooks.SessionStart[0].hooks, [
     { command: 'node scripts/unrelated-check.mjs' },
   ]);

@@ -7,7 +7,7 @@ These references let `setup-lean-coding-agent` initialize a project using only i
 - [`config.toml`](config.toml) is the baseline Codex project configuration copied when the target has no `.codex/config.toml`; its footer status line shows model and reasoning, project name, Git branch, context window size, and used tokens.
 - [`baseline/AGENTS.md`](baseline/AGENTS.md) and [`baseline/CLAUDE.md`](baseline/CLAUDE.md) are snapshots of the repository baseline files.
 - [`docs/incidents/README.md`](docs/incidents/README.md) is the incident report template.
-- [`release.json`](release.json) records the skills collection version and repository for the installed release checker.
+- [`release.json`](release.json) records the skills collection version and repository for the installed setup manifest.
 - [Skill override files](skill-overrides/) are snapshots of `skills/skill-overrides/`.
 
 Update these copies whenever their source files change. The setup script copies skills from sibling directories in the installed skill directory.

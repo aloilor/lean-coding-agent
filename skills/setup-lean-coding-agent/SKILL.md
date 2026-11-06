@@ -1,11 +1,11 @@
 ---
 name: setup-lean-coding-agent
-description: Initialize the current project with the Lean Coding Agent baseline for Codex, Claude Code, or both after installing its skills, including project guidance, available skills, skill overrides, configurable subagents, and a manually run release and upstream skill update checker.
+description: Initialize the current project with the Lean Coding Agent baseline for Codex, Claude Code, or both after installing its skills, including project guidance, available skills, skill overrides, and configurable subagents.
 ---
 
 # Setup Lean Coding Agent
 
-Run this skill after installing it with the Skills CLI to initialize the current project for Codex, Claude Code, or both. The Node.js script copies the available skills and baseline assets into the project, records the installed release in `.agents/skills-installed.json`, installs the subagents for each selected coding agent with the models chosen by the user, installs the release and skills update checker at `scripts/check-skill-updates.mjs`, installs the agent-browser development dependency, and adds the upstream skills for the selected coding agents.
+Run this skill after installing it with the Skills CLI to initialize the current project for Codex, Claude Code, or both. The Node.js script copies the available skills and baseline assets into the project, records the installed release in `.agents/skills-installed.json`, installs the subagents for each selected coding agent with the models chosen by the user, installs the agent-browser development dependency, and adds the upstream skills for the selected coding agents.
 
 ## Workflow
 
@@ -42,7 +42,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
 
    Locate `<setup-skill>` from this skill's installed directory. Do not ask the user to find or run the script. It uses Node.js and npm's `npx` on Windows, macOS, and Linux. If setup fails, report the failed command and stop; rerun only after resolving the reported environment or network issue.
 6. After setup completes, ask the user whether they want to run the `init-conventions` skill to capture project conventions in `docs/conventions/`. Run it only if they agree. If setup reported a legacy `agent-context/` folder, mention that the skill migrates it. If the skill is not available in the active session, read `<target-project>/.agents/skills/init-conventions/SKILL.md` and follow it directly after they agree.
-7. Confirm the project contains the baseline files, `scripts/check-skill-updates.mjs`, `.agents/skills-installed.json`, `.agents/skill-overrides/` and its index, `.agents/templates/plan.md`, `.agents/templates/implementation-report.md`, `.agents/templates/code-review.md`, `.agents/skills/`, and the upstream skills. For Codex, also confirm `.codex/config.toml` with the bundled multi-agent defaults and `.codex/agents/` with all four agents. For Claude Code, confirm `.claude/agents/` with all four agents. Summarize the selected coding agents, installed skills, selected models and reasoning effort, the `lean-grill-with-docs` documentation folder, and whether `init-conventions` was run or deferred.
+7. Confirm the project contains the baseline files, `.agents/skills-installed.json`, `.agents/skill-overrides/` and its index, `.agents/templates/plan.md`, `.agents/templates/implementation-report.md`, `.agents/templates/code-review.md`, `.agents/skills/`, and the upstream skills. For Codex, also confirm `.codex/config.toml` with the bundled multi-agent defaults and `.codex/agents/` with all four agents. For Claude Code, confirm `.claude/agents/` with all four agents. Summarize the selected coding agents, installed skills, selected models and reasoning effort, the `lean-grill-with-docs` documentation folder, and whether `init-conventions` was run or deferred.
 
 ## Managed Files And Effects
 
@@ -54,9 +54,9 @@ Run this skill after installing it with the Skills CLI to initialize the current
 - With `--docs-dir <folder>`, setup writes `.agents/skill-overrides/lean-grill-with-docs.md` and its index entry so `lean-grill-with-docs` keeps `GLOSSARY.md`, `GLOSSARY-MAP.md`, and `adr/` in that folder. The folder must be inside the project. Reruns with a new folder update the generated override, `--docs-dir docs/conventions` removes it, and reruns without the option keep it. Setup stops rather than replace a project-owned `lean-grill-with-docs.md` override, which can set the same folder by hand.
 - It copies available sibling skill folders into `.agents/skills/`. Those copies are managed outputs; local edits to a copied baseline skill are replaced when setup runs again.
 - It copies the shared plan, implementation-report, and code-review templates into `.agents/templates/` for every selected coding agent. The planner, implementer, and code reviewer read these templates when writing their artifacts. Setup refreshes `plan.md`, `implementation-report.md`, and `code-review.md` on every run while preserving other project-owned templates.
-- It records the installed Lean Coding Agent release in `.agents/skills-installed.json`, moves a legacy `agent-context/skills-installed.json` there, removes managed skills that the release no longer ships, and copies the version checker into `scripts/check-skill-updates.mjs`. On reruns, it removes old checker hooks while preserving unrelated hooks.
-- `references/release.json` records the skills release version and repository. The checker compares that release with GitHub Releases and checks GitHub-backed upstream skills listed in `skills-lock.json`.
-- The checker is available as a manual command; the baseline does not ask agents to run it at session start.
+- It records the installed Lean Coding Agent release in `.agents/skills-installed.json`, moves a legacy `agent-context/skills-installed.json` there, and removes managed skills that the release no longer ships. Setup removes previously installed checker scripts and legacy hooks while preserving unrelated scripts and hooks.
+- `references/release.json` records the skills release version and repository.
+- Use `npx skills check` to check for available skill updates.
 - The agent-browser setup installs a development dependency with the detected package manager and installs its browser runtime. Upstream skills are installed through `npx skills add` for the selected coding agents and require network access.
 - The Node.js script is the single cross-platform entry point for both project setup and skill installation.
 

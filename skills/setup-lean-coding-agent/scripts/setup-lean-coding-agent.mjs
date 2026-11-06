@@ -10,7 +10,6 @@ const skillDirectory = path.resolve(scriptDirectory, '..');
 const siblingSkillsDirectory = path.resolve(skillDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
 const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
-const updateCheckerSourcePath = path.join(scriptDirectory, 'check-skill-updates.mjs');
 const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
 const agentTools = {
@@ -585,18 +584,6 @@ async function removeLegacyManifest(legacyManifestPath) {
   }
 }
 
-async function ensureRegularDirectory(directoryPath) {
-  try {
-    const details = await fs.lstat(directoryPath);
-    if (details.isSymbolicLink() || !details.isDirectory()) {
-      throw new Error(`Refusing to write through a non-directory path: ${directoryPath}`);
-    }
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-    await fs.mkdir(directoryPath);
-  }
-}
-
 function isLegacyProjectUpdateHook(handler) {
   return [handler?.command, handler?.commandWindows].some((command) => {
     if (typeof command !== 'string') return false;
@@ -681,11 +668,8 @@ async function removeEmptyDirectory(directoryPath) {
   await fs.rmdir(directoryPath);
 }
 
-export async function installUpdateChecker(targetProject) {
-  const scriptsDirectory = path.join(targetProject, 'scripts');
-  await ensureRegularDirectory(scriptsDirectory);
-  const checkerPath = path.join(targetProject, projectUpdateCheckerPath);
-  await fs.copyFile(updateCheckerSourcePath, checkerPath);
+export async function removeUpdateChecker(targetProject) {
+  await fs.rm(path.join(targetProject, projectUpdateCheckerPath), { force: true });
 
   const codexDirectory = path.join(targetProject, '.codex');
   await removeLegacyProjectHookFromJson(path.join(codexDirectory, 'hooks.json'));
@@ -696,7 +680,6 @@ export async function installUpdateChecker(targetProject) {
   const legacyHookDirectory = path.join(targetProject, '.codex', 'hooks', 'lean-coding-agent');
   await removeEmptyDirectory(legacyHookDirectory);
   await removeEmptyDirectory(path.dirname(legacyHookDirectory));
-  return { checkerPath };
 }
 
 async function detectPackageManager(targetProject) {
@@ -800,7 +783,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
   const skillResult = await syncInstalledSkills(targetProject);
-  const updateChecker = await installUpdateChecker(targetProject);
+  await removeUpdateChecker(targetProject);
   const agentBrowserStatus = await installAgentBrowser(targetProject);
   const upstreamSkillNames = await installUpstreamSkills(targetProject, tools);
 
@@ -826,7 +809,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   if (codexConfigPath) console.log(`Ensured Codex config: ${codexConfigPath}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed ${skillResult.skillCount} available skills into: ${skillResult.skillDirectory}`);
-  console.log(`Installed skills update checker: ${updateChecker.checkerPath}`);
   const legacyAgentContextDirectory = path.join(targetProject, legacyAgentContextDirectoryName);
   if (await pathExists(legacyAgentContextDirectory)) {
     console.log(

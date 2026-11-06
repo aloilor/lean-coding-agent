@@ -29,7 +29,7 @@ In the installer, select Codex, Claude Code, or both, and the skills you want. S
 
 Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Claude Code run `/setup-lean-coding-agent`.
 
-The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`), and a cross-tool skills update checker that agents can run manually. It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
+The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`). It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
 
 For Codex, setup creates `.codex/config.toml` when it is missing, with multi-agent defaults and a status line showing the model and reasoning level, project name, Git branch, context window size, and used tokens. Existing config files are preserved.
 
@@ -47,7 +47,7 @@ npx skills update -p
 
 The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-Run `node scripts/check-skill-updates.mjs` when you want to compare this checkout's release metadata with the latest stable GitHub Release and check GitHub-backed skill copies tracked in `skills-lock.json`. Initialized projects also receive the checker; pass `--project --manifest .agents/skills-installed.json` to check the installed project skills when that manifest exists. The checker does not change installed files and is not run automatically at session startup.
+Run `npx skills check` to check for available skill updates.
 
 ## Skill reference
 
