@@ -1,5 +1,11 @@
 # lean-coding-agent
 
+## 1.1.0
+
+### Minor Changes
+
+- [`392e2d8`](https://github.com/aloilor/lean-coding-agent/commit/392e2d87afe8ce6742cad5f1101d751a6529ec73) Thanks [@aloilor](https://github.com/aloilor)! - Add an `explorer` subagent, and have `lean-grill-with-docs` use it for fact lookups when available.
+
 ## 1.0.0
 
 ### Major Changes
