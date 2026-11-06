@@ -27,9 +27,9 @@ Run this skill after installing it with the Skills CLI to initialize the current
    - `sonnet` (`claude-sonnet-5-5`) — the best combination of speed and intelligence.
    - `haiku` (`claude-haiku-5-5`) — fastest.
 
-   Claude Code subagents default to `sonnet`.
+   Claude Code subagents default to `opus` for `planner` and `code-reviewer`, and `haiku` for `bug-diagnostician` and `implementer`.
 
-   In both tools, `planner` and `code-reviewer` use `max` reasoning effort and `bug-diagnostician` and `implementer` use `xhigh`. Then ask: “Which models should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer` for each selected coding agent? Choose the defaults, or provide a model for each.” Preserve each agent's reasoning-effort setting.
+   Codex `planner` and `code-reviewer` use `max` reasoning effort and `bug-diagnostician` and `implementer` use `xhigh`. Claude Code `planner` and `code-reviewer` use `low` effort and `bug-diagnostician` and `implementer` use `xhigh`. Then ask: “Which models should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer` for each selected coding agent? Choose the defaults, or provide a model for each.” Preserve each agent's reasoning-effort setting.
 4. Ask where `lean-grill-with-docs` should keep the project's `GLOSSARY.md` and ADRs. Recommend the skill's default, `docs/conventions/` (`docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`), or let the user give a folder path relative to the project root, such as `docs/domain`. Always pass the answer as `--docs-dir`, including `--docs-dir docs/conventions` for the default; that value removes a folder override from an earlier run.
 5. Run the bundled Node.js setup script from the target project, passing the selected coding agents and only the model options that apply to them:
 

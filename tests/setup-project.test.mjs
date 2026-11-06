@@ -115,7 +115,7 @@ test('setup initializes project files and preserves project-owned content on rer
   const claudePlanner = await fs.readFile(path.join(project, '.claude', 'agents', 'planner.md'), 'utf8');
   const claudeImplementer = await fs.readFile(path.join(project, '.claude', 'agents', 'implementer.md'), 'utf8');
   assert.match(claudePlanner, /^model: opus$/m);
-  assert.match(claudeImplementer, /^model: sonnet$/m);
+  assert.match(claudeImplementer, /^model: haiku$/m);
   assert.equal(
     await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'),
     await fs.readFile(path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'config.toml'), 'utf8'),
@@ -204,7 +204,8 @@ test('setup for Claude Code only installs Claude Code agents and skills without 
 
   for (const agentName of ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer']) {
     const installed = await fs.readFile(path.join(project, '.claude', 'agents', `${agentName}.md`), 'utf8');
-    assert.match(installed, /^model: sonnet$/m);
+    const expectedModel = ['planner', 'code-reviewer'].includes(agentName) ? 'opus' : 'haiku';
+    assert.match(installed, new RegExp(`^model: ${expectedModel}$`, 'm'));
   }
   await assert.rejects(fs.access(path.join(project, '.codex')), { code: 'ENOENT' });
   const skillCommands = (await loggedCommands(commandLog)).filter(({ command }) => command === 'npx');

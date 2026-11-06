@@ -1,7 +1,7 @@
 ---
 name: bug-diagnostician
 description: "Bug triage and root-cause specialist that investigates assigned failures before implementation and drafts an actionable incident investigation."
-model: sonnet
+model: haiku
 effort: xhigh
 ---
 

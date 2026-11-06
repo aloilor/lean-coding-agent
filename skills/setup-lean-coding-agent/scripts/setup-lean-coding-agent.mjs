@@ -16,7 +16,12 @@ const agentTools = {
     templateDirectory: 'codex',
     targetDirectory: ['.codex', 'agents'],
     extension: '.toml',
-    defaultModel: 'gpt-6-luna',
+    defaultModels: {
+      planner: 'gpt-6-luna',
+      'bug-diagnostician': 'gpt-6-luna',
+      implementer: 'gpt-6-luna',
+      'code-reviewer': 'gpt-6-luna',
+    },
     modelOptionPrefix: '',
     modelAssignmentPattern: /^model\s*=\s*"[^"]*"\s*$/m,
     modelAssignment: (modelId) => `model = "${modelId}"`,
@@ -26,7 +31,12 @@ const agentTools = {
     templateDirectory: 'claude-code',
     targetDirectory: ['.claude', 'agents'],
     extension: '.md',
-    defaultModel: 'sonnet',
+    defaultModels: {
+      planner: 'opus',
+      'bug-diagnostician': 'haiku',
+      implementer: 'haiku',
+      'code-reviewer': 'opus',
+    },
     modelOptionPrefix: 'claude-',
     modelAssignmentPattern: /^model:\s*\S+\s*$/m,
     modelAssignment: (modelId) => `model: ${modelId}`,
@@ -105,9 +115,9 @@ function modelOptionName(tool, agentName) {
 
 function readOptions() {
   const modelOptions = {};
-  for (const [tool, { defaultModel }] of Object.entries(agentTools)) {
+  for (const [tool, { defaultModels }] of Object.entries(agentTools)) {
     for (const agentName of agentNames) {
-      modelOptions[modelOptionName(tool, agentName)] = { type: 'string', default: defaultModel };
+      modelOptions[modelOptionName(tool, agentName)] = { type: 'string', default: defaultModels[agentName] };
     }
   }
   const { values, positionals } = parseArgs({
@@ -128,8 +138,9 @@ function readOptions() {
         'Options:',
         '  --tools <codex|claude-code|both>   Coding agents to set up (default codex)',
         `  --<agent>-model <id>               Codex model for planner, bug-diagnostician,`,
-        `                                     implementer, or code-reviewer (default ${agentTools.codex.defaultModel})`,
-        `  --claude-<agent>-model <id>        Claude Code model for the same agents (default ${agentTools['claude-code'].defaultModel})`,
+        `                                     implementer, or code-reviewer (default ${agentTools.codex.defaultModels.planner})`,
+        '  --claude-<agent>-model <id>        Claude Code model for the same agents (default opus for planner and',
+        '                                     code-reviewer; haiku for bug-diagnostician and implementer)',
         '  --docs-dir <path>                  Project folder for lean-grill-with-docs GLOSSARY.md and adr/',
         '  -h, --help                         Show this help',
       ].join('\n'),

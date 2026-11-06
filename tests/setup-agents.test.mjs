@@ -67,7 +67,7 @@ test('Claude Code agent installation assigns selected models and preserves effor
 
   for (const [agentName, model] of Object.entries(selectedModels)) {
     const installed = await fs.readFile(path.join(project, '.claude', 'agents', `${agentName}.md`), 'utf8');
-    const expectedEffort = ['planner', 'code-reviewer'].includes(agentName) ? 'max' : 'xhigh';
+    const expectedEffort = ['planner', 'code-reviewer'].includes(agentName) ? 'low' : 'xhigh';
     assert.match(installed, new RegExp(`^---\r?\nname: ${agentName}\r?\n`));
     assert.match(installed, new RegExp(`^model: ${model}$`, 'm'));
     assert.match(installed, new RegExp(`^effort: ${expectedEffort}\r?$`, 'm'));
