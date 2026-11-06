@@ -2,78 +2,129 @@
 
 **Engineering discipline for your coding agent, without the bloat.**
 
-Small, composable skills for Codex and Claude Code, built for real codebases. Install the skills, run `setup-lean-coding-agent` once in your project, and your agent is ready for day-to-day work.
+Coding agents do well on small requests and drift on large ones. The usual answer is a framework, but many are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn.
 
-## Why Lean Coding Agent?
+Lean Coding Agent makes a different bet: ordinary requests stay ordinary. You get a rigorous plan, implement, review loop only when you ask for one, and a direct answer the rest of the time. It's a set of small, composable skills for Codex and Claude Code. The always-loaded baseline is under 800 words, and each workflow skill is under 450.
 
-Lean Coding Agent gives your coding agent a rigorous plan, act, review loop when a change deserves it, and a direct answer when it doesn't. Many frameworks are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn. This one keeps the loop and drops the rest.
+## See it in action
 
-- **Opt-in process.** Ordinary requests are handled directly. A workflow starts only when you name it, and both Codex and Claude Code are configured to stop the agent from starting one itself.
-- **Slim workflows.** Each one is a short list of orchestration steps. Detailed instructions stay in dedicated subagents, leaving more room in the main session's context window.
-- **A lean team of four subagents.** A planner, diagnostician, implementer, and reviewer cover the workflows.
-- **A bounded review loop.** Feature, bug-fix, and refactor workflows repeat implementation and independent review until the change is approved. After three failed fixes for the same problem, or if success would mean weakening a test or expanding scope, the agent stops and reports back.
-- **Workflows that fit the work.** Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
-- **Task memory in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session. Incident reports in `docs/incidents/` can be committed; the rest are git-ignored by default.
-- **Small, verified project context.** [`AGENTS.md`](AGENTS.md) holds only the essential rules. Conventions live in modular files under `docs/conventions/`, loaded on demand, and [`init-conventions`](skills/init-conventions/SKILL.md) runs commands before recording them. [See why](docs/init-conventions-rationale.md).
-- **Skills that adapt without forking.** [Skill overrides](#skill-overrides) add project guidance from a separate file, so the installed skill stays unchanged and can keep updating from upstream.
-## Installation
+Ask for help as usual and the agent simply does the work. When a change deserves more rigor, name a workflow:
 
-Install skills from this repository:
-
-```sh
-npx skills@latest add aloilor/lean-coding-agent
+```text
+/workflow-bug-fixing Checkout returns 500 when the cart is empty
 ```
 
-In the installer, select Codex, Claude Code, or both, and the skills you want. Select `setup-lean-coding-agent` to initialize a project with the shared baseline.
+1. A diagnostician investigates and records the root cause in an incident report.
+2. You approve the repair plan. Nothing changes before that.
+3. An implementer reproduces the bug in a test, then fixes it.
+4. An independent reviewer checks the change, and the loop repeats until it's approved. If the same problem survives three fix attempts, the agent stops and reports back.
 
-## Set up your project
-
-Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Claude Code run `/setup-lean-coding-agent`.
-
-The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, skill overrides, and subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`). It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
-
-For Codex, setup creates `.codex/config.toml` when it is missing, with multi-agent defaults and a status line showing the model and reasoning level, project name, Git branch, context window size, and used tokens. Existing config files are preserved.
-
-## Use the skills
-
-Ask your coding agent for help as usual, or call a skill by name when you want it. For example, use `init-conventions` to record a repository's verified conventions or `workflow-feature-development` to explicitly start that workflow (`$skill-name` in Codex, `/skill-name` in Claude Code).
-
-## Updates
-
-Update project-installed skills from the project directory with:
-
-```sh
-npx skills update -p
+```mermaid
+flowchart LR
+    A[You name a workflow] --> B[Plan]
+    B --> C{You approve?}
+    C -->|Yes| D[Implement test-first]
+    C -->|Revise| B
+    D --> E[Independent review]
+    E -->|Blocked| D
+    E -->|Approved| F[Verify and report]
 ```
 
-The CLI owns skill installation, tracking, updates, and removal; setup does not copy or prune skill folders. The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
+## Why it's built this way
 
-Run `npx skills check` to check for available skill updates. Rerun setup after updating when you want refreshed project guidance, templates, overrides, or agent configuration.
+- **Process is opt-in.** A workflow starts only when you name it. Both Codex and Claude Code are configured to stop the agent from starting one itself.
+- **Workflows stay slim.** Each is a short list of orchestration steps. Detailed instructions live in four dedicated subagents (planner, diagnostician, implementer, and reviewer), leaving more room in the main session's context window.
+- **The review loop is bounded.** After three failed fixes for the same problem, or if success would mean weakening a test or expanding scope, the agent stops and reports back instead of forcing a green result.
+- **Each workflow fits its work.** Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
+- **Task memory lives in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session.
+- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose and implement. See [Model defaults](#model-defaults).
+- **Skills adapt without forking.** [Skill overrides](#skill-overrides) add project guidance from a separate file, so installed skills can keep updating from upstream.
 
-## Skill reference
+### The evidence for keeping context small
+
+More agent instructions aren't automatically better:
+
+- [Gloaguen et al.](https://arxiv.org/abs/2602.11988) found that context files do not generally improve task success rates, while increasing inference cost by over 20% on average. That held for both LLM-generated and developer-committed files.
+- [Lulla et al.](https://arxiv.org/abs/2601.20404) found that developer-written `AGENTS.md` files were associated with lower median runtime and fewer output tokens, with comparable task completion.
+
+So context earns its place through operational facts an agent can't discover on its own, not through overviews. [`AGENTS.md`](AGENTS.md) holds only the essential rules. Project conventions live in modular files under `docs/conventions/`, loaded on demand, and [`init-conventions`](skills/init-conventions/SKILL.md) runs commands before recording them. Read the [full rationale](docs/init-conventions-rationale.md), including the limits of this evidence.
+
+## Is it for you?
+
+**It's a good fit if** you use Codex or Claude Code on real codebases and want rigor for the changes that need it, without paying for it on every task.
+
+**It's probably not a good fit if** you want a process enforced on every change, or you use a coding agent other than Codex or Claude Code.
+
+## Quick start
+
+You need Node.js, npm, and a project opened in Codex or Claude Code.
+
+1. Install the skills from your project directory:
+
+   ```sh
+   npx skills@latest add aloilor/lean-coding-agent
+   ```
+
+   In the installer, select Codex, Claude Code, or both, then select `setup-lean-coding-agent` and any other skills you want.
+
+2. Read [what setup changes](#what-setup-changes), especially if your project already has an `AGENTS.md` or `CLAUDE.md`.
+
+3. Run setup in your project: `/setup-lean-coding-agent` in Claude Code, or `$setup-lean-coding-agent` in Codex.
+
+   Setup asks which coding agents to configure and which model each subagent should use, then offers to capture your project's conventions.
+
+4. Work as usual, or call a skill by name, such as `/workflow-feature-development` in Claude Code or `$workflow-feature-development` in Codex.
+
+## What setup changes
+
+> [!WARNING]
+> Setup replaces `AGENTS.md` and `CLAUDE.md` on every run, so any existing content in them is lost. Before you run it, move shared project rules to `docs/conventions/` and private notes to `AGENTS.override.md`. Rerunning setup leaves those files alone.
+
+| Change | Details |
+| --- | --- |
+| Replaced on every run | `AGENTS.md` and `CLAUDE.md`. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it. |
+| Refreshed on every run | The four bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the upstream skills below, and the three bundled templates in `.agents/templates/`. Your own agents, templates, and override index entries are preserved. |
+| Created when missing | `AGENTS.override.md`, `.agents/lessons/`, `.agents/skill-overrides/`, and, for Codex, `.codex/config.toml` with multi-agent defaults and a status line. |
+| Added to `.gitignore` | Local files, agent task and report directories, and `node_modules/`. |
+| Installed | `agent-browser@latest` as a development dependency, plus its browser runtime, and the [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
+
+Setup uses your project's package manager and falls back to npm, so a project without a `package.json` gets one.
+
+`docs/conventions/` is written by [`init-conventions`](skills/init-conventions/SKILL.md), not by setup. Incident reports in `docs/incidents/` can be committed. Plans, implementation reports, and code reviews are git-ignored by default.
+
+## Skills
 
 ### Setup and project context
 
-- [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project after installing the skill.
+- [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project.
 - [`init-conventions`](skills/init-conventions/SKILL.md) — initialize or refresh `docs/conventions/` with repo-specific, verified commands, examples to follow, boundaries, and traps.
-- [`lean-grill-with-docs`](skills/lean-grill-with-docs/SKILL.md) — a personal fork of Matt Pocock’s original skill, adapted to work with my setup; clarifies plans against project terminology and documented decisions.
+- [`lean-grill-with-docs`](skills/lean-grill-with-docs/SKILL.md) — clarify plans against project terminology and documented decisions. Forked and adapted from [Matt Pocock's original skill](https://github.com/mattpocock/skills).
 - [`feature-specification`](skills/feature-specification/SKILL.md) — write a client-approvable feature spec from a fixed template.
 
 ### Change workflows
 
-Workflows are user-invoked only. Name the specific workflow skill in your request to start one; the assistant must not select or start one based on the task type or inferred usefulness. Ordinary requests are handled directly. The Claude Code skills set `disable-model-invocation: true`, and Codex skills set `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
+Workflows are user-invoked only: name one in your request to start it. The Claude Code skills set `disable-model-invocation: true`, and the Codex skills set `policy.allow_implicit_invocation: false` in `agents/openai.yaml`.
 
-| Workflow | Use it for | Process and output |
-| --- | --- | --- |
-| [`workflow-planning`](skills/workflow-planning/SKILL.md) | Planning requested work without implementing it. | Resolve scope, decisions, acceptance criteria, and verification expectations, then obtain approval of the plan in `.agents/plans/`. |
-| [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) | Changing externally observable behavior. | Clarify the change, obtain approval of the plan, implement test-first, then run an independent review and verification. Produces a plan, implementation report, and review pass. |
-| [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) | Investigating and repairing a bug or regression. | Record the symptom and diagnosis, approve the repair plan, reproduce and fix test-first, then review and verify. Produces a plan, incident report in `docs/incidents/`, implementation report, and review pass. |
-| [`workflow-refactor`](skills/workflow-refactor/SKILL.md) | Restructuring code while preserving behavior. | Establish a baseline, obtain approval of the plan, make small behavior-preserving changes, then review and verify. Produces a plan, implementation report, and review pass. |
-| [`workflow-review`](skills/workflow-review/SKILL.md) | Reviewing code or assessing risk. | An independent review records findings in a review pass; it does not make fixes unless you ask for them. |
+| Workflow | Use it for | Process | Guide |
+| --- | --- | --- | --- |
+| [`workflow-planning`](skills/workflow-planning/SKILL.md) | Planning work without implementing it. | Resolve scope, decisions, acceptance criteria, and verification expectations, then approve the plan. | [Planning](docs/workflows/planning.md) |
+| [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) | Changing externally observable behavior. | Approve a plan, implement test-first, then review and verify. | [Feature development](docs/workflows/feature-development.md) |
+| [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) | Investigating and repairing a bug or regression. | Diagnose, approve the repair plan, fix test-first, then review and verify. | [Bug fixing](docs/workflows/bug-fixing.md) |
+| [`workflow-refactor`](skills/workflow-refactor/SKILL.md) | Restructuring code while preserving behavior. | Establish a baseline, approve a plan, make small changes, then review and verify. Stops if behavior would change. | [Refactoring](docs/workflows/refactor.md) |
+| [`workflow-review`](skills/workflow-review/SKILL.md) | Reviewing code or assessing risk. | Record findings in severity order. Makes no fixes unless you ask. | [Code review](docs/workflows/review.md) |
 
-Planning workflows save user-approved plans under `.agents/plans/`. Implementation reports and review passes are saved under `.agents/implementation-reports/` and `.agents/code-reviews/` respectively. Bug-fixing workflows also keep a durable incident report under `docs/incidents/`.
+The [workflow guides](docs/workflows/README.md) include process diagrams. The linked skills remain the canonical instructions.
 
-Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates/plan.md), [implementation-report](skills/setup-lean-coding-agent/references/templates/implementation-report.md), and [code-review](skills/setup-lean-coding-agent/references/templates/code-review.md) templates into `.agents/templates/`. Both Codex and Claude Code planners, implementers, and reviewers use them, with stable core sections and detail proportional to the task. Setup refreshes the three bundled templates on reruns while preserving other project-owned templates.
+Each workflow leaves a written record of the agreed scope, decisions, and verification evidence:
+
+| Record | Path |
+| --- | --- |
+| Approved plan | `.agents/plans/plan_YYYYMMDD_<name>.md` |
+| Implementation report | `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` |
+| Review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` |
+| Incident report | `docs/incidents/incident_YYYYMMDD_<name>.md` |
+
+Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates/plan.md), [implementation-report](skills/setup-lean-coding-agent/references/templates/implementation-report.md), and [code-review](skills/setup-lean-coding-agent/references/templates/code-review.md) templates, used by the planners, implementers, and reviewers of both coding agents.
 
 ### Engineering and Git
 
@@ -81,8 +132,6 @@ Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates
 - [`maintain-changelog`](skills/maintain-changelog/SKILL.md) — inspect Git history in any commit format and curate released or unreleased changes using Keep a Changelog and Semantic Versioning.
 
 ### Upstream skills installed by setup
-
-Setup also installs these skills from upstream repositories. Use this list to choose a skill for a task; each skill name links to its upstream definition.
 
 | Skill | Source | Use when |
 | --- | --- | --- |
@@ -93,67 +142,58 @@ Setup also installs these skills from upstream repositories. Use this list to ch
 | [`refactor`](https://github.com/github/awesome-copilot/blob/main/skills/refactor/SKILL.md) | [github/awesome-copilot](https://github.com/github/awesome-copilot) | Improve code structure or readability while preserving externally visible behavior. |
 | [`skill-creator`](https://github.com/anthropics/skills/tree/main/skills/skill-creator) | [anthropics/skills](https://github.com/anthropics/skills) | Create, improve, and evaluate agent skills with structured test cases and benchmarks. |
 
+## Configuration
+
+### Model defaults
+
+The defaults spend on judgment and save on execution. You can choose a different model for each subagent during setup, or pass options such as `--planner-model` for Codex and `--claude-planner-model` for Claude Code.
+
+| Subagent | Role | Codex | Claude Code |
+| --- | --- | --- | --- |
+| `planner` | Prepares plans. | `gpt-6.1-sol`, `low` | `opus`, `low` |
+| `code-reviewer` | Independently reviews changes. | `gpt-6.1-sol`, `low` | `opus`, `low` |
+| `bug-diagnostician` | Investigates bugs. | `gpt-6-luna`, `max` | `haiku`, `xhigh` |
+| `implementer` | Carries out approved plans. | `gpt-6-luna`, `xhigh` | `haiku`, `xhigh` |
+
+Each entry shows the model and its reasoning effort.
+
 ### Skill overrides
 
-Overrides add project guidance to an installed skill without changing the skill itself. The setup copies bundled overrides into `.agents/skill-overrides/` and maintains an `INDEX.md` there that maps skill names to their override files. Before using a skill, Codex checks this index and reads the matching `<skill-name>.md` file when one is listed. The override extends the skill's instructions; if they conflict, the override takes precedence.
+Overrides add project guidance to an installed skill without changing the skill itself. Setup copies bundled overrides into `.agents/skill-overrides/` and maintains an `INDEX.md` there that maps skill names to their override files. Before using a skill, the agent checks this index and reads the matching `<skill-name>.md` file. If an override conflicts with the skill, the override takes precedence.
 
-For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md) applies the baseline's testing guidance whenever tests are planned, written, or reviewed. To add project-specific guidance for another skill, create a matching Markdown file in `.agents/skill-overrides/` and add a link for it to `INDEX.md`. Setup refreshes bundled override files while preserving project-owned entries in the index.
+For example, the bundled [`tdd` override](skills/setup-lean-coding-agent/references/skill-overrides/tdd.md) applies the baseline's testing guidance whenever tests are planned, written, or reviewed. To add your own, create a matching Markdown file in `.agents/skill-overrides/` and link it from `INDEX.md`. Setup refreshes bundled override files while preserving your index entries.
 
-To keep `lean-grill-with-docs` documentation somewhere other than the default `docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`, choose a folder during setup (`--docs-dir docs/domain`). Setup generates a `lean-grill-with-docs` override that stores `GLOSSARY.md` and `adr/` in that folder. You can also write that override yourself in `.agents/skill-overrides/lean-grill-with-docs.md`.
+To keep `lean-grill-with-docs` documentation somewhere other than the default `docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`, choose a folder during setup (`--docs-dir docs/domain`). Setup generates the matching override for you.
 
-## Workflow guide
+## Updating
 
-Workflow skills define a consistent process for planning, implementation, bug repair, refactoring, and review. In this repository, only the user can start one by explicitly requesting its skill, such as `$workflow-feature-development`. The assistant must not choose or start a workflow on the user's behalf, even when a request matches its scope.
-
-See the [workflow guides](docs/workflows/README.md) for process diagrams and detailed overviews of [planning](docs/workflows/planning.md), [feature development](docs/workflows/feature-development.md), [bug fixing](docs/workflows/bug-fixing.md), [refactoring](docs/workflows/refactor.md), and [code review](docs/workflows/review.md). The linked skills remain the canonical instructions.
-
-The workflow set uses four subagents in different combinations; each workflow invokes only the roles it needs. The `planner` prepares plans for planning, feature-development, bug-fixing, and refactoring ([Codex](skills/setup-lean-coding-agent/references/agents/codex/planner.toml), [Claude Code](skills/setup-lean-coding-agent/references/agents/claude-code/planner.md)); the `bug-diagnostician` investigates bugs; the `implementer` carries out approved feature, repair, and refactor plans; and the `code-reviewer` independently reviews those changes and handles review-only workflows. The main agent obtains explicit user approval of the plan before implementation or repair.
-
-Setup installs `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer`. Codex defaults to `gpt-6.1-sol` with `low` reasoning effort for the planner and code reviewer, `gpt-6-luna` with `max` for the bug diagnostician, and `gpt-6-luna` with `xhigh` for the implementer. Claude Code subagents default to `opus` with `low` effort for the planner and code reviewer, and `haiku` with `xhigh` effort for the bug diagnostician and implementer. Setup accepts a separate model choice for each agent and tool, such as `--planner-model` for Codex and `--claude-planner-model` for Claude Code. Run `node --test` to check setup initialization, agent installation, reruns, and failure handling in [`tests/`](tests/).
-
-### Planning only
-
-Use [`workflow-planning`](skills/workflow-planning/SKILL.md) when you want the work explored and documented as an approved plan without starting implementation. It can cover feature, bug-fix, refactoring, or other scoped work; the planner resolves open decisions, defines acceptance criteria and verification expectations, and records the plan for a later task.
-
-### Feature development
-
-Use [`workflow-feature-development`](skills/workflow-feature-development/SKILL.md) to change externally observable behavior. After the user approves the planner's plan, the implementer works test-first and records implementation and verification evidence. An independent reviewer checks the change against the plan. If review blocks the change, address its findings and repeat the relevant checks and review. Finish with focused verification, broader checks when needed, and a final diff review.
-
-### Bug fixing
-
-Use [`workflow-bug-fixing`](skills/workflow-bug-fixing/SKILL.md) for bugs, regressions, failing tests, or runtime and CI failures. The planner and `bug-diagnostician` prepare the repair plan and incident report. Obtain explicit approval of the repair plan before changing production or test code, then reproduce the problem and repair it test-first, followed by an independent review and broader verification where needed. The reviewer finalizes the incident report. If the repair expands into feature behavior or contract work, stop and ask for direction.
-
-### Refactoring
-
-Use [`workflow-refactor`](skills/workflow-refactor/SKILL.md) to restructure code while preserving its behavior and contracts. The planner records behavior to preserve, scope, risks, and verification; after user approval, the implementer establishes the test baseline and makes small changes while keeping focused checks green. An independent reviewer checks for behavior drift, scope creep, and missing documentation or tests. If the work reveals a behavior change, stop and ask for direction.
-
-### Code review
-
-Use [`workflow-review`](skills/workflow-review/SKILL.md) for a review, audit, or risk assessment. The reviewer records findings in severity order in a review pass under `.agents/code-reviews/`. This workflow does not draft a plan, run the documentation grill, or make changes. Ask separately for fixes if you want findings addressed.
-
-### Workflow records
-
-Plans use `.agents/plans/plan_YYYYMMDD_<name>.md`. Implementations use `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md`, and each review pass uses `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md`. Bug-fixing workflows also keep an incident report at `docs/incidents/incident_YYYYMMDD_<name>.md`. These records make the agreed scope, decisions, and verification evidence available for review and follow-up.
-
-## Working on this repository
-
-The [`skills/`](skills/) directory contains the source skills. The setup skill's `references/` directory contains baseline snapshots it needs when installed on its own; update those copies when their source files change.
-
-Edit skill overrides in [`skills/skill-overrides/`](skills/skill-overrides/) only. Enable the repository hooks once with `git config core.hooksPath .githooks`; the pre-commit hook then mirrors staged override changes into the setup skill's `references/skill-overrides/` and stages the copies. Run `npm run sync-skill-overrides` to sync manually, or `npm run check-skill-overrides` to check for drift.
-
-The root [`package.json`](package.json) is the release version source. This repository uses Changesets to version the skills collection and prepare GitHub releases. Install the development dependencies with `npm ci`, then add a changeset for each user-facing change:
+Update project-installed skills from the project directory:
 
 ```sh
-npm run changeset
+npx skills update -p
 ```
 
-The release workflow opens a version pull request after changesets reach `main`. Merging that pull request updates `package.json` and `CHANGELOG.md`, then creates a GitHub tag and release for the skills collection.
+Run `npx skills check` to see whether updates are available. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. Rerun setup when you want refreshed project guidance, templates, overrides, or agent configuration. Remember that this replaces `AGENTS.md` and `CLAUDE.md`.
 
-Run the Node.js test suite with:
+The Skills CLI owns skill installation, tracking, updates, and removal. See its [update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-```sh
-node --test
-```
+## Uninstalling
+
+There's no uninstall command. To remove Lean Coding Agent from a project:
+
+1. Run `npx skills remove` to remove the installed skills.
+2. Remove the `agent-browser` development dependency.
+3. Delete the [files setup created](#what-setup-changes) and its `.gitignore` entries.
+
+## Project status
+
+Lean Coding Agent is pre-1.0, so expect changes between releases. See the [changelog](CHANGELOG.md).
+
+The automated tests cover setup, not how agents behave once they're using the skills. The evaluation of `init-conventions` so far is limited to two runs on this repository. Its [rationale](docs/init-conventions-rationale.md#limits-of-the-evidence) describes what hasn't been tested yet.
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
