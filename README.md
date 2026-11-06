@@ -9,7 +9,8 @@ Small, composable skills for Codex and Claude Code, built for real codebases. In
 Lean Coding Agent gives your coding agent a rigorous plan, act, review loop when a change deserves it, and a direct answer when it doesn't. Many frameworks are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn. This one keeps the loop and drops the rest.
 
 - **Opt-in process.** Ordinary requests are handled directly. A workflow starts only when you name it, and both Codex and Claude Code are configured to stop the agent from starting one itself.
-- **Slim workflows.** Each one is a short list of steps that only orchestrates. Detailed instructions stay in dedicated subagents, leaving the main session's context for your work.
+- **Slim workflows.** Each one is a short list of orchestration steps. Detailed instructions stay in dedicated subagents, leaving more room in the main session's context window.
+- **A lean team of four subagents.** A planner, diagnostician, implementer, and reviewer cover the workflows.
 - **A bounded review loop.** Feature, bug-fix, and refactor workflows repeat implementation and independent review until the change is approved. After three failed fixes for the same problem, or if success would mean weakening a test or expanding scope, the agent stops and reports back.
 - **Workflows that fit the work.** Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
 - **Task memory in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session. Incident reports in `docs/incidents/` can be committed; the rest are git-ignored by default.
