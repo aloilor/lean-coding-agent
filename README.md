@@ -11,12 +11,12 @@ Lean Coding Agent is a set of skills, workflows, and subagents for Codex and Cla
 Ask for help as usual and the agent simply does the work. When a change deserves more rigor, name a workflow:
 
 ```text
-/workflow-bug-fixing Checkout returns 500 when the cart is empty
+/workflow-feature-development Add CSV export to the orders page
 ```
 
-1. A diagnostician investigates and records the root cause in an incident report.
-2. You approve the repair plan. Nothing changes before that.
-3. An implementer reproduces the bug in a test, then fixes it.
+1. A planner works through the requirements with you and writes them into a plan.
+2. You approve the plan. Nothing changes before that.
+3. An implementer builds it test-first, one behavior at a time.
 4. An independent reviewer checks the change, and the loop repeats until it's approved. If the same problem survives three fix attempts, the agent stops and reports back.
 
 ```mermaid
