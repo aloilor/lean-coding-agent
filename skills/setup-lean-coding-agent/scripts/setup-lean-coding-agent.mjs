@@ -548,12 +548,9 @@ export async function syncInstalledSkills(targetProject) {
 
   const releaseMetadata = await readReleaseMetadata();
   const manifest = {
-    source_root: siblingSkillsDirectory,
     version: releaseMetadata.version,
     repository: releaseMetadata.repository,
-    managed_skill_dirs: [path.join(agentsDirectoryName, 'skills')],
     skills: sourceDirectories.map((directory) => ({
-      source: path.basename(directory),
       installed_as: path.basename(directory),
     })),
   };
