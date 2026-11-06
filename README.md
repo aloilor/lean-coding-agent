@@ -4,7 +4,7 @@
 
 Coding agents do well on small requests and drift on large ones. The usual answer is a framework, but many are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn.
 
-Lean Coding Agent makes a different bet: ordinary requests stay ordinary. You get a rigorous plan, implement, review loop only when you ask for one, and a direct answer the rest of the time. It's a set of small, composable skills for Codex and Claude Code. The always-loaded baseline is under 800 words, and each workflow skill is under 450.
+Lean Coding Agent is a set of skills, workflows, and subagents for Codex and Claude Code. Normal requests get a direct answer. When a change needs more rigor, you start a workflow that plans, implements, and reviews it. The always-loaded baseline is under 800 words, and each workflow is under 450.
 
 ## See it in action
 
@@ -33,27 +33,28 @@ flowchart LR
 ## Why it's built this way
 
 - **Process is opt-in.** A workflow starts only when you name it. Both Codex and Claude Code are configured to stop the agent from starting one itself.
-- **Workflows stay slim.** Each is a short list of orchestration steps. Detailed instructions live in four dedicated subagents (planner, diagnostician, implementer, and reviewer), leaving more room in the main session's context window.
+- **Workflows stay slim.** Each is a short list of orchestration steps. Detailed instructions live in five dedicated subagents (planner, diagnostician, implementer, reviewer, and explorer), leaving more room in the main session's context window.
 - **The review loop is bounded.** After three failed fixes for the same problem, or if success would mean weakening a test or expanding scope, the agent stops and reports back instead of forcing a green result.
 - **Each workflow fits its work.** Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
 - **Task memory lives in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session.
-- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose and implement. See [Model defaults](#model-defaults).
+- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
 - **Skills adapt without forking.** [Skill overrides](#skill-overrides) add project guidance from a separate file, so installed skills can keep updating from upstream.
+- **Project context stays small and verified.** [`AGENTS.md`](AGENTS.md) holds only the essential rules. Conventions live in modular files under `docs/conventions/`, loaded on demand, and [`init-conventions`](skills/init-conventions/SKILL.md) runs commands before recording them. [See why](docs/init-conventions-rationale.md).
 
-### The evidence for keeping context small
+## Who it's for
 
-More agent instructions aren't automatically better:
+**Use it if you want:**
 
-- [Gloaguen et al.](https://arxiv.org/abs/2602.11988) found that context files do not generally improve task success rates, while increasing inference cost by over 20% on average. That held for both LLM-generated and developer-committed files.
-- [Lulla et al.](https://arxiv.org/abs/2601.20404) found that developer-written `AGENTS.md` files were associated with lower median runtime and fewer output tokens, with comparable task completion.
+- **A setup without the bloat that still works reliably.** Many agent frameworks add long instructions to every task and mandatory process to small requests. This one doesn't. Every workflow, subagent, and skill is kept short, so you can read what your agent is told instead of taking it on trust: the always-loaded baseline is under 800 words, each workflow is under 450, and the longest subagent or skill is about 2,100. Short doesn't mean careless: the workflows still give you approved plans, tested changes, and independent review.
+- **Rigor without ceremony.** Your agent should answer a small request directly, and plan, test, and get reviewed only when a change deserves it.
+- **You in control of the process.** Nothing heavier than a normal request starts unless you ask for it, and no workflow changes code before you approve the plan.
+- **A second opinion on real changes.** An independent reviewer checks the work, and the agent stops and reports back instead of looping or weakening a test to get a pass.
 
-So context earns its place through operational facts an agent can't discover on its own, not through overviews. [`AGENTS.md`](AGENTS.md) holds only the essential rules. Project conventions live in modular files under `docs/conventions/`, loaded on demand, and [`init-conventions`](skills/init-conventions/SKILL.md) runs commands before recording them. Read the [full rationale](docs/init-conventions-rationale.md), including the limits of this evidence.
+**Skip it if:**
 
-## Is it for you?
-
-**It's a good fit if** you use Codex or Claude Code on real codebases and want rigor for the changes that need it, without paying for it on every task.
-
-**It's probably not a good fit if** you want a process enforced on every change, or you use a coding agent other than Codex or Claude Code.
+- You want process enforced on every change. Workflows here start only when you name them.
+- You mostly build quick prototypes or throwaway scripts. A plain coding agent is probably enough.
+- You use a coding agent other than Codex or Claude Code.
 
 ## Quick start
 
@@ -83,7 +84,7 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 | Change | Details |
 | --- | --- |
 | Replaced on every run | `AGENTS.md` and `CLAUDE.md`. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it. |
-| Refreshed on every run | The four bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the upstream skills below, and the three bundled templates in `.agents/templates/`. Your own agents, templates, and override index entries are preserved. |
+| Refreshed on every run | The five bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the upstream skills below, and the three bundled templates in `.agents/templates/`. Your own agents, templates, and override index entries are preserved. |
 | Created when missing | `AGENTS.override.md`, `.agents/lessons/`, `.agents/skill-overrides/`, and, for Codex, `.codex/config.toml` with multi-agent defaults and a status line. |
 | Added to `.gitignore` | Local files, agent task and report directories, and `node_modules/`. |
 | Installed | `agent-browser@latest` as a development dependency, plus its browser runtime, and the [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
@@ -154,6 +155,7 @@ The defaults spend on judgment and save on execution. You can choose a different
 | `code-reviewer` | Independently reviews changes. | `gpt-6.1-sol`, `low` | `opus`, `low` |
 | `bug-diagnostician` | Investigates bugs. | `gpt-6-luna`, `max` | `haiku`, `xhigh` |
 | `implementer` | Carries out approved plans. | `gpt-6-luna`, `xhigh` | `haiku`, `xhigh` |
+| `explorer` | Looks up facts for `lean-grill-with-docs`. | `gpt-6-luna`, `high` | `haiku`, `high` |
 
 Each entry shows the model and its reasoning effort.
 
