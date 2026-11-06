@@ -90,8 +90,6 @@ test('setup initializes project files and preserves project-owned content on rer
     'AGENTS.override.md',
     '.agents/lessons/LESSONS.md',
     '.agents/skill-overrides/tdd.md',
-    '.agents/skills/setup-lean-coding-agent/SKILL.md',
-    '.agents/skills/lean-grill-with-docs/SKILL.md',
     '.codex/config.toml',
     '.codex/agents/planner.toml',
     '.codex/agents/bug-diagnostician.toml',
@@ -102,11 +100,11 @@ test('setup initializes project files and preserves project-owned content on rer
     '.claude/agents/implementer.md',
     '.claude/agents/code-reviewer.md',
     'docs/incidents/README.md',
-    '.agents/skills-installed.json',
   ]) {
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
   }
-  await assert.rejects(fs.access(path.join(project, '.agents', 'skills', 'grill-with-docs')), { code: 'ENOENT' });
+  await assert.rejects(fs.access(path.join(project, '.agents', 'skills')), { code: 'ENOENT' });
+  await assert.rejects(fs.access(path.join(project, '.agents', 'skills-installed.json')), { code: 'ENOENT' });
 
   const planner = await fs.readFile(path.join(project, '.codex', 'agents', 'planner.toml'), 'utf8');
   const implementer = await fs.readFile(path.join(project, '.codex', 'agents', 'implementer.toml'), 'utf8');
@@ -162,6 +160,41 @@ test('setup initializes project files and preserves project-owned content on rer
   assert.match(ignoreRules, /^AGENTS\.override\.md$/m);
   assert.equal((ignoreRules.match(/^node_modules\/$/gm) ?? []).length, 1);
   assert.equal((await loggedCommands(commandLog)).length, 14);
+});
+
+test('setup removes obsolete manifests without changing installed skills or the CLI lock on rerun', async (t) => {
+  const { project, env } = await setupFixture(t);
+  const skillsDirectory = path.join(project, '.agents', 'skills');
+  const skillContents = {
+    'setup-lean-coding-agent': 'CLI-installed baseline skill\n',
+    'retired-skill': 'Previously copied skill\n',
+    'project-skill': 'Project-owned skill\n',
+  };
+  for (const [name, contents] of Object.entries(skillContents)) {
+    await fs.mkdir(path.join(skillsDirectory, name), { recursive: true });
+    await fs.writeFile(path.join(skillsDirectory, name, 'SKILL.md'), contents);
+  }
+  const lockPath = path.join(project, 'skills-lock.json');
+  const lock = '{"version":1,"skills":{}}\n';
+  await fs.writeFile(lockPath, lock);
+  const manifests = ['.agents/skills-installed.json', 'agent-context/skills-installed.json'];
+  await fs.mkdir(path.join(project, 'agent-context'));
+  await fs.writeFile(path.join(project, 'agent-context', 'notes.md'), 'Project notes\n');
+  for (const manifest of manifests) {
+    await fs.writeFile(path.join(project, manifest), '{"skills":[{"installed_as":"retired-skill"}]}');
+  }
+
+  for (let pass = 0; pass < 2; pass += 1) {
+    await runFile(process.execPath, [setupScript, project], { env });
+    for (const manifest of manifests) {
+      await assert.rejects(fs.access(path.join(project, manifest)), { code: 'ENOENT' });
+    }
+    for (const [name, contents] of Object.entries(skillContents)) {
+      assert.equal(await fs.readFile(path.join(skillsDirectory, name, 'SKILL.md'), 'utf8'), contents);
+    }
+    assert.equal(await fs.readFile(lockPath, 'utf8'), lock);
+    assert.equal(await fs.readFile(path.join(project, 'agent-context', 'notes.md'), 'utf8'), 'Project notes\n');
+  }
 });
 
 test('setup for Claude Code only installs Claude Code agents and skills without Codex files', async (t) => {

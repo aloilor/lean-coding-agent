@@ -29,7 +29,7 @@ In the installer, select Codex, Claude Code, or both, and the skills you want. S
 
 Open the target repository in Codex and run `$setup-lean-coding-agent`, or in Claude Code run `/setup-lean-coding-agent`.
 
-The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, available skills, skill overrides, subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`). It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
+The setup skill asks whether to set up Codex, Claude Code, or both, and which model each subagent should use. It installs the shared project guidance, skill overrides, and subagents for each selected coding agent (`.codex/agents/` and `.claude/agents/`). It also installs Agent Browser and the upstream skills used by the baseline for the selected coding agents, then offers to capture project conventions. Node.js is required for setup. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it.
 
 For Codex, setup creates `.codex/config.toml` when it is missing, with multi-agent defaults and a status line showing the model and reasoning level, project name, Git branch, context window size, and used tokens. Existing config files are preserved.
 
@@ -45,9 +45,11 @@ Update project-installed skills from the project directory with:
 npx skills update -p
 ```
 
-The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
+The CLI owns skill installation, tracking, updates, and removal; setup does not copy or prune skill folders. The CLI updates skills already installed from their tracked sources. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. See the [Skills CLI update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 
-Run `npx skills check` to check for available skill updates.
+Run `npx skills check` to check for available skill updates. Rerun setup after updating when you want refreshed project guidance, templates, overrides, or agent configuration.
+
+For projects initialized by an older setup version, rerun `npx skills add aloilor/lean-coding-agent` and select the desired skills so the CLI tracks them. Setup removes the obsolete `skills-installed.json` manifests on rerun and leaves existing skill folders intact. Use `npx skills remove <skill>` for unwanted copies.
 
 ## Skill reference
 
@@ -140,13 +142,13 @@ The [`skills/`](skills/) directory contains the source skills. The setup skill's
 
 Edit skill overrides in [`skills/skill-overrides/`](skills/skill-overrides/) only. Enable the repository hooks once with `git config core.hooksPath .githooks`; the pre-commit hook then mirrors staged override changes into the setup skill's `references/skill-overrides/` and stages the copies. Run `npm run sync-skill-overrides` to sync manually, or `npm run check-skill-overrides` to check for drift.
 
-The root [`package.json`](package.json) is the release version source; the setup skill's [`release.json`](skills/setup-lean-coding-agent/references/release.json) is synchronized from it so initialized projects can check for newer skill releases. This repository uses Changesets to version the skills collection and prepare GitHub releases. Install the development dependencies with `npm ci`, then add a changeset for each user-facing change:
+The root [`package.json`](package.json) is the release version source. This repository uses Changesets to version the skills collection and prepare GitHub releases. Install the development dependencies with `npm ci`, then add a changeset for each user-facing change:
 
 ```sh
 npm run changeset
 ```
 
-The release workflow opens a version pull request after changesets reach `main`. Merging that pull request updates `package.json` and `CHANGELOG.md`, synchronizes `release.json`, then creates a GitHub tag and release for the skills collection. Run `npm run check-release-version` to check that the release metadata is synchronized.
+The release workflow opens a version pull request after changesets reach `main`. Merging that pull request updates `package.json` and `CHANGELOG.md`, then creates a GitHub tag and release for the skills collection.
 
 Run the Node.js test suite with:
 

@@ -7,9 +7,7 @@ import { parseArgs } from 'node:util';
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const skillDirectory = path.resolve(scriptDirectory, '..');
-const siblingSkillsDirectory = path.resolve(skillDirectory, '..');
 const referencesDirectory = path.join(skillDirectory, 'references');
-const releaseMetadataPath = path.join(referencesDirectory, 'release.json');
 const agentNames = ['planner', 'bug-diagnostician', 'implementer', 'code-reviewer'];
 const modelIdPattern = /^[A-Za-z0-9][A-Za-z0-9._:/-]*$/;
 const agentTools = {
@@ -39,7 +37,6 @@ const toolSelections = {
   'claude-code': ['claude-code'],
   both: ['codex', 'claude-code'],
 };
-const manifestName = 'skills-installed.json';
 const legacyAgentContextDirectoryName = 'agent-context';
 const agentsDirectoryName = '.agents';
 const skillOverridesDirectoryName = 'skill-overrides';
@@ -209,23 +206,6 @@ async function requiredReference(...parts) {
     throw error;
   }
   return referencePath;
-}
-
-async function readReleaseMetadata() {
-  let releaseMetadata;
-  try {
-    releaseMetadata = JSON.parse(await fs.readFile(releaseMetadataPath, 'utf8'));
-  } catch (error) {
-    throw new Error(`Could not read setup skill release metadata: ${error.message}`);
-  }
-  if (
-    !releaseMetadata
-    || typeof releaseMetadata.version !== 'string'
-    || typeof releaseMetadata.repository !== 'string'
-  ) {
-    throw new Error(`Setup skill release metadata is invalid: ${releaseMetadataPath}`);
-  }
-  return releaseMetadata;
 }
 
 function validateModels(models) {
@@ -471,103 +451,9 @@ async function syncBaselineSkillOverrides(targetProject) {
   return copiedPaths;
 }
 
-async function discoverSiblingSkills() {
-  const entries = await fs.readdir(siblingSkillsDirectory, { withFileTypes: true });
-  const skillDirectories = [];
-  for (const entry of entries) {
-    if (!entry.isDirectory()) continue;
-    const sourceDirectory = path.join(siblingSkillsDirectory, entry.name);
-    if (await pathExists(path.join(sourceDirectory, 'SKILL.md'))) {
-      skillDirectories.push(sourceDirectory);
-    }
-  }
-  skillDirectories.sort((left, right) => path.basename(left).localeCompare(path.basename(right)));
-  if (skillDirectories.length === 0) {
-    throw new Error(`No installable skills found beside the setup skill: ${siblingSkillsDirectory}`);
-  }
-  return skillDirectories;
-}
-
-async function removeManagedSkill(skillPath) {
-  try {
-    const details = await fs.lstat(skillPath);
-    if (details.isSymbolicLink()) {
-      await fs.unlink(skillPath);
-    } else if (details.isDirectory()) {
-      await fs.rm(skillPath, { recursive: true, force: true });
-    } else {
-      await fs.unlink(skillPath);
-    }
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
-}
-
-export async function syncInstalledSkills(targetProject) {
-  const agentsDirectory = path.join(targetProject, agentsDirectoryName);
-  const skillsDirectory = path.join(agentsDirectory, 'skills');
-  try {
-    if ((await fs.lstat(agentsDirectory)).isSymbolicLink()) {
-      throw new Error(`Refusing to write through a symlinked directory: ${agentsDirectory}`);
-    }
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
-  try {
-    if ((await fs.lstat(skillsDirectory)).isSymbolicLink()) {
-      throw new Error(`Refusing to write through a symlinked directory: ${skillsDirectory}`);
-    }
-  } catch (error) {
-    if (error.code !== 'ENOENT') throw error;
-  }
-  await fs.mkdir(skillsDirectory, { recursive: true });
-
-  const manifestPath = path.join(agentsDirectory, manifestName);
-  const legacyManifestPath = path.join(targetProject, legacyAgentContextDirectoryName, manifestName);
-  const previousManifest = await readPreviousManifest(manifestPath, legacyManifestPath);
-  const sourceDirectories = await discoverSiblingSkills();
-  const sourceNames = new Set(sourceDirectories.map((directory) => path.basename(directory)));
-  for (const { installed_as: installedAs } of previousManifest?.skills ?? []) {
-    if (typeof installedAs !== 'string' || path.basename(installedAs) !== installedAs) continue;
-    if (installedAs === '.' || installedAs === '..' || sourceNames.has(installedAs)) continue;
-    await removeManagedSkill(path.join(skillsDirectory, installedAs));
-  }
-  for (const sourceDirectory of sourceDirectories) {
-    const destination = path.join(skillsDirectory, path.basename(sourceDirectory));
-    if (path.resolve(sourceDirectory) === path.resolve(destination)) continue;
-    await removeManagedSkill(destination);
-    await fs.cp(sourceDirectory, destination, {
-      recursive: true,
-      filter: (sourcePath) => {
-        const relativeParts = path.relative(sourceDirectory, sourcePath).split(path.sep);
-        return !relativeParts.includes('.git') && !relativeParts.includes('__pycache__');
-      },
-    });
-  }
-
-  const releaseMetadata = await readReleaseMetadata();
-  const manifest = {
-    version: releaseMetadata.version,
-    repository: releaseMetadata.repository,
-    skills: sourceDirectories.map((directory) => ({
-      installed_as: path.basename(directory),
-    })),
-  };
-  await fs.writeFile(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-  await removeLegacyManifest(legacyManifestPath);
-
-  return { skillDirectory: skillsDirectory, skillCount: sourceDirectories.length };
-}
-
-async function readPreviousManifest(...manifestPaths) {
-  for (const manifestPath of manifestPaths) {
-    try {
-      return JSON.parse(await fs.readFile(manifestPath, 'utf8'));
-    } catch (error) {
-      if (error.code !== 'ENOENT' && !(error instanceof SyntaxError)) throw error;
-    }
-  }
-  return null;
+async function removeInstalledSkillsManifests(targetProject) {
+  await fs.rm(path.join(targetProject, agentsDirectoryName, 'skills-installed.json'), { force: true });
+  await removeLegacyManifest(path.join(targetProject, legacyAgentContextDirectoryName, 'skills-installed.json'));
 }
 
 async function removeLegacyManifest(legacyManifestPath) {
@@ -782,7 +668,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
-  const skillResult = await syncInstalledSkills(targetProject);
+  await removeInstalledSkillsManifests(targetProject);
   await removeUpdateChecker(targetProject);
   const agentBrowserStatus = await installAgentBrowser(targetProject);
   const upstreamSkillNames = await installUpstreamSkills(targetProject, tools);
@@ -808,7 +694,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   if (grillOverride?.removed) console.log(`Removed lean-grill-with-docs folder override: ${grillOverride.overridePath}`);
   if (codexConfigPath) console.log(`Ensured Codex config: ${codexConfigPath}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
-  console.log(`Installed ${skillResult.skillCount} available skills into: ${skillResult.skillDirectory}`);
   const legacyAgentContextDirectory = path.join(targetProject, legacyAgentContextDirectoryName);
   if (await pathExists(legacyAgentContextDirectory)) {
     console.log(
