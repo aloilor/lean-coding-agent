@@ -1,5 +1,9 @@
 # Lean Coding Agent
 
+[![CI](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
+
 **Engineering discipline for your coding agent, without the bloat.**
 
 Coding agents do well on small requests and drift on large ones. The usual answer is a framework, but many are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn.
