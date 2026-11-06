@@ -6,10 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import {
-  installAgents,
-  removeUpdateChecker,
-} from '../skills/setup-lean-coding-agent/scripts/setup-lean-coding-agent.mjs';
+import { installAgents } from '../skills/setup-lean-coding-agent/scripts/setup-lean-coding-agent.mjs';
 
 const runFile = promisify(execFile);
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -105,62 +102,6 @@ test('setup rejects an unknown tool selection before changing the target project
     },
   );
   assert.deepEqual(await fs.readdir(project), []);
-});
-
-test('checker removal deletes installed scripts and legacy hooks while preserving unrelated files on rerun', async (t) => {
-  const project = await temporaryProject(t);
-  const codexDirectory = path.join(project, '.codex');
-  const legacyDirectory = path.join(codexDirectory, 'hooks', 'lean-coding-agent');
-  await fs.mkdir(legacyDirectory, { recursive: true });
-  const legacyScript = path.join(legacyDirectory, 'check-skill-updates.mjs');
-  await fs.writeFile(legacyScript, 'old checker\n');
-
-  const hooksPath = path.join(codexDirectory, 'hooks.json');
-  const hooks = {
-    hooks: {
-      SessionStart: [{
-        hooks: [
-          { command: 'node .codex/hooks/lean-coding-agent/check-skill-updates.mjs' },
-          { command: 'node scripts/unrelated-check.mjs' },
-        ],
-      }],
-      AfterToolUse: [{ hooks: [{ command: 'node scripts/after-tool.mjs' }] }],
-    },
-  };
-  await fs.writeFile(hooksPath, JSON.stringify(hooks));
-
-  const configPath = path.join(codexDirectory, 'config.toml');
-  await fs.writeFile(configPath, [
-    'model = "gpt-6-sol"',
-    '# Lean Coding Agent session-start version check',
-    '[[hooks.SessionStart]]',
-    'command = "node .codex/hooks/lean-coding-agent/check-skill-updates.mjs"',
-    'timeout = 10',
-    '',
-  ].join('\n'));
-
-  const scriptsDirectory = path.join(project, 'scripts');
-  await fs.mkdir(scriptsDirectory);
-  const checkerPath = path.join(scriptsDirectory, 'check-skill-updates.mjs');
-  const unrelatedScript = path.join(scriptsDirectory, 'unrelated-check.mjs');
-  await fs.writeFile(checkerPath, 'old checker\n');
-  await fs.writeFile(unrelatedScript, 'project script\n');
-
-  await removeUpdateChecker(project);
-  const firstHooks = await fs.readFile(hooksPath, 'utf8');
-  const firstConfig = await fs.readFile(configPath, 'utf8');
-  await removeUpdateChecker(project);
-
-  await assert.rejects(fs.access(checkerPath), { code: 'ENOENT' });
-  assert.equal(await fs.readFile(unrelatedScript, 'utf8'), 'project script\n');
-  assert.deepEqual(JSON.parse(firstHooks).hooks.SessionStart[0].hooks, [
-    { command: 'node scripts/unrelated-check.mjs' },
-  ]);
-  assert.deepEqual(JSON.parse(firstHooks).hooks.AfterToolUse, hooks.hooks.AfterToolUse);
-  assert.equal(firstConfig, 'model = "gpt-6-sol"\n');
-  assert.equal(await fs.readFile(hooksPath, 'utf8'), firstHooks);
-  assert.equal(await fs.readFile(configPath, 'utf8'), firstConfig);
-  await assert.rejects(fs.access(legacyScript), { code: 'ENOENT' });
 });
 
 test('setup rejects an invalid model before changing the target project', async (t) => {

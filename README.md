@@ -49,8 +49,6 @@ The CLI owns skill installation, tracking, updates, and removal; setup does not 
 
 Run `npx skills check` to check for available skill updates. Rerun setup after updating when you want refreshed project guidance, templates, overrides, or agent configuration.
 
-For projects initialized by an older setup version, rerun `npx skills add aloilor/lean-coding-agent` and select the desired skills so the CLI tracks them. Setup removes the obsolete `skills-installed.json` manifests on rerun and leaves existing skill folders intact. Use `npx skills remove <skill>` for unwanted copies.
-
 ## Skill reference
 
 ### Setup and project context

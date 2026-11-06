@@ -63,8 +63,6 @@ test('setup initializes project files and preserves project-owned content on rer
   await fs.writeFile(path.join(project, 'package.json'), '{"packageManager":"pnpm@9.0.0"}\n');
   await fs.writeFile(path.join(project, 'AGENTS.override.md'), 'Private notes\n');
   await fs.writeFile(path.join(project, '.gitignore'), '# Existing rules\nnode_modules/\n');
-  await fs.mkdir(path.join(project, 'agent-context'));
-  await fs.writeFile(path.join(project, 'agent-context', 'testing.md'), 'Project testing guidance\n');
   const overrideDirectory = path.join(project, '.agents', 'skill-overrides');
   await fs.mkdir(overrideDirectory, { recursive: true });
   await fs.writeFile(path.join(overrideDirectory, 'INDEX.md'), '# Skill Overrides\n\n- [custom](custom.md) - project rule.\n');
@@ -82,7 +80,6 @@ test('setup initializes project files and preserves project-owned content on rer
   await runFile(process.execPath, options, { env });
 
   await assertBaselinesMatchBundledReferences(project);
-  await assert.rejects(fs.access(path.join(project, 'scripts', 'check-skill-updates.mjs')), { code: 'ENOENT' });
 
   for (const relativePath of [
     'AGENTS.md',
@@ -104,7 +101,6 @@ test('setup initializes project files and preserves project-owned content on rer
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
   }
   await assert.rejects(fs.access(path.join(project, '.agents', 'skills')), { code: 'ENOENT' });
-  await assert.rejects(fs.access(path.join(project, '.agents', 'skills-installed.json')), { code: 'ENOENT' });
 
   const planner = await fs.readFile(path.join(project, '.codex', 'agents', 'planner.toml'), 'utf8');
   const implementer = await fs.readFile(path.join(project, '.codex', 'agents', 'implementer.toml'), 'utf8');
@@ -138,17 +134,12 @@ test('setup initializes project files and preserves project-owned content on rer
   await fs.writeFile(path.join(project, 'CLAUDE.md'), 'Outdated managed baseline\n');
   await fs.writeFile(path.join(project, '.codex', 'config.toml'), 'model = "project-choice"\n');
   await fs.writeFile(path.join(overrideDirectory, 'tdd.md'), 'Outdated managed override\n');
-  await fs.mkdir(path.join(project, 'scripts'));
-  await fs.writeFile(path.join(project, 'scripts', 'check-skill-updates.mjs'), 'old checker\n');
-  const { stdout: rerunOutput } = await runFile(process.execPath, options, { env });
-  assert.match(rerunOutput, /Legacy project context found in .*agent-context; run init-conventions/);
+  await runFile(process.execPath, options, { env });
   await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
 
   await assertBaselinesMatchBundledReferences(project);
-  await assert.rejects(fs.access(path.join(project, 'scripts', 'check-skill-updates.mjs')), { code: 'ENOENT' });
   assert.equal(await fs.readFile(path.join(project, 'AGENTS.override.md'), 'utf8'), 'Private notes\n');
   assert.equal(await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'), 'model = "project-choice"\n');
-  assert.equal(await fs.readFile(path.join(project, 'agent-context', 'testing.md'), 'utf8'), 'Project testing guidance\n');
   const overrideIndex = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
   assert.match(overrideIndex, /- \[custom\]\(custom\.md\)/);
   assert.equal((overrideIndex.match(/- \[tdd\]\(tdd\.md\)/g) ?? []).length, 1);
@@ -162,7 +153,7 @@ test('setup initializes project files and preserves project-owned content on rer
   assert.equal((await loggedCommands(commandLog)).length, 14);
 });
 
-test('setup removes obsolete manifests without changing installed skills or the CLI lock on rerun', async (t) => {
+test('setup preserves installed skills and the CLI lock on rerun', async (t) => {
   const { project, env } = await setupFixture(t);
   const skillsDirectory = path.join(project, '.agents', 'skills');
   const skillContents = {
@@ -177,23 +168,13 @@ test('setup removes obsolete manifests without changing installed skills or the 
   const lockPath = path.join(project, 'skills-lock.json');
   const lock = '{"version":1,"skills":{}}\n';
   await fs.writeFile(lockPath, lock);
-  const manifests = ['.agents/skills-installed.json', 'agent-context/skills-installed.json'];
-  await fs.mkdir(path.join(project, 'agent-context'));
-  await fs.writeFile(path.join(project, 'agent-context', 'notes.md'), 'Project notes\n');
-  for (const manifest of manifests) {
-    await fs.writeFile(path.join(project, manifest), '{"skills":[{"installed_as":"retired-skill"}]}');
-  }
 
   for (let pass = 0; pass < 2; pass += 1) {
     await runFile(process.execPath, [setupScript, project], { env });
-    for (const manifest of manifests) {
-      await assert.rejects(fs.access(path.join(project, manifest)), { code: 'ENOENT' });
-    }
     for (const [name, contents] of Object.entries(skillContents)) {
       assert.equal(await fs.readFile(path.join(skillsDirectory, name, 'SKILL.md'), 'utf8'), contents);
     }
     assert.equal(await fs.readFile(lockPath, 'utf8'), lock);
-    assert.equal(await fs.readFile(path.join(project, 'agent-context', 'notes.md'), 'utf8'), 'Project notes\n');
   }
 });
 
