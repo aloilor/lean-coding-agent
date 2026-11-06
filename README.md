@@ -187,7 +187,7 @@ There's no uninstall command. To remove Lean Coding Agent from a project:
 
 ## Project status
 
-Lean Coding Agent is pre-1.0, so expect changes between releases. See the [changelog](CHANGELOG.md).
+Releases follow [Semantic Versioning](https://semver.org/), so breaking changes land only in major versions. See the [changelog](CHANGELOG.md).
 
 The automated tests cover setup, not how agents behave once they're using the skills. The evaluation of `init-conventions` so far is limited to two runs on this repository. Its [rationale](docs/init-conventions-rationale.md#limits-of-the-evidence) describes what hasn't been tested yet.
 
