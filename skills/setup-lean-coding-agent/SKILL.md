@@ -19,7 +19,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
    - `gpt-6-sol` — designed for complex coding and agentic workflows; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
    - `gpt-6-luna` — efficient for focused, high-volume work; supports `none`, `low`, `medium`, `high`, `xhigh`, and `max`.
 
-   Codex subagents default to `gpt-6-luna`.
+   Codex subagents default to `gpt-6.1-sol` for `planner` and `code-reviewer`, and `gpt-6-luna` for `bug-diagnostician` and `implementer`.
 
    **Claude Code.** Check the official [Claude models overview](https://platform.claude.com/docs/en/about-claude/models/overview) and [subagent documentation](https://code.claude.com/docs/en/sub-agents). Subagents accept an alias (`fable`, `opus`, `sonnet`, `haiku`), a full model ID, or `inherit` to use the main conversation's model:
    - `fable` (`claude-fable-5-1`) — for demanding reasoning and long-horizon agentic work; slowest and most expensive.
@@ -29,7 +29,7 @@ Run this skill after installing it with the Skills CLI to initialize the current
 
    Claude Code subagents default to `opus` for `planner` and `code-reviewer`, and `haiku` for `bug-diagnostician` and `implementer`.
 
-   Codex `planner` and `code-reviewer` use `max` reasoning effort and `bug-diagnostician` and `implementer` use `xhigh`. Claude Code `planner` and `code-reviewer` use `low` effort and `bug-diagnostician` and `implementer` use `xhigh`. Then ask: “Which models should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer` for each selected coding agent? Choose the defaults, or provide a model for each.” Preserve each agent's reasoning-effort setting.
+   Codex `planner` and `code-reviewer` use `low` reasoning effort, `bug-diagnostician` uses `max`, and `implementer` uses `xhigh`. Claude Code `planner` and `code-reviewer` use `low` effort and `bug-diagnostician` and `implementer` use `xhigh`. Then ask: “Which models should setup assign to `planner`, `bug-diagnostician`, `implementer`, and `code-reviewer` for each selected coding agent? Choose the defaults, or provide a model for each.” Preserve each agent's reasoning-effort setting.
 4. Ask where `lean-grill-with-docs` should keep the project's `GLOSSARY.md` and ADRs. Recommend the skill's default, `docs/conventions/` (`docs/conventions/GLOSSARY.md` and `docs/conventions/adr/`), or let the user give a folder path relative to the project root, such as `docs/domain`. Always pass the answer as `--docs-dir`, including `--docs-dir docs/conventions` for the default; that value removes a folder override from an earlier run.
 5. Run the bundled Node.js setup script from the target project, passing the selected coding agents and only the model options that apply to them:
 

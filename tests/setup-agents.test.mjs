@@ -44,7 +44,12 @@ test('agent installation assigns selected models and preserves reasoning effort 
 
   for (const [agentName, model] of Object.entries(selectedModels)) {
     const installed = await fs.readFile(path.join(project, '.codex', 'agents', `${agentName}.toml`), 'utf8');
-    const expectedEffort = ['planner', 'code-reviewer'].includes(agentName) ? 'max' : 'xhigh';
+    const expectedEffort = {
+      planner: 'low',
+      'bug-diagnostician': 'max',
+      implementer: 'xhigh',
+      'code-reviewer': 'low',
+    }[agentName];
     assert.match(installed, new RegExp(`^model = "${model}"$`, 'm'));
     assert.match(installed, new RegExp(`^model_reasoning_effort = "${expectedEffort}"$`, 'm'));
   }

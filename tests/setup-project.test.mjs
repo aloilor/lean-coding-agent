@@ -109,7 +109,7 @@ test('setup initializes project files and preserves project-owned content on rer
   const planner = await fs.readFile(path.join(project, '.codex', 'agents', 'planner.toml'), 'utf8');
   const implementer = await fs.readFile(path.join(project, '.codex', 'agents', 'implementer.toml'), 'utf8');
   assert.match(planner, /^model = "gpt-6-astra"$/m);
-  assert.match(planner, /^model_reasoning_effort = "max"$/m);
+  assert.match(planner, /^model_reasoning_effort = "low"$/m);
   assert.match(implementer, /^model = "gpt-6-astra"$/m);
   assert.match(implementer, /^model_reasoning_effort = "xhigh"$/m);
   const claudePlanner = await fs.readFile(path.join(project, '.claude', 'agents', 'planner.md'), 'utf8');
