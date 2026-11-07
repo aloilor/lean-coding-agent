@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
 
-**Engineering discipline for your coding agent, without the bloat.**
+**A lightweight, customizable baseline for Codex and Claude Code, with shared engineering principles, project-specific conventions, and opt-in workflows.**
 
 I built this for my own work, and it's what I use there. I wanted something basic. Newer models don't need the handholding and strict guardrails of the more prescriptive frameworks: long instructions on every task, mandatory process for small requests, and extra tooling to learn. What they still need on larger changes is a simple loop: plan, act, review. I designed it around KISS (Keep It Simple, Stupid): every piece earns its place, or it doesn't go in.
 
@@ -43,7 +43,7 @@ flowchart LR
 - **Task memory lives in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session.
 - **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
 - **Skills adapt without forking.** [Skill overrides](#skill-overrides) add project guidance from a separate file, so installed skills can keep updating from upstream.
-- **Project context stays small and verified.** [`AGENTS.md`](AGENTS.md) holds only the essential rules. Conventions live in modular files under `docs/conventions/`, loaded on demand, and [`init-conventions`](skills/init-conventions/SKILL.md) runs commands before recording them. [See why](docs/init-conventions-rationale.md).
+- **A shared baseline, adapted to each project.** [`AGENTS.md`](AGENTS.md) holds the common engineering principles. Separate files under `docs/conventions/` capture your project’s coding standards, testing setup, and development practices, loaded only when relevant. [`init-conventions`](skills/init-conventions/SKILL.md) gathers those facts from your repository and verifies commands before recording them. [See why](docs/init-conventions-rationale.md).
 
 ## Who it's for
 
