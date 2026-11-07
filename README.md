@@ -4,22 +4,22 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
 
-**A lightweight, customizable baseline for Codex and Claude Code, with shared engineering principles, project-specific conventions, and opt-in workflows.**
+Lean Coding Agent is a lightweight, customizable baseline for Codex and Claude Code. It combines shared engineering principles, project-specific conventions, and opt-in workflows.
 
-I built this for my own work, and it's what I use there. I wanted something basic. Newer models don't need the handholding and strict guardrails of the more prescriptive frameworks: long instructions on every task, mandatory process for small requests, and extra tooling to learn. What they still need on larger changes is a simple loop: plan, act, review.
+I built it for my own work. I feel newer models need less handholding and fewer strict guardrails than more prescriptive frameworks tend to provide. I wanted something basic: short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
 
-Lean Coding Agent is a set of skills, workflows, and subagents for Codex and Claude Code. Normal requests get a direct answer. When a change needs more rigor, you start a workflow that plans, implements, and reviews it. The always-loaded baseline is under 800 words, and each workflow is under 450.
+The repository provides predefined rules, skills, workflows, and subagents, kept short and easy to inspect. Normal requests are handled directly; you invoke a workflow when you want structured planning, implementation, and review. The always-loaded baseline is under 800 words, and each workflow is under 450.
 
 ## See it in action
 
-Ask for help as usual and the agent simply does the work. When a change deserves more rigor, name a workflow:
+For everyday requests, work with the agent as usual. To start a workflow, name it explicitly. For example, in Claude Code:
 
 ```text
 /workflow-feature-development Add CSV export to the orders page
 ```
 
 1. A planner works through the requirements with you and writes them into a plan.
-2. You approve the plan. Nothing changes before that.
+2. You approve the plan before implementation starts.
 3. An implementer builds it test-first, one behavior at a time.
 4. An independent reviewer checks the change, and the loop repeats until it's approved. If the same problem survives three fix attempts, the agent stops and reports back.
 
@@ -33,32 +33,6 @@ flowchart LR
     E -->|Blocked| D
     E -->|Approved| F[Verify and report]
 ```
-
-## Why it's built this way
-
-- **Process is opt-in.** A workflow starts only when you name it. Both Codex and Claude Code are configured to stop the agent from starting one itself.
-- **Workflows stay slim.** Each is a short list of orchestration steps. Detailed instructions live in five dedicated subagents (planner, diagnostician, implementer, reviewer, and explorer), leaving more room in the main session's context window.
-- **The review loop is bounded.** After three failed fixes for the same problem, or if success would mean weakening a test or expanding scope, the agent stops and reports back instead of forcing a green result.
-- **Each workflow fits its work.** Bug repairs need an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code.
-- **Task memory lives in files.** Plans, implementation reports, reviews, and incident reports outlast auto-compaction and the session.
-- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
-- **Skills adapt without forking.** [Skill overrides](#skill-overrides) add project guidance from a separate file, so installed skills can keep updating from upstream.
-- **A shared baseline, adapted to each project.** [`AGENTS.md`](AGENTS.md) holds the common engineering principles. Separate files under `docs/conventions/` capture your project’s coding standards, testing setup, and development practices, loaded only when relevant. [`init-conventions`](skills/init-conventions/SKILL.md) gathers those facts from your repository and verifies commands before recording them. [See why](docs/init-conventions-rationale.md).
-
-## Who it's for
-
-**Use it if you want:**
-
-- **A setup without the bloat that still works reliably.** Many agent frameworks add long instructions to every task and mandatory process to small requests. This one doesn't. Every workflow, subagent, and skill is kept short, so you can read what your agent is told instead of taking it on trust: the always-loaded baseline is under 800 words, each workflow is under 450, and the longest subagent or skill is about 2,100. Short doesn't mean careless: the workflows still give you approved plans, tested changes, and independent review.
-- **Rigor without ceremony.** Your agent should answer a small request directly, and plan, test, and get reviewed only when a change deserves it.
-- **You in control of the process.** Nothing heavier than a normal request starts unless you ask for it, and no workflow changes code before you approve the plan.
-- **A second opinion on real changes.** An independent reviewer checks the work, and the agent stops and reports back instead of looping or weakening a test to get a pass.
-
-**Skip it if:**
-
-- You want process enforced on every change. Workflows here start only when you name them.
-- You mostly build quick prototypes or throwaway scripts. A plain coding agent is probably enough.
-- You use a coding agent other than Codex or Claude Code.
 
 ## Quick start
 
@@ -96,6 +70,15 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 Setup uses your project's package manager and falls back to npm, so a project without a `package.json` gets one.
 
 `docs/conventions/` is written by [`init-conventions`](skills/init-conventions/SKILL.md), not by setup. Incident reports in `docs/incidents/` can be committed. Plans, implementation reports, and code reviews are git-ignored by default.
+
+## Design choices
+
+- **Short instructions.** The always-loaded baseline is under 800 words, and each workflow is under 450. Workflows coordinate five subagents: planner, diagnostician, implementer, reviewer, and explorer.
+- **A shared baseline, adapted to each project.** The baseline combines shared engineering rules in [`AGENTS.md`](AGENTS.md) with predefined skills, workflows, and subagents. Separate files under `docs/conventions/` capture your project's coding standards, testing setup, and development practices, loaded only when relevant. [`init-conventions`](skills/init-conventions/SKILL.md) gathers those facts from your repository and verifies commands before recording them. [See why](docs/init-conventions-rationale.md).
+- **Explicit workflow boundaries.** Bug repairs require an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code. Workflows also stop if success would require weakening a test or expanding the approved scope.
+- **Written task records.** Plans, implementation reports, reviews, and incident reports preserve scope, decisions, and verification evidence across context compaction and sessions.
+- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
+- **Separate skill overrides.** [Overrides](#skill-overrides) add project guidance without editing installed skills, allowing those skills to receive upstream updates.
 
 ## Skills
 
