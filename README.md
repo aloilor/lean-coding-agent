@@ -6,7 +6,7 @@
 
 **Engineering discipline for your coding agent, without the bloat.**
 
-Coding agents do well on small requests and drift on large ones. The usual answer is a framework, but many are full of bloat: long instructions on every task, mandatory process for small requests, and extra tooling to learn.
+I built this for my own work, and it's what I use there. I wanted something basic. Newer models don't need the handholding and strict guardrails of the more prescriptive frameworks: long instructions on every task, mandatory process for small requests, and extra tooling to learn. What they still need on larger changes is a simple loop: plan, act, review.
 
 Lean Coding Agent is a set of skills, workflows, and subagents for Codex and Claude Code. Normal requests get a direct answer. When a change needs more rigor, you start a workflow that plans, implements, and reviews it. The always-loaded baseline is under 800 words, and each workflow is under 450.
 
