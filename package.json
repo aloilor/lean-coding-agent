@@ -1,6 +1,6 @@
 {
   "name": "lean-coding-agent",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "private": true,
   "description": "Engineering discipline for your coding agent, without the bloat. Opt-in plan, act, review workflows and small, composable skills for Codex and Claude Code.",
   "repository": {
