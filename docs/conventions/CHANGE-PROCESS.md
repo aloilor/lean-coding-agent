@@ -1,11 +1,11 @@
-# Workflows
+# Change Process
 
-## Change Process
+## Branches, Commits, And PRs
 
 - **Small changes go straight to `main`:** commit and push directly, with no branch or PR. This is the default for small, low-risk changes such as README and docs edits, typos, `TODO.md`, these conventions, and small fixes whose checks pass locally.
 - **Branch and PR for larger work:** start from an up-to-date `main`. Name branches `<type>/<description>` per [Conventional Branch 1.1.0](https://conventionalbranch.org/), using `feat/`, `fix/`, or `chore/`. `docs`, `refactor`, and `test` work goes under `chore/`.
 - **Trunk-based:** `main` is the only long-lived branch. Split larger work into small PRs.
-- **Commits:** use the [`git-conventional-commit`](../../skills/git-conventional-commit/SKILL.md) skill.
+- **Commits:** use the `git-conventional-commit` skill.
 - **Changeset:** add one with `npm run changeset` in the same PR or commit for changes that reach skill users. Skip it for repo-only changes such as tests, `TODO.md`, or these conventions.
 - **PR:** keep to one concern. Write the title as a Conventional Commit, since it becomes the commit on `main`. The body says what changed, why, and how it was verified.
 - **Merge:** the author reviews the diff, then runs `gh pr merge --squash --delete-branch`. Agents open PRs but merge only when asked.

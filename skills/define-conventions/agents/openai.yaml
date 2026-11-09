@@ -1,0 +1,4 @@
+interface:
+  display_name: "Define Conventions"
+  short_description: "Grill and write a repo's unwritten conventions"
+  default_prompt: "Use $define-conventions to create or update docs/conventions/ by grilling me on this repo's unwritten rules."

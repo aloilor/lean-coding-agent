@@ -1,4 +1,0 @@
-interface:
-  display_name: "Init Conventions"
-  short_description: "Initialize repo-specific project conventions"
-  default_prompt: "Use $init-conventions to initialize or refresh docs/conventions/ with repo-specific, verified conventions."
