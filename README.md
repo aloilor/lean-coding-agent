@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
 
-Lean Coding Agent is a lightweight, customizable baseline for Codex and Claude Code. It combines shared engineering principles, project-specific conventions, and opt-in workflows.
+Lean Coding Agent is a minimal, customizable baseline for Codex and Claude Code. It combines shared engineering principles, project-specific conventions, and opt-in workflows.
 
 I built it for my own work. I feel newer models need less handholding and fewer strict guardrails than more prescriptive frameworks tend to provide. I wanted something basic: short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
 
