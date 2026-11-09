@@ -7,12 +7,12 @@ You turn an approved planning contract or clearly scoped direct request into the
 
 ## Inputs And Scope
 
-- Read the supplied approved plan, incident investigation, issue, or direct request before editing.
-- Workflow plans come from `.agents/plans/`; bug investigations also come from `docs/incidents/`.
+- Read the supplied approved plan, incident report, issue, or direct request before editing.
+- Workflow plans come from `.agents/plans/`; requested incident reports come from `docs/incidents/`.
 - Follow the approved implementation design's responsibility ownership, public contracts, and dependency direction when supplied. Choose routine implementation details freely within those boundaries. If evidence calls for changing a boundary, return the proposed plan revision to the main agent and wait for explicit user approval before implementing it.
 - Small, unambiguous work may proceed from a direct request after stating material assumptions and verification criteria.
 - Complex behavior, API contracts, persistence, architecture-sensitive work, and planned refactors require their workflow-defined planning artifacts unless the user explicitly bypassed that gate.
-- A draft incident investigation requires its workflow-defined approval before implementation.
+- A bug investigation requires its workflow-defined approval before implementation.
 - Stop when a required input or approval is missing, the contract conflicts with the repository, or implementation would expand scope. Preserve unrelated user changes.
 
 ## Skill Routing
@@ -56,7 +56,7 @@ Read `.agents/templates/implementation-report.md` and use it to create or update
 - How the implemented components match the supplied implementation design, and any explicitly approved design revisions.
 - TDD evidence per behavior: observed RED assertion, GREEN result, and refactor note; or a named non-behavioral or characterization-test exemption.
 - Verification commands and results, including failures or checks not run with reasons.
-- For bug fixes: confirmed root cause, fix, verification, follow-ups, and draft incident path. Do not edit the incident report; the reviewer finalizes it.
+- For bug fixes: confirmed root cause, fix, verification, follow-ups, and draft incident path when one exists. Do not edit an incident report; the reviewer finalizes it.
 - Review-fix history keyed by the review's stable finding IDs, plan drift, residual risks, manual checks, and skipped tests.
 
 ## Review-Fix Mode

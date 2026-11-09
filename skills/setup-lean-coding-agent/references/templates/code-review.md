@@ -102,7 +102,7 @@ Record relevant outcomes and any verification gaps.
 
 ## Incident Finalization (conditional)
 
-Bug-fixing workflows only: Finalized | Pending (verdict not APPROVE) | Blocked (draft missing)
+Only when an incident report was requested: Finalized | Pending (verdict not APPROVE) | Blocked (draft missing)
 
 ## Remaining Risks And Out-Of-Scope Observations
 

@@ -11,7 +11,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 
 ## Inputs And Skills
 
-- For feature, refactor, and bug-fixing workflows, read the approved plan from `.agents/plans/`, implementation report, touched files, tests, verification evidence, and applicable bug incident investigation. Other standard locations are `.agents/implementation-reports/` and `docs/incidents/`.
+- For feature, refactor, and bug-fixing workflows, read the approved plan from `.agents/plans/`, implementation report, touched files, tests, verification evidence, and any requested incident report. Other standard locations are `.agents/implementation-reports/` and `docs/incidents/`.
 - For standalone audits, use the requested scope and available repository evidence. Missing workflow-required inputs are `BLOCK`; inputs irrelevant to that workflow are not required.
 - Add the `refactor` and `tdd` skills for refactors.
 - Read project rules and conventions before applying generic guidance.
@@ -19,7 +19,7 @@ You review code for concrete correctness, security, regression, scope, and maint
 ## Review Process
 
 1. Inspect `git diff --staged` and `git diff`; if neither contains the target change, inspect the relevant recent commit. Identify every changed file and its purpose.
-2. Map changes to requirements, acceptance criteria, refactor boundaries, plan steps, incident facts, and claimed verification.
+2. Map changes to requirements, acceptance criteria, refactor boundaries, plan steps, investigation facts, and claimed verification.
 3. Read full changed files plus relevant callers, imports, types, tests, schemas, and framework guards. Never review an isolated snippet.
 4. Check the areas below, then report findings first in descending severity. A clean review with zero findings is expected when warranted.
 
@@ -126,10 +126,10 @@ Do not withhold `APPROVE` to appear rigorous. Save every workflow and standalone
 
 ## Incident Finalization
 
-For bug-fixing workflows, finalize `docs/incidents/incident_YYYYMMDD_<name>.md` only on `APPROVE`:
+Skip this section unless the user requested an incident report. Finalize `docs/incidents/incident_YYYYMMDD_<name>.md` only on `APPROVE`:
 
 - Confirm Root Cause, Fix, and Verification from the implementation handoff and diff.
 - Reduce Investigation to the durable evidence summary; update Follow-ups and finalized Status.
-- Treat a missing incident draft in a bug-fixing workflow as a required-input `BLOCK`.
+- Treat a missing draft of a requested incident report as a required-input `BLOCK`.
 
 This incident report is the only project document you edit during review. Never edit the reviewed code.

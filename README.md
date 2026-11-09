@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
 
-Lean Coding Agent is a lightweight, customizable baseline for Codex and Claude Code. It combines shared engineering principles, project-specific conventions, and opt-in workflows.
+Lean Coding Agent is a minimal, customizable baseline for Codex and Claude Code. It combines shared engineering principles, project-specific conventions, and opt-in workflows.
 
 I built it for my own work. I feel newer models need less handholding and fewer strict guardrails than more prescriptive frameworks tend to provide. I wanted something basic: short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
 
@@ -76,7 +76,7 @@ Setup uses your project's package manager and falls back to npm, so a project wi
 - **Short instructions.** The always-loaded baseline is under 800 words, and each workflow is under 450. Workflows coordinate five subagents: planner, diagnostician, implementer, reviewer, and explorer.
 - **A shared baseline, adapted to each project.** The baseline combines shared engineering rules in [`AGENTS.md`](AGENTS.md) with predefined skills, workflows, and subagents. Separate files under `docs/conventions/` capture your project's coding standards, testing, deployment, and change process, loaded only when relevant. [`define-conventions`](skills/define-conventions/SKILL.md) scans your repository for evidence, then grills you on the rules it cannot show. [See why](docs/define-conventions-rationale.md).
 - **Explicit workflow boundaries.** Bug repairs require an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code. Workflows also stop if success would require weakening a test or expanding the approved scope.
-- **Written task records.** Plans, implementation reports, reviews, and incident reports preserve scope, decisions, and verification evidence across context compaction and sessions.
+- **Written task records.** Plans, implementation reports, reviews, and any requested incident reports preserve scope, decisions, and verification evidence across context compaction and sessions.
 - **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
 - **Separate skill overrides.** [Overrides](#skill-overrides) add project guidance without editing installed skills, allowing those skills to receive upstream updates.
 
@@ -110,7 +110,7 @@ Each workflow leaves a written record of the agreed scope, decisions, and verifi
 | Approved plan | `.agents/plans/plan_YYYYMMDD_<name>.md` |
 | Implementation report | `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` |
 | Review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` |
-| Incident report | `docs/incidents/incident_YYYYMMDD_<name>.md` |
+| Incident report, only on request | `docs/incidents/incident_YYYYMMDD_<name>.md` |
 
 Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates/plan.md), [implementation-report](skills/setup-lean-coding-agent/references/templates/implementation-report.md), and [code-review](skills/setup-lean-coding-agent/references/templates/code-review.md) templates, used by the planners, implementers, and reviewers of both coding agents.
 
