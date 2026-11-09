@@ -6,7 +6,6 @@ Open items only, one line each. Delete an item when it's done; git history and [
 
 ## Next
 
-- Rework `init-conventions` into a grill session that uncovers a repo's unwritten conventions; it should suggest conventions but not duplicate facts readable in the repo.
 - Update the workflows to spawn multiple implementers and reviewers so work runs in parallel.
 
 ## Later

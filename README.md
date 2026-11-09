@@ -69,12 +69,12 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 
 Setup uses your project's package manager and falls back to npm, so a project without a `package.json` gets one.
 
-`docs/conventions/` is written by [`init-conventions`](skills/init-conventions/SKILL.md), not by setup. Incident reports in `docs/incidents/` can be committed. Plans, implementation reports, and code reviews are git-ignored by default.
+`docs/conventions/` is written by [`define-conventions`](skills/define-conventions/SKILL.md), not by setup. Incident reports in `docs/incidents/` can be committed. Plans, implementation reports, and code reviews are git-ignored by default.
 
 ## Design choices
 
 - **Short instructions.** The always-loaded baseline is under 800 words, and each workflow is under 450. Workflows coordinate five subagents: planner, diagnostician, implementer, reviewer, and explorer.
-- **A shared baseline, adapted to each project.** The baseline combines shared engineering rules in [`AGENTS.md`](AGENTS.md) with predefined skills, workflows, and subagents. Separate files under `docs/conventions/` capture your project's coding standards, testing setup, and development practices, loaded only when relevant. [`init-conventions`](skills/init-conventions/SKILL.md) gathers those facts from your repository and verifies commands before recording them. [See why](docs/init-conventions-rationale.md).
+- **A shared baseline, adapted to each project.** The baseline combines shared engineering rules in [`AGENTS.md`](AGENTS.md) with predefined skills, workflows, and subagents. Separate files under `docs/conventions/` capture your project's coding standards, testing, deployment, and change process, loaded only when relevant. [`define-conventions`](skills/define-conventions/SKILL.md) scans your repository for evidence, then grills you on the rules it cannot show. [See why](docs/define-conventions-rationale.md).
 - **Explicit workflow boundaries.** Bug repairs require an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code. Workflows also stop if success would require weakening a test or expanding the approved scope.
 - **Written task records.** Plans, implementation reports, reviews, and incident reports preserve scope, decisions, and verification evidence across context compaction and sessions.
 - **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
@@ -85,7 +85,7 @@ Setup uses your project's package manager and falls back to npm, so a project wi
 ### Setup and project context
 
 - [`setup-lean-coding-agent`](skills/setup-lean-coding-agent/SKILL.md) — install the baseline into the current project.
-- [`init-conventions`](skills/init-conventions/SKILL.md) — initialize or refresh `docs/conventions/` with repo-specific, verified commands, examples to follow, boundaries, and traps.
+- [`define-conventions`](skills/define-conventions/SKILL.md) — create or update `docs/conventions/` by grilling you on the non-obvious rules your repository cannot show, including excellent code to imitate.
 - [`lean-grill-with-docs`](skills/lean-grill-with-docs/SKILL.md) — clarify plans against project terminology and documented decisions. Forked and adapted from [Matt Pocock's original skill](https://github.com/mattpocock/skills).
 - [`feature-specification`](skills/feature-specification/SKILL.md) — write a client-approvable feature spec from a fixed template.
 
@@ -178,7 +178,7 @@ There's no uninstall command. To remove Lean Coding Agent from a project:
 
 Releases follow [Semantic Versioning](https://semver.org/), so breaking changes land only in major versions. See the [changelog](CHANGELOG.md).
 
-The automated tests cover setup, not how agents behave once they're using the skills. The evaluation of `init-conventions` so far is limited to two runs on this repository. Its [rationale](docs/init-conventions-rationale.md#limits-of-the-evidence) describes what hasn't been tested yet.
+The automated tests cover setup, not how agents behave once they're using the skills. The evaluation of `define-conventions` so far uses scripted answers instead of real interviews. Its [rationale](docs/define-conventions-rationale.md#limits-of-the-evidence) describes what hasn't been tested yet.
 
 ## Contributing
 
