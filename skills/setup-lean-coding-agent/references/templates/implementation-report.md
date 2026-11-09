@@ -47,7 +47,7 @@ Exemptions: <non-behavioral or characterization-test exemptions with reasons, or
 - Confirmed root cause: <cause>
 - Fix: <repair>
 - Follow-ups: <items or None>
-- Draft incident: <docs/incidents/incident_YYYYMMDD_<name>.md>
+- Draft incident: <docs/incidents/incident_YYYYMMDD_<name>.md or Not requested>
 
 ## Review-Fix History (conditional)
 

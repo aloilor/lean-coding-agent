@@ -60,7 +60,7 @@ Use these fixed paths rather than inventing alternatives. Every planning workflo
 | Approved plan | `.agents/plans/plan_YYYYMMDD_<name>.md` | planner drafts; main agent obtains user approval |
 | Implementation report | `.agents/implementation-reports/implementation_YYYYMMDD_<name>.md` | implementer |
 | Code review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` | code-reviewer |
-| Incident report (with Investigation section) | `docs/incidents/incident_YYYYMMDD_<name>.md` | diagnostician drafts; code-reviewer finalizes |
+| Incident report, only when the user requests one (with Investigation section) | `docs/incidents/incident_YYYYMMDD_<name>.md` | diagnostician drafts; code-reviewer finalizes |
 
 ### Shared Stop Conditions
 

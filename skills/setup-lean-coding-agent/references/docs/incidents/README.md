@@ -1,6 +1,6 @@
 # Incident Reports
 
-Store the durable incident investigation for every bug-fixing workflow in this folder.
+Store incident reports in this folder. Create one only when the user requests it; a bug that is causing no trouble does not get a report.
 
 Use `incident_YYYYMMDD_short_description.md`. The diagnostician drafts the Investigation section before implementation; the code reviewer confirms the final facts after repair and verification, trims Investigation to a durable summary, and finalizes Status, Root Cause, Fix, Verification, and Follow-ups.
 
