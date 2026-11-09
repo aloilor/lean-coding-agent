@@ -1,5 +1,11 @@
 # lean-coding-agent
 
+## 2.1.0
+
+### Minor Changes
+
+- [#7](https://github.com/aloilor/lean-coding-agent/pull/7) [`247a3ef`](https://github.com/aloilor/lean-coding-agent/commit/247a3ef0a6b978e1681434bd26199793903e89f4) Thanks [@aloilor](https://github.com/aloilor)! - Make incident reports opt-in. `workflow-bug-fixing` now creates `docs/incidents/incident_YYYYMMDD_<name>.md` only when the user requests one, and carries the diagnosis through the approved plan otherwise. Rerun setup to update the installed baseline, agents, and templates.
+
 ## 2.0.0
 
 ### Major Changes
