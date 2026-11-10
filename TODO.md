@@ -7,5 +7,6 @@ Open items only, one line each. Delete an item when it's done; git history and [
 ## Next
 
 - Update the workflows to spawn multiple implementers and reviewers so work runs in parallel.
+- Add adversarial plan review: given a plan, spawn an agent from a different coding system to challenge its assumptions, identify gaps and risks, and suggest improvements (for example, Claude Code reviews a plan drafted by Codex).
 
 ## Later
