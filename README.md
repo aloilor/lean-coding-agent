@@ -4,11 +4,15 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
 
-Lean Coding Agent is a minimal, customizable baseline for Codex and Claude Code. It combines shared engineering principles, project-specific conventions, and opt-in workflows.
+Lean Coding Agent adds minimal workflows to Codex and Claude Code for planning, test-driven implementation, and code review.
 
-I built it for my own work. I feel newer models need less handholding and fewer strict guardrails than more prescriptive frameworks tend to provide. I wanted something basic: short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
+- **Workflows.** The feature, bug-fix, and refactor workflows follow a simple loop: you approve a plan, then an implementer and a reviewer iterate until the reviewer approves. Implementation follows test-driven development, one behavior at a time. If the same problem survives three fix attempts, the loop stops and reports back. Planning and code review can also run on their own.
+- **Subagents.** Each step runs in a subagent with its own context: planner, bug diagnostician, implementer, or code reviewer. An explorer looks up facts when needed. Each subagent is defined in a prompt file of at most 135 lines.
+- **Project conventions.** The [`define-conventions`](skills/define-conventions/SKILL.md) skill scans your repository, asks about rules the code doesn't show, and writes them to `docs/conventions/` for agents to read. It's the main way to give the workflows your project's context.
 
-The repository provides predefined rules, skills, workflows, and subagents, kept short and easy to inspect. Normal requests are handled directly; you invoke a workflow when you want structured planning, implementation, and review. The always-loaded baseline is under 800 words, and each workflow is under 450.
+Normal requests are handled directly. To use a workflow, start it by name. The always-loaded baseline is under 800 words, and each workflow is under 450.
+
+I wanted short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
 
 ## See it in action
 
