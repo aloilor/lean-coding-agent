@@ -49,6 +49,8 @@ Diagnose bugs before changing code. Present the symptom, evidence or likely root
 
 ### Workflow Delegation
 
+Run a `workflow-*` skill only when the user explicitly invokes that skill.
+
 In workflows, spawn subagents as directed by the selected `workflow-*` skill. If a required agent is unavailable, stop and report it. Use the shared artifact paths and stop conditions below.
 
 ### Standard Artifacts
