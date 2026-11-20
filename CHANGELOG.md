@@ -1,5 +1,11 @@
 # lean-coding-agent
 
+## 2.3.0
+
+### Minor Changes
+
+- [#10](https://github.com/aloilor/lean-coding-agent/pull/10) [`2d76456`](https://github.com/aloilor/lean-coding-agent/commit/2d76456523bdf152053ff52fb979ef4c8dd5c879) Thanks [@aloilor](https://github.com/aloilor)! - Setup now adds default Claude Code auto-compaction limits (`modelSettings.<model>.autoCompactWindow`) to `.claude/settings.json` for each model that has none.
+
 ## 2.2.0
 
 ### Minor Changes
