@@ -60,7 +60,6 @@ async function assertBaselinesMatchBundledReferences(project) {
 
 test('setup initializes project files and preserves project-owned content on rerun', async (t) => {
   const { project, commandLog, env } = await setupFixture(t);
-  await fs.writeFile(path.join(project, 'package.json'), '{"packageManager":"pnpm@9.0.0"}\n');
   await fs.writeFile(path.join(project, 'AGENTS.override.md'), 'Private notes\n');
   await fs.writeFile(path.join(project, '.gitignore'), '# Existing rules\nnode_modules/\n');
   const overrideDirectory = path.join(project, '.agents', 'skill-overrides');
@@ -136,11 +135,8 @@ test('setup initializes project files and preserves project-owned content on rer
   });
 
   const firstCommands = await loggedCommands(commandLog);
-  assert.deepEqual(firstCommands.map(({ command }) => command), ['pnpm', 'pnpm', 'npx', 'npx', 'npx', 'npx', 'npx']);
-  assert.deepEqual(firstCommands[0].args, ['add', '--save-dev', 'agent-browser@latest']);
-  assert.deepEqual(firstCommands[1].args, ['exec', '--', 'agent-browser', 'install']);
-  assert.deepEqual(firstCommands.slice(2).map(({ args }) => args), [
-    ['skills', 'add', 'https://github.com/vercel-labs/agent-browser', '--skill', 'agent-browser', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+  assert.deepEqual(firstCommands.map(({ command }) => command), ['npx', 'npx', 'npx', 'npx']);
+  assert.deepEqual(firstCommands.map(({ args }) => args), [
     ['skills', 'add', 'https://github.com/mattpocock/skills', '--skill', 'handoff', 'tdd', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'refactor', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/anthropics/claude-plugins-community', '--skill', 'eli5', '--agent', 'codex', 'claude-code', '--copy', '-y'],
@@ -179,8 +175,7 @@ test('setup initializes project files and preserves project-owned content on rer
   );
   const ignoreRules = await fs.readFile(path.join(project, '.gitignore'), 'utf8');
   assert.match(ignoreRules, /^AGENTS\.override\.md$/m);
-  assert.equal((ignoreRules.match(/^node_modules\/$/gm) ?? []).length, 1);
-  assert.equal((await loggedCommands(commandLog)).length, 14);
+  assert.equal((await loggedCommands(commandLog)).length, 8);
 });
 
 test('setup preserves installed skills and the CLI lock on rerun', async (t) => {
@@ -220,7 +215,7 @@ test('setup for Claude Code only installs Claude Code agents and skills without 
   }
   await assert.rejects(fs.access(path.join(project, '.codex')), { code: 'ENOENT' });
   const skillCommands = (await loggedCommands(commandLog)).filter(({ command }) => command === 'npx');
-  assert.equal(skillCommands.length, 5);
+  assert.equal(skillCommands.length, 4);
   for (const { args } of skillCommands) {
     assert.deepEqual(args.slice(args.indexOf('--agent')), ['--agent', 'claude-code', '--copy', '-y']);
   }
@@ -266,16 +261,16 @@ test('setup installs shared artifact templates for each tool selection and refre
 
 test('setup reports installer failures and stops before later commands', async (t) => {
   const { project, commandLog, env } = await setupFixture(t);
-  env.SETUP_FAIL_COMMAND = 'npm';
+  env.SETUP_FAIL_COMMAND = 'npx';
 
   await assert.rejects(
     runFile(process.execPath, [setupScript, project], { env }),
     (error) => {
-      assert.match(error.stderr, /Could not install agent-browser@latest with npm \(exit code 7\)/);
+      assert.match(error.stderr, /Could not install upstream skills from https:\/\/github\.com\/mattpocock\/skills with npx \(exit code 7\)/);
       return true;
     },
   );
-  assert.deepEqual((await loggedCommands(commandLog)).map(({ command }) => command), ['npm']);
+  assert.deepEqual((await loggedCommands(commandLog)).map(({ command }) => command), ['npx']);
 });
 
 test('setup with --docs-dir points lean-grill-with-docs at the chosen folder and updates it on rerun', async (t) => {
@@ -354,7 +349,6 @@ test('setup rejects a --docs-dir outside the target project before changing it',
 
 test('setup adds the Claude Code status line to existing settings and skips it for Codex only', async (t) => {
   const { project, env } = await setupFixture(t);
-  await fs.writeFile(path.join(project, 'package.json'), '{}\n');
   await runFile(process.execPath, [setupScript, project, '--tools', 'codex'], { env });
   await assert.rejects(fs.access(path.join(project, '.claude')), { code: 'ENOENT' });
 

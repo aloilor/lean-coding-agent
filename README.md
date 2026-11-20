@@ -68,10 +68,8 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 | Replaced on every run | `AGENTS.md` and `CLAUDE.md`. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it. |
 | Refreshed on every run | The five bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the upstream skills below, and the three bundled templates in `.agents/templates/`. Your own agents, templates, and override index entries are preserved. |
 | Created when missing | `AGENTS.override.md`, `.agents/lessons/`, `.agents/skill-overrides/`, and, for Codex, `.codex/config.toml` with multi-agent defaults and a status line, and, for Claude Code, a status line in `.claude/statusline.mjs` registered in `.claude/settings.json` unless that file already sets one, plus per-model `autoCompactWindow` limits for models without one and `permissions.deny` entries for the `Artifact` and `PowerShell` tools when they are not already denied. `Artifact` is denied because coding sessions do not need claude.ai artifacts and its tool and skill definitions consume context; `PowerShell` is denied so Claude Code on Windows runs every shell command through Bash (POSIX), keeping commands and scripts consistent across platforms. |
-| Added to `.gitignore` | Local files, agent task and report directories, and `node_modules/`. |
-| Installed | `agent-browser@latest` as a development dependency, plus its browser runtime, and the [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
-
-Setup uses your project's package manager and falls back to npm, so a project without a `package.json` gets one.
+| Added to `.gitignore` | Local files and agent task and report directories. |
+| Installed | The [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
 
 `docs/conventions/` is written by [`define-conventions`](skills/define-conventions/SKILL.md), not by setup. Incident reports in `docs/incidents/` can be committed. Plans, implementation reports, and code reviews are git-ignored by default.
 
@@ -127,7 +125,6 @@ Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates
 
 | Skill | Source | Use when |
 | --- | --- | --- |
-| [`agent-browser`](https://github.com/vercel-labs/agent-browser/blob/main/skills/agent-browser/SKILL.md) | [vercel-labs/agent-browser](https://github.com/vercel-labs/agent-browser) | Navigate and interact with websites, fill forms, extract page data, or test web apps through a browser. |
 | [`eli5`](https://www.skills.sh/anthropics/claude-plugins-community/eli5) | [anthropics/claude-plugins-community](https://github.com/anthropics/claude-plugins-community) | Explain a topic in beginner-friendly terms using a visual HTML artifact. |
 | [`handoff`](https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Pass ongoing work to another agent or session with a concise summary, next steps, and links to existing artifacts. |
 | [`tdd`](https://github.com/mattpocock/skills/blob/main/skills/engineering/tdd/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | Build a feature or fix a bug test-first, one behavior slice at a time, using red-green-refactor. |
@@ -175,8 +172,7 @@ The Skills CLI owns skill installation, tracking, updates, and removal. See its 
 There's no uninstall command. To remove Lean Coding Agent from a project:
 
 1. Run `npx skills remove` to remove the installed skills.
-2. Remove the `agent-browser` development dependency.
-3. Delete the [files setup created](#what-setup-changes) and its `.gitignore` entries.
+2. Delete the [files setup created](#what-setup-changes) and its `.gitignore` entries.
 
 ## Project status
 

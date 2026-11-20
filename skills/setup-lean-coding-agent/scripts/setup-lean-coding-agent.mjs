@@ -64,14 +64,9 @@ const ignoredAgentFiles = [
   '.agents/implementation-reports/',
   '.agents/tasks/',
   '.codex/tasks/',
-  'node_modules/',
 ];
 
 const upstreamSkillGroups = [
-  {
-    source: 'https://github.com/vercel-labs/agent-browser',
-    skills: ['agent-browser'],
-  },
   {
     source: 'https://github.com/mattpocock/skills',
     skills: ['handoff', 'tdd'],
@@ -89,20 +84,6 @@ const upstreamSkillGroups = [
     skills: ['skill-creator'],
   },
 ];
-
-const packageManagerCommands = {
-  npm: ['npm', 'install', '--save-dev'],
-  pnpm: ['pnpm', 'add', '--save-dev'],
-  yarn: ['yarn', 'add', '--dev'],
-  bun: ['bun', 'add', '--dev'],
-};
-
-const agentBrowserInstallCommands = {
-  npm: ['npm', 'exec', '--', 'agent-browser', 'install'],
-  pnpm: ['pnpm', 'exec', '--', 'agent-browser', 'install'],
-  yarn: ['yarn', 'run', 'agent-browser', 'install'],
-  bun: ['bun', 'run', 'agent-browser', 'install'],
-};
 
 function modelOptionName(tool, agentName) {
   return `${agentTools[tool].modelOptionPrefix}${agentName}-model`;
@@ -494,38 +475,6 @@ async function syncBaselineSkillOverrides(targetProject) {
   return copiedPaths;
 }
 
-async function detectPackageManager(targetProject) {
-  const packageJsonPath = path.join(targetProject, 'package.json');
-  if (await pathExists(packageJsonPath)) {
-    let packageJson;
-    try {
-      packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
-    } catch {
-      throw new Error(`Target package.json is not valid JSON: ${packageJsonPath}`);
-    }
-    if (packageJson === null || typeof packageJson !== 'object' || Array.isArray(packageJson)) {
-      throw new Error(`Target package.json must contain a JSON object: ${packageJsonPath}`);
-    }
-    if (typeof packageJson.packageManager === 'string') {
-      const managerName = packageJson.packageManager.split('@', 1)[0];
-      if (Object.hasOwn(packageManagerCommands, managerName)) return managerName;
-    }
-  }
-
-  const lockfiles = [
-    ['pnpm-lock.yaml', 'pnpm'],
-    ['yarn.lock', 'yarn'],
-    ['bun.lock', 'bun'],
-    ['bun.lockb', 'bun'],
-    ['package-lock.json', 'npm'],
-    ['npm-shrinkwrap.json', 'npm'],
-  ];
-  for (const [filename, managerName] of lockfiles) {
-    if (await pathExists(path.join(targetProject, filename))) return managerName;
-  }
-  return 'npm';
-}
-
 function executableName(commandName) {
   return process.platform === 'win32' ? `${commandName}.cmd` : commandName;
 }
@@ -548,23 +497,6 @@ function runCommand(command, args, targetProject, failureMessage) {
       }
     });
   });
-}
-
-async function installAgentBrowser(targetProject) {
-  const managerName = await detectPackageManager(targetProject);
-  await runCommand(
-    packageManagerCommands[managerName][0],
-    [...packageManagerCommands[managerName].slice(1), 'agent-browser@latest'],
-    targetProject,
-    `Could not install agent-browser@latest with ${managerName}`,
-  );
-  await runCommand(
-    agentBrowserInstallCommands[managerName][0],
-    agentBrowserInstallCommands[managerName].slice(1),
-    targetProject,
-    `Could not run agent-browser install with ${managerName}`,
-  );
-  return `package installed and browser installed with ${managerName}`;
 }
 
 async function installUpstreamSkills(targetProject, tools) {
@@ -595,7 +527,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
-  const agentBrowserStatus = await installAgentBrowser(targetProject);
   const upstreamSkillNames = await installUpstreamSkills(targetProject, tools);
 
   console.log(`Initialized project repo: ${targetProject}`);
@@ -609,7 +540,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
       console.log(`- ${agentPaths[tool][index]}: ${models[tool][agentName]}`);
     });
   }
-  console.log(`Agent Browser dependency: ${agentBrowserStatus}`);
   console.log(`Ensured incident reports file: ${incidentReadme}`);
   console.log(`Ensured shared lessons index: ${lessonsIndex}`);
   console.log('Installed shared artifact templates:');
