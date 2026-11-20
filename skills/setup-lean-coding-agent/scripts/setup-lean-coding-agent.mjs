@@ -288,6 +288,22 @@ async function ensureCodexConfig(targetProject) {
   return configPath;
 }
 
+async function ensureClaudeStatusLine(targetProject) {
+  const claudeDirectory = path.join(targetProject, '.claude');
+  await fs.mkdir(claudeDirectory, { recursive: true });
+  const scriptPath = path.join(claudeDirectory, 'statusline.mjs');
+  if (!(await pathExists(scriptPath))) {
+    await fs.copyFile(await requiredReference('statusline.mjs'), scriptPath);
+  }
+  const settingsPath = path.join(claudeDirectory, 'settings.json');
+  const settings = (await pathExists(settingsPath)) ? JSON.parse(await fs.readFile(settingsPath, 'utf8')) : {};
+  if (settings.statusLine === undefined) {
+    settings.statusLine = { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' };
+    await fs.writeFile(settingsPath, `${JSON.stringify(settings, null, 2)}\n`);
+  }
+  return { scriptPath, settingsPath };
+}
+
 export async function installAgents(targetProject, tool, models) {
   const {
     templateDirectory,
@@ -556,6 +572,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const agentPaths = {};
   for (const tool of tools) agentPaths[tool] = await installAgents(targetProject, tool, models[tool]);
   const codexConfigPath = tools.includes('codex') ? await ensureCodexConfig(targetProject) : null;
+  const claudeStatusLine = tools.includes('claude-code') ? await ensureClaudeStatusLine(targetProject) : null;
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
@@ -582,6 +599,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
   if (grillOverride?.removed) console.log(`Removed lean-grill-with-docs folder override: ${grillOverride.overridePath}`);
   if (codexConfigPath) console.log(`Ensured Codex config: ${codexConfigPath}`);
+  if (claudeStatusLine) console.log(`Ensured Claude Code status line: ${claudeStatusLine.scriptPath}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
   console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
 }

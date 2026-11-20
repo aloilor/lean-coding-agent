@@ -98,6 +98,8 @@ test('setup initializes project files and preserves project-owned content on rer
     '.claude/agents/implementer.md',
     '.claude/agents/code-reviewer.md',
     '.claude/agents/explorer.md',
+    '.claude/statusline.mjs',
+    '.claude/settings.json',
     'docs/incidents/README.md',
   ]) {
     assert.ok((await fs.stat(path.join(project, relativePath))).isFile(), relativePath);
@@ -119,6 +121,14 @@ test('setup initializes project files and preserves project-owned content on rer
     await fs.readFile(path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'config.toml'), 'utf8'),
   );
 
+  assert.equal(
+    await fs.readFile(path.join(project, '.claude', 'statusline.mjs'), 'utf8'),
+    await fs.readFile(path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'statusline.mjs'), 'utf8'),
+  );
+  assert.deepEqual(JSON.parse(await fs.readFile(path.join(project, '.claude', 'settings.json'), 'utf8')), {
+    statusLine: { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' },
+  });
+
   const firstCommands = await loggedCommands(commandLog);
   assert.deepEqual(firstCommands.map(({ command }) => command), ['pnpm', 'pnpm', 'npx', 'npx', 'npx', 'npx', 'npx']);
   assert.deepEqual(firstCommands[0].args, ['add', '--save-dev', 'agent-browser@latest']);
@@ -135,6 +145,8 @@ test('setup initializes project files and preserves project-owned content on rer
   await fs.writeFile(path.join(project, 'AGENTS.md'), 'Outdated managed baseline\n');
   await fs.writeFile(path.join(project, 'CLAUDE.md'), 'Outdated managed baseline\n');
   await fs.writeFile(path.join(project, '.codex', 'config.toml'), 'model = "project-choice"\n');
+  await fs.writeFile(path.join(project, '.claude', 'statusline.mjs'), '// project choice\n');
+  await fs.writeFile(path.join(project, '.claude', 'settings.json'), '{"statusLine":{"type":"command","command":"custom"}}\n');
   await fs.writeFile(path.join(overrideDirectory, 'tdd.md'), 'Outdated managed override\n');
   await runFile(process.execPath, options, { env });
   await assert.rejects(fs.stat(path.join(project, 'docs', 'conventions')), { code: 'ENOENT' });
@@ -142,6 +154,11 @@ test('setup initializes project files and preserves project-owned content on rer
   await assertBaselinesMatchBundledReferences(project);
   assert.equal(await fs.readFile(path.join(project, 'AGENTS.override.md'), 'utf8'), 'Private notes\n');
   assert.equal(await fs.readFile(path.join(project, '.codex', 'config.toml'), 'utf8'), 'model = "project-choice"\n');
+  assert.equal(await fs.readFile(path.join(project, '.claude', 'statusline.mjs'), 'utf8'), '// project choice\n');
+  assert.equal(
+    await fs.readFile(path.join(project, '.claude', 'settings.json'), 'utf8'),
+    '{"statusLine":{"type":"command","command":"custom"}}\n',
+  );
   const overrideIndex = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
   assert.match(overrideIndex, /- \[custom\]\(custom\.md\)/);
   assert.equal((overrideIndex.match(/- \[tdd\]\(tdd\.md\)/g) ?? []).length, 1);
@@ -322,4 +339,20 @@ test('setup rejects a --docs-dir outside the target project before changing it',
     );
     assert.deepEqual(await fs.readdir(project), [], docsDirectory);
   }
+});
+
+test('setup adds the Claude Code status line to existing settings and skips it for Codex only', async (t) => {
+  const { project, env } = await setupFixture(t);
+  await fs.writeFile(path.join(project, 'package.json'), '{}\n');
+  await runFile(process.execPath, [setupScript, project, '--tools', 'codex'], { env });
+  await assert.rejects(fs.access(path.join(project, '.claude')), { code: 'ENOENT' });
+
+  await fs.mkdir(path.join(project, '.claude'));
+  await fs.writeFile(path.join(project, '.claude', 'settings.json'), '{"permissions":{"deny":["Bash"]}}\n');
+  await runFile(process.execPath, [setupScript, project, '--tools', 'claude-code'], { env });
+  assert.deepEqual(JSON.parse(await fs.readFile(path.join(project, '.claude', 'settings.json'), 'utf8')), {
+    permissions: { deny: ['Bash'] },
+    statusLine: { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' },
+  });
+  assert.ok((await fs.stat(path.join(project, '.claude', 'statusline.mjs'))).isFile());
 });
