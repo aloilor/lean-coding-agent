@@ -1,5 +1,17 @@
 # lean-coding-agent
 
+## 2.4.0
+
+### Minor Changes
+
+- [`c451883`](https://github.com/aloilor/lean-coding-agent/commit/c4518830a11a1d37349d5d859d40bb2c82108070) Thanks [@aloilor](https://github.com/aloilor)! - Stop installing `agent-browser` during setup: no dev dependency, browser runtime, upstream skill, or `node_modules/` gitignore entry.
+
+### Patch Changes
+
+- [`2ab2586`](https://github.com/aloilor/lean-coding-agent/commit/2ab2586811da0dfbdce3c0b0f921d93ad5a297ff) Thanks [@aloilor](https://github.com/aloilor)! - Document why setup denies the `Artifact` and `PowerShell` Claude Code tools.
+
+- [`1670961`](https://github.com/aloilor/lean-coding-agent/commit/1670961c8218c8a7450f4425e20835eea5ea8be9) Thanks [@aloilor](https://github.com/aloilor)! - Show time until the 5-hour and 7-day rate limits reset in the Claude Code status line.
+
 ## 2.3.2
 
 ### Patch Changes
