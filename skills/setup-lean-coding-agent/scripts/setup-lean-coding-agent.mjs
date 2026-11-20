@@ -294,6 +294,8 @@ const CLAUDE_AUTO_COMPACT_WINDOWS = {
   'claude-sonnet-5-5': 350000,
 };
 
+const CLAUDE_DENIED_TOOLS = ['Artifact', 'PowerShell'];
+
 async function ensureClaudeStatusLine(targetProject) {
   const claudeDirectory = path.join(targetProject, '.claude');
   await fs.mkdir(claudeDirectory, { recursive: true });
@@ -310,6 +312,11 @@ async function ensureClaudeStatusLine(targetProject) {
     settings.modelSettings[model].autoCompactWindow ??= autoCompactWindow;
   }
   settings.statusLine ??= { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' };
+  settings.permissions ??= {};
+  settings.permissions.deny ??= [];
+  for (const tool of CLAUDE_DENIED_TOOLS) {
+    if (!settings.permissions.deny.includes(tool)) settings.permissions.deny.push(tool);
+  }
   if (JSON.stringify(settings) !== before) {
     await fs.writeFile(settingsPath, `${JSON.stringify(settings, null, 2)}\n`);
   }

@@ -13,5 +13,11 @@
   "statusLine": {
     "type": "command",
     "command": "node \"$CLAUDE_PROJECT_DIR/.claude/statusline.mjs\""
+  },
+  "permissions": {
+    "deny": [
+      "Artifact",
+      "PowerShell"
+    ]
   }
 }
