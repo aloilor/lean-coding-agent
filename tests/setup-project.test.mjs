@@ -132,6 +132,7 @@ test('setup initializes project files and preserves project-owned content on rer
       'claude-sonnet-5-5': { autoCompactWindow: 350000 },
     },
     statusLine: { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' },
+    permissions: { deny: ['Artifact', 'PowerShell'] },
   });
 
   const firstCommands = await loggedCommands(commandLog);
@@ -167,6 +168,7 @@ test('setup initializes project files and preserves project-owned content on rer
       'claude-haiku-5-5': { autoCompactWindow: 250000 },
       'claude-sonnet-5-5': { autoCompactWindow: 350000 },
     },
+    permissions: { deny: ['Artifact', 'PowerShell'] },
   });
   const overrideIndex = await fs.readFile(path.join(overrideDirectory, 'INDEX.md'), 'utf8');
   assert.match(overrideIndex, /- \[custom\]\(custom\.md\)/);
@@ -360,7 +362,7 @@ test('setup adds the Claude Code status line to existing settings and skips it f
   await fs.writeFile(path.join(project, '.claude', 'settings.json'), '{"permissions":{"deny":["Bash"]}}\n');
   await runFile(process.execPath, [setupScript, project, '--tools', 'claude-code'], { env });
   assert.deepEqual(JSON.parse(await fs.readFile(path.join(project, '.claude', 'settings.json'), 'utf8')), {
-    permissions: { deny: ['Bash'] },
+    permissions: { deny: ['Bash', 'Artifact', 'PowerShell'] },
     modelSettings: {
       'claude-opus-5-5': { autoCompactWindow: 450000 },
       'claude-haiku-5-5': { autoCompactWindow: 250000 },
