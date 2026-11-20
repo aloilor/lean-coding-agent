@@ -45,7 +45,7 @@ test('agent installation assigns selected models and preserves reasoning effort 
     const installed = await fs.readFile(path.join(project, '.codex', 'agents', `${agentName}.toml`), 'utf8');
     const expectedEffort = {
       planner: 'low',
-      'bug-diagnostician': 'max',
+      'bug-diagnostician': 'xhigh',
       implementer: 'xhigh',
       'code-reviewer': 'low',
       explorer: 'high',
