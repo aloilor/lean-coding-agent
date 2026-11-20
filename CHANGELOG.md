@@ -1,5 +1,11 @@
 # lean-coding-agent
 
+## 2.3.1
+
+### Patch Changes
+
+- [#12](https://github.com/aloilor/lean-coding-agent/pull/12) [`a242a5b`](https://github.com/aloilor/lean-coding-agent/commit/a242a5b113e03f4be2eb79b8a3464737ad9cfe5b) Thanks [@aloilor](https://github.com/aloilor)! - Change the Codex `bug-diagnostician` default reasoning effort from `max` to `xhigh`.
+
 ## 2.3.0
 
 ### Minor Changes
