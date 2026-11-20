@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Claude Code status line, two lines:
 //   [Model] effort 📁 project | 🌿 branch
-//   ▓▓▓░░░░░ 49.3k/1m | 5h 23% | 7d 61%
+//   ▓▓▓░░░░░ 49.3k/1m | 5h 23% ↻2h13m | 7d 61% ↻3d4h
 import { readFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import os from 'node:os';
@@ -28,6 +28,12 @@ const bar = (pct, w = 10) => {
   const f = Math.max(0, Math.min(w, Math.round((pct / 100) * w)));
   const col = pct >= 90 ? 31 : pct >= 70 ? 33 : 32;
   return c(col, '█'.repeat(f)) + c(90, '░'.repeat(w - f));
+};
+// Countdown until a rate-limit window resets (resets_at is Unix epoch seconds).
+const until = (epoch) => {
+  const m = Math.max(0, Math.round((epoch * 1000 - Date.now()) / 60000));
+  const d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60), min = m % 60;
+  return d ? `${d}d${h}h` : h ? `${h}h${min}m` : `${min}m`;
 };
 const pctColor = (p) => (p >= 90 ? 31 : p >= 70 ? 33 : 37);
 
@@ -65,6 +71,8 @@ if (pct != null) {
 }
 for (const [key, label] of [['five_hour', '5h'], ['seven_day', '7d']]) {
   const p = j.rate_limits?.[key]?.used_percentage;
-  if (p != null) parts.push(c(pctColor(p), `${label} ${Math.round(p)}%`));
+  if (p == null) continue;
+  const r = j.rate_limits[key].resets_at;
+  parts.push(c(pctColor(p), `${label} ${Math.round(p)}%`) + (r ? c(90, ` ↻${until(r)}`) : ""));
 }
 process.stdout.write(parts.length ? `${line1}\n${parts.join(' | ')}` : line1);
