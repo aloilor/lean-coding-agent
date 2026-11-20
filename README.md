@@ -67,7 +67,7 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 | --- | --- |
 | Replaced on every run | `AGENTS.md` and `CLAUDE.md`. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it. |
 | Refreshed on every run | The five bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the upstream skills below, and the three bundled templates in `.agents/templates/`. Your own agents, templates, and override index entries are preserved. |
-| Created when missing | `AGENTS.override.md`, `.agents/lessons/`, `.agents/skill-overrides/`, and, for Codex, `.codex/config.toml` with multi-agent defaults and a status line, and, for Claude Code, a status line in `.claude/statusline.mjs` registered in `.claude/settings.json` unless that file already sets one. |
+| Created when missing | `AGENTS.override.md`, `.agents/lessons/`, `.agents/skill-overrides/`, and, for Codex, `.codex/config.toml` with multi-agent defaults and a status line, and, for Claude Code, a status line in `.claude/statusline.mjs` registered in `.claude/settings.json` unless that file already sets one, plus per-model `autoCompactWindow` limits for models without one. |
 | Added to `.gitignore` | Local files, agent task and report directories, and `node_modules/`. |
 | Installed | `agent-browser@latest` as a development dependency, plus its browser runtime, and the [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
 

@@ -1,4 +1,15 @@
 {
+  "modelSettings": {
+    "claude-opus-5-5": {
+      "autoCompactWindow": 450000
+    },
+    "claude-haiku-5-5": {
+      "autoCompactWindow": 250000
+    },
+    "claude-sonnet-5-5": {
+      "autoCompactWindow": 350000
+    }
+  },
   "statusLine": {
     "type": "command",
     "command": "node \"$CLAUDE_PROJECT_DIR/.claude/statusline.mjs\""

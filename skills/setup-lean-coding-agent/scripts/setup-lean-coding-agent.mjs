@@ -288,6 +288,12 @@ async function ensureCodexConfig(targetProject) {
   return configPath;
 }
 
+const CLAUDE_AUTO_COMPACT_WINDOWS = {
+  'claude-opus-5-5': 450000,
+  'claude-haiku-5-5': 250000,
+  'claude-sonnet-5-5': 350000,
+};
+
 async function ensureClaudeStatusLine(targetProject) {
   const claudeDirectory = path.join(targetProject, '.claude');
   await fs.mkdir(claudeDirectory, { recursive: true });
@@ -297,8 +303,14 @@ async function ensureClaudeStatusLine(targetProject) {
   }
   const settingsPath = path.join(claudeDirectory, 'settings.json');
   const settings = (await pathExists(settingsPath)) ? JSON.parse(await fs.readFile(settingsPath, 'utf8')) : {};
-  if (settings.statusLine === undefined) {
-    settings.statusLine = { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' };
+  const before = JSON.stringify(settings);
+  settings.modelSettings ??= {};
+  for (const [model, autoCompactWindow] of Object.entries(CLAUDE_AUTO_COMPACT_WINDOWS)) {
+    settings.modelSettings[model] ??= {};
+    settings.modelSettings[model].autoCompactWindow ??= autoCompactWindow;
+  }
+  settings.statusLine ??= { type: 'command', command: 'node "$CLAUDE_PROJECT_DIR/.claude/statusline.mjs"' };
+  if (JSON.stringify(settings) !== before) {
     await fs.writeFile(settingsPath, `${JSON.stringify(settings, null, 2)}\n`);
   }
   return { scriptPath, settingsPath };
