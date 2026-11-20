@@ -1,5 +1,11 @@
 # lean-coding-agent
 
+## 2.3.2
+
+### Patch Changes
+
+- [#14](https://github.com/aloilor/lean-coding-agent/pull/14) [`171b977`](https://github.com/aloilor/lean-coding-agent/commit/171b9776b567355a7fc23864d1411e2d01b91c1b) Thanks [@aloilor](https://github.com/aloilor)! - Setup adds `Artifact` and `PowerShell` to `permissions.deny` in `.claude/settings.json` when missing, keeping existing deny rules.
+
 ## 2.3.1
 
 ### Patch Changes
