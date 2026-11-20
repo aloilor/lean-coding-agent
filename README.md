@@ -1,6 +1,7 @@
 # Lean Coding Agent
 
 [![CI](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/aloilor/lean-coding-agent)](https://github.com/aloilor/lean-coding-agent/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#quick-start)
 
