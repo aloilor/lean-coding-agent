@@ -1,5 +1,13 @@
 # lean-coding-agent
 
+## 2.2.0
+
+### Minor Changes
+
+- [`c49005c`](https://github.com/aloilor/lean-coding-agent/commit/c49005c64ec32cbfbe78fd37f1f9c521916866fd) Thanks [@aloilor](https://github.com/aloilor)! - Setup now installs a Claude Code status line in `.claude/statusline.mjs` and registers it in `.claude/settings.json` when no status line is set.
+
+- [`a382dcd`](https://github.com/aloilor/lean-coding-agent/commit/a382dcd1f1696360e7b4871f31b9aa89c9ffc025) Thanks [@aloilor](https://github.com/aloilor)! - Run `workflow-*` skills only when the user explicitly invokes them.
+
 ## 2.1.0
 
 ### Minor Changes
