@@ -2,41 +2,26 @@
 
 [![CI](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#see-it-in-action)
+[![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#quick-start)
 
-Lean Coding Agent adds minimal workflows to Codex and Claude Code for planning, test-driven implementation, and code review.
+Coding agents tend to either skip planning entirely or bury every small request in ceremony. Lean Coding Agent gives Codex and Claude Code a **plan → test-first implementation → independent review** loop that runs only when you ask for it. Predefined workflows set the loop and its stop conditions without scripting every move, lean subagents of at most 135 lines each do the work, and [`define-conventions`](skills/define-conventions/SKILL.md) captures your project's rules. Rules follow progressive disclosure: instead of piling everything into `AGENTS.md`, agents load each convention file by topic only when a task needs it. The always-loaded baseline stays under 800 words, and each workflow under 450.
+
+![Small requests run directly. Named workflows go through plan, your approval, test-first implementation, and independent review, stopping after three failed fix attempts.](docs/assets/workflow-loop.svg)
 
 - **Workflows.** The feature, bug-fix, and refactor workflows follow a simple loop: you approve a plan, then an implementer and a reviewer iterate until the reviewer approves. Implementation follows test-driven development, one behavior at a time. If the same problem survives three fix attempts, the loop stops and reports back. Planning and code review can also run on their own.
 - **Subagents.** Each step runs in a subagent with its own context: planner, bug diagnostician, implementer, or code reviewer. An explorer looks up facts when needed. Each subagent is defined in a prompt file of at most 135 lines.
-- **Project conventions.** The [`define-conventions`](skills/define-conventions/SKILL.md) skill scans your repository, asks about rules the code doesn't show, and writes them to `docs/conventions/` for agents to read. It's the main way to give the workflows your project's context.
+- **Project conventions.** The [`define-conventions`](skills/define-conventions/SKILL.md) skill scans your repository, asks about rules the code doesn't show, and writes them to `docs/conventions/` as separate files for coding standards, testing, change process, and deployment. Agents load only the files the current task needs, so a testing change reads `TESTING.md` and nothing about deployments. It's the main way to give the workflows your project's context.
 
-Normal requests are handled directly. To use a workflow, start it by name. The always-loaded baseline is under 800 words, and each workflow is under 450.
+Normal requests are handled directly. To use a workflow, start it by name.
 
 I wanted short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
 
-## See it in action
+## Why not just…?
 
-For everyday requests, work with the agent as usual. To start a workflow, name it explicitly. For example, in Claude Code:
-
-```text
-/workflow-feature-development Add CSV export to the orders page
-```
-
-1. A planner works through the requirements with you and writes them into a plan.
-2. You approve the plan before implementation starts.
-3. An implementer builds it test-first, one behavior at a time.
-4. An independent reviewer checks the change, and the loop repeats until it's approved. If the same problem survives three fix attempts, the agent stops and reports back.
-
-```mermaid
-flowchart LR
-    A[You name a workflow] --> B[Plan]
-    B --> C{You approve?}
-    C -->|Yes| D[Implement test-first]
-    C -->|Revise| B
-    D --> E[Independent review]
-    E -->|Blocked| D
-    E -->|Approved| F[Verify and report]
-```
+- **…write a longer `CLAUDE.md` or `AGENTS.md`?** Every word in it is loaded for every request, including typo fixes. Here the always-loaded part stays small, project conventions load per topic only when a task needs them, and workflow instructions load only when you name a workflow.
+- **…use a bigger skill or agent framework?** Many are bloated with handholding and guardrails that newer models no longer need, and all that instruction is a token sink on every request. Here the guidance lives where it matters: a precise plan you approve for each task, plus a short loop with clear stop conditions, instead of pages of generic rules. Nothing is mandatory: small requests run directly, and you choose when to pay for planning and review.
+- **…let a single agent plan, build, and check its own work?** An agent reviewing its own context tends to approve itself. Here the reviewer is a separate subagent with fresh context, and the loop stops and reports back instead of retrying forever.
+- **…use the strongest model for everything?** It costs more without improving well-specified execution. Strong models plan and review, and fast models implement against an approved plan and tests. See [Model defaults](#model-defaults).
 
 ## Quick start
 
@@ -50,18 +35,29 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 
    In the installer, select Codex, Claude Code, or both, then select `setup-lean-coding-agent` and any other skills you want.
 
-2. Read [what setup changes](#what-setup-changes), especially if your project already has an `AGENTS.md` or `CLAUDE.md`.
+2. Commit or stash your work, ideally on a fresh branch, so `git diff` shows exactly what setup changes and `git checkout .` undoes it. If your project already has an `AGENTS.md` or `CLAUDE.md`, read [what setup changes](#what-setup-changes) first.
 
 3. Run setup in your project: `/setup-lean-coding-agent` in Claude Code, or `$setup-lean-coding-agent` in Codex.
 
    Setup asks which coding agents to configure and which model each subagent should use, then offers to capture your project's conventions.
 
-4. Work as usual, or call a skill by name, such as `/workflow-feature-development` in Claude Code or `$workflow-feature-development` in Codex.
+4. Work as usual. When you want the full loop, start a workflow by name with your request, for example in Claude Code:
+
+   ```text
+   /workflow-feature-development Add CSV export to the orders page
+   ```
+
+   In Codex, use `$workflow-feature-development` instead.
 
 ## What setup changes
 
-> [!WARNING]
-> Setup replaces `AGENTS.md` and `CLAUDE.md` on every run, so any existing content in them is lost. Before you run it, move shared project rules to `docs/conventions/` and private notes to `AGENTS.override.md`. Rerunning setup leaves those files alone.
+Setup only writes inside your project, and every change shows up in `git status`. It doesn't touch your source code.
+
+> [!IMPORTANT]
+> Setup replaces `AGENTS.md` and `CLAUDE.md` on every run. If you already have content in them, move shared project rules to `docs/conventions/` and private notes to `AGENTS.override.md` first. Setup never overwrites those files.
+
+<details>
+<summary>Full list of changes</summary>
 
 | Change | Details |
 | --- | --- |
@@ -71,11 +67,13 @@ You need Node.js, npm, and a project opened in Codex or Claude Code.
 | Added to `.gitignore` | Local files and agent task and report directories. |
 | Installed | The [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
 
+</details>
+
 `docs/conventions/` is written by [`define-conventions`](skills/define-conventions/SKILL.md), not by setup. Incident reports in `docs/incidents/` can be committed. Plans, implementation reports, and code reviews are git-ignored by default.
 
 ## Design choices
 
-- **Short instructions.** The always-loaded baseline is under 800 words, and each workflow is under 450. Workflows coordinate five subagents: planner, diagnostician, implementer, reviewer, and explorer.
+- **Short instructions.** Workflows coordinate five subagents: planner, diagnostician, implementer, reviewer, and explorer.
 - **A shared baseline, adapted to each project.** The baseline combines shared engineering rules in [`AGENTS.md`](AGENTS.md) with predefined skills, workflows, and subagents. Separate files under `docs/conventions/` capture your project's coding standards, testing, deployment, and change process, loaded only when relevant. [`define-conventions`](skills/define-conventions/SKILL.md) scans your repository for evidence, then grills you on the rules it cannot show. [See why](docs/define-conventions-rationale.md).
 - **Explicit workflow boundaries.** Bug repairs require an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code. Workflows also stop if success would require weakening a test or expanding the approved scope.
 - **Written task records.** Plans, implementation reports, reviews, and any requested incident reports preserve scope, decisions, and verification evidence across context compaction and sessions.
@@ -146,6 +144,10 @@ The defaults spend on judgment and save on execution. You can choose a different
 | `explorer` | Looks up facts for `lean-grill-with-docs`. | `gpt-6-luna`, `high` | `haiku`, `high` |
 
 Each entry shows the model and its reasoning effort.
+
+**Why a fast model implements.** By the time the implementer runs, the hard decisions are already made: you've approved a plan with acceptance criteria, the tests define what "done" means, and a stronger model reviews the result. What's left is mostly careful execution, which a fast model at high effort handles at a fraction of the cost. When it gets stuck, the reviewer catches it, and the loop stops after three failed attempts rather than spending tokens in silence. If your codebase needs more judgment at implementation time, choose a stronger implementer during setup.
+
+**Why low effort for the planner and reviewer.** Stronger models already reason well at low effort, and planning is interactive: you answer its questions, so faster turns matter more than long solo thinking.
 
 ### Skill overrides
 
