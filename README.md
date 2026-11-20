@@ -144,7 +144,7 @@ The defaults spend on judgment and save on execution. You can choose a different
 | --- | --- | --- | --- |
 | `planner` | Prepares plans. | `gpt-6.1-sol`, `low` | `opus`, `low` |
 | `code-reviewer` | Independently reviews changes. | `gpt-6.1-sol`, `low` | `opus`, `low` |
-| `bug-diagnostician` | Investigates bugs. | `gpt-6-luna`, `max` | `haiku`, `xhigh` |
+| `bug-diagnostician` | Investigates bugs. | `gpt-6-luna`, `xhigh` | `haiku`, `xhigh` |
 | `implementer` | Carries out approved plans. | `gpt-6-luna`, `xhigh` | `haiku`, `xhigh` |
 | `explorer` | Looks up facts for `lean-grill-with-docs`. | `gpt-6-luna`, `high` | `haiku`, `high` |
 
