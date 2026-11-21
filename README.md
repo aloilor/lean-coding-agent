@@ -187,6 +187,16 @@ The automated tests cover setup, not how agents behave once they're using the sk
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Acknowledgements
+
+Lean Coding Agent builds on the work of others:
+
+- [Matt Pocock's skills](https://github.com/mattpocock/skills) — the original grill-with-docs skill, forked and adapted as [`lean-grill-with-docs`](skills/lean-grill-with-docs/SKILL.md), plus the `handoff` and `tdd` skills installed by setup.
+- [anthropics/skills](https://github.com/anthropics/skills) and [anthropics/claude-plugins-community](https://github.com/anthropics/claude-plugins-community) — the `skill-creator` and `eli5` skills.
+- [github/awesome-copilot](https://github.com/github/awesome-copilot) — the `refactor` skill.
+- [Vercel's Skills CLI](https://github.com/vercel-labs/skills) — installation, tracking, and updates.
+- The research and writing cited in the [`define-conventions` rationale](docs/define-conventions-rationale.md), which shaped how conventions are captured.
+
 ## License
 
 Available under the [MIT License](LICENSE).
