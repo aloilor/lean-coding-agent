@@ -15,14 +15,14 @@ Coding agents tend to either skip planning entirely or bury every small request 
 
 Normal requests are handled directly. To use a workflow, start it by name.
 
-I wanted short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review.
+I wanted short instructions, few additional tools to learn, and no mandatory workflow for small requests. For larger changes, I wanted a simple loop: plan, implement, review. I explain the design choices in [I built lean coding agent workflows because popular frameworks are bloated token sinks](https://aloilor.github.io/lean-coding-agent/).
 
 ## Why not just…?
 
 - **…write a longer `CLAUDE.md` or `AGENTS.md`?** Every word in it is loaded for every request, including typo fixes. Here the always-loaded part stays small, project conventions load per topic only when a task needs them, and workflow instructions load only when you name a workflow.
 - **…use a bigger skill or agent framework?** Many are bloated with handholding and guardrails that newer models no longer need, and all that instruction is a token sink on every request. Here the guidance lives where it matters: a precise plan you approve for each task, plus a short loop with clear stop conditions, instead of pages of generic rules. Nothing is mandatory: small requests run directly, and you choose when to pay for planning and review.
 - **…let a single agent plan, build, and check its own work?** An agent reviewing its own context tends to approve itself. Here the reviewer is a separate subagent with fresh context, and the loop stops and reports back instead of retrying forever.
-- **…use the strongest model for everything?** It costs more without improving well-specified execution. Strong models plan and review, and fast models implement against an approved plan and tests. See [Model defaults](#model-defaults).
+- **…use the strongest model for everything?** It costs more without improving well-specified execution. Strong models plan and review, and cheap models implement against an approved plan and tests. See [Model defaults](#model-defaults).
 
 ## Quick start
 
@@ -78,7 +78,7 @@ Setup only writes inside your project, and every change shows up in `git status`
 - **A shared baseline, adapted to each project.** The baseline combines shared engineering rules in [`AGENTS.md`](AGENTS.md) with predefined skills, workflows, and subagents. Separate files under `docs/conventions/` capture your project's coding standards, testing, deployment, and change process, loaded only when relevant. [`define-conventions`](skills/define-conventions/SKILL.md) scans your repository for evidence, then grills you on the rules it cannot show. [See why](docs/define-conventions-rationale.md).
 - **Explicit workflow boundaries.** Bug repairs require an approved diagnosis, refactors stop if behavior would change, and reviews don't edit code. Workflows also stop if success would require weakening a test or expanding the approved scope.
 - **Written task records.** Plans, implementation reports, reviews, and any requested incident reports preserve scope, decisions, and verification evidence across context compaction and sessions.
-- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and faster models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
+- **Models follow the work.** By default, setup spends on judgment and saves on execution: stronger models plan and review, and cheaper models diagnose, implement, and look things up. See [Model defaults](#model-defaults).
 - **Separate skill overrides.** [Overrides](#skill-overrides) add project guidance without editing installed skills, allowing those skills to receive upstream updates.
 
 ## Skills
@@ -146,7 +146,7 @@ The defaults spend on judgment and save on execution. You can choose a different
 
 Each entry shows the model and its reasoning effort.
 
-**Why a fast model implements.** By the time the implementer runs, the hard decisions are already made: you've approved a plan with acceptance criteria, the tests define what "done" means, and a stronger model reviews the result. What's left is mostly careful execution, which a fast model at high effort handles at a fraction of the cost. When it gets stuck, the reviewer catches it, and the loop stops after three failed attempts rather than spending tokens in silence. If your codebase needs more judgment at implementation time, choose a stronger implementer during setup.
+**Why a cheap model implements.** By the time the implementer runs, the hard decisions are already made: you've approved a plan with acceptance criteria, the tests define what "done" means, and a stronger model reviews the result. What's left is mostly careful execution, which a cheap model at high effort handles at a fraction of the cost. When it gets stuck, the reviewer catches it, and the loop stops after three failed attempts rather than spending tokens in silence. If your codebase needs more judgment at implementation time, choose a stronger implementer during setup.
 
 **Why low effort for the planner and reviewer.** Stronger models already reason well at low effort, and planning is interactive: you answer its questions, so faster turns matter more than long solo thinking.
 
