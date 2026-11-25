@@ -1,13 +1,13 @@
 # Lean Coding Agent
 
+![Demo: a feature workflow run. The planner drafts a plan, you approve it, the implementer works test-first, the reviewer blocks once, and the loop ends in APPROVE.](docs/assets/demo.gif)
+
 [![CI](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/aloilor/lean-coding-agent)](https://github.com/aloilor/lean-coding-agent/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#quick-start)
 
 Popular coding agent frameworks can be slow and token-hungry: huge ceremony fills the context on every request, and even a one-line fix goes through a full plan-and-review loop. In my experience, newer models don't need that much handholding and that many guardrails. Without a framework, agents tend to skip planning entirely. Lean Coding Agent gives Codex and Claude Code a **plan → test-first implementation → independent review** loop that runs only when you ask for it, with each step handled by a separate subagent in its own context. Predefined workflows set the loop and its stop conditions without scripting every move, each subagent prompt is at most 135 lines, and [`define-conventions`](skills/define-conventions/SKILL.md) captures your project's rules. Rules follow progressive disclosure: instead of piling everything into `AGENTS.md`, agents load each convention file by topic only when a task needs it. The always-loaded baseline stays under 800 words, and each workflow under 450.
-
-![Small requests run directly. Named workflows go through plan, your approval, test-first implementation, and independent review, stopping after three failed fix attempts.](docs/assets/workflow-loop.svg)
 
 - **Workflows.** The feature, bug-fix, and refactor workflows follow a simple loop: you approve a plan, then an implementer and a reviewer iterate until the reviewer approves. Implementation follows test-driven development, one behavior at a time. If the same problem survives three fix attempts, the loop stops and reports back. Planning and code review can also run on their own.
 - **Subagents.** Each step runs in a subagent with its own context: planner, bug diagnostician, implementer, or code reviewer. An explorer looks up facts when needed. Each subagent is defined in a prompt file of at most 135 lines.
