@@ -1,6 +1,6 @@
 # Lean Coding Agent
 
-![Demo: a feature workflow run. The planner drafts a plan, you approve it, the implementer works test-first, the reviewer blocks once, and the loop ends in APPROVE.](docs/assets/demo.gif)
+<img src="docs/assets/demo.gif" width="860" alt="Demo: a feature workflow run. The planner drafts a plan, you approve it, the implementer works test-first, the reviewer blocks once, and the loop ends in APPROVE.">
 
 [![CI](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/aloilor/lean-coding-agent/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/aloilor/lean-coding-agent)](https://github.com/aloilor/lean-coding-agent/releases)

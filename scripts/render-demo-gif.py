@@ -7,8 +7,10 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
 
-WIDTH, HEIGHT = 860, 560
-PAD, LINE_H, FONT_SIZE = 22, 21, 15
+# Drawn at 2x so the README, which displays it at width 860, stays sharp on HiDPI screens.
+SCALE = 2
+WIDTH, HEIGHT = 860 * SCALE, 560 * SCALE
+PAD, LINE_H, FONT_SIZE = 22 * SCALE, 21 * SCALE, 15 * SCALE
 BG, FG, DIM = "#1e1f24", "#d8dae0", "#7d828f"
 COLORS = {
     "fg": FG, "dim": DIM, "user": "#8fc1ff", "agent": "#c9a7ff",
@@ -80,9 +82,10 @@ def render(lines, cursor):
     img = Image.new("RGB", (WIDTH, HEIGHT), BG)
     draw = ImageDraw.Draw(img)
     for i, color in enumerate(("#ff5f57", "#febc2e", "#28c840")):
-        draw.ellipse((PAD + i * 20, 14, PAD + i * 20 + 12, 26), fill=color)
-    draw.text((WIDTH // 2, 20), "lean-coding-agent — feature workflow", font=FONT, fill=DIM, anchor="mm")
-    y = 50
+        left = PAD + i * 20 * SCALE
+        draw.ellipse((left, 14 * SCALE, left + 12 * SCALE, 26 * SCALE), fill=color)
+    draw.text((WIDTH // 2, 20 * SCALE), "lean-coding-agent — feature workflow", font=FONT, fill=DIM, anchor="mm")
+    y = 50 * SCALE
     x = PAD
     for segments in lines:
         x = PAD
@@ -92,7 +95,7 @@ def render(lines, cursor):
             x += draw.textlength(text, font=font)
         y += LINE_H
     if cursor:
-        draw.rectangle((x + 1, y - LINE_H + 2, x + 9, y - 3), fill=FG)
+        draw.rectangle((x + SCALE, y - LINE_H + 2 * SCALE, x + 9 * SCALE, y - 3 * SCALE), fill=FG)
     return img
 
 
