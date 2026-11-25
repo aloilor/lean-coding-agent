@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Drawn at 2x so the README, which displays it at width 860, stays sharp on HiDPI screens.
 SCALE = 2
-WIDTH, HEIGHT = 860 * SCALE, 604 * SCALE
+WIDTH, HEIGHT = 860 * SCALE, 720 * SCALE
 PAD, LINE_H, FONT_SIZE = 22 * SCALE, 28 * SCALE, 20 * SCALE
 BG, FG, DIM = "#1e1f24", "#d8dae0", "#7d828f"
 COLORS = {
@@ -93,8 +93,7 @@ def render(lines, cursor):
             font = BOLD if bold else FONT
             draw.text((x, y), text, font=font, fill=COLORS[color])
             x += draw.textlength(text, font=font)
-        # Blank lines are half height: enough to separate blocks without wasting space.
-        y += LINE_H if segments else LINE_H // 2
+        y += LINE_H
     if cursor:
         draw.rectangle((x + SCALE, y - LINE_H + 2 * SCALE, x + 9 * SCALE, y - 3 * SCALE), fill=FG)
     return img
