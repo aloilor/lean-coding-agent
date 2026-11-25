@@ -9,8 +9,8 @@ from PIL import Image, ImageDraw, ImageFont
 
 # Drawn at 2x so the README, which displays it at width 860, stays sharp on HiDPI screens.
 SCALE = 2
-WIDTH, HEIGHT = 860 * SCALE, 560 * SCALE
-PAD, LINE_H, FONT_SIZE = 22 * SCALE, 21 * SCALE, 15 * SCALE
+WIDTH, HEIGHT = 860 * SCALE, 720 * SCALE
+PAD, LINE_H, FONT_SIZE = 22 * SCALE, 28 * SCALE, 20 * SCALE
 BG, FG, DIM = "#1e1f24", "#d8dae0", "#7d828f"
 COLORS = {
     "fg": FG, "dim": DIM, "user": "#8fc1ff", "agent": "#c9a7ff",
@@ -31,7 +31,7 @@ FONT, BOLD = load_font("consola.ttf"), load_font("consolab.ttf")
 
 AGENT_COLORS = {"planner": "#c9a7ff", "implementer": "#f0a86a", "code-reviewer": "#6fd3d3"}
 COLORS.update(AGENT_COLORS)
-RULE_CHARS = 99
+RULE_CHARS = 74
 
 
 def header(agent, note, pause):
@@ -85,7 +85,7 @@ def render(lines, cursor):
         left = PAD + i * 20 * SCALE
         draw.ellipse((left, 14 * SCALE, left + 12 * SCALE, 26 * SCALE), fill=color)
     draw.text((WIDTH // 2, 20 * SCALE), "lean-coding-agent — feature workflow", font=FONT, fill=DIM, anchor="mm")
-    y = 50 * SCALE
+    y = 56 * SCALE
     x = PAD
     for segments in lines:
         x = PAD
