@@ -511,6 +511,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
   const grillOverride = docsDirectory === null ? null : await syncGrillWithDocsOverride(targetProject, docsDirectory);
   if (grillOverride !== null && docsDirectory !== defaultDocsDirectory) overridePaths.push(grillOverride.overridePath);
+  const upstreamSkillNames = await installUpstreamSkills(targetProject, tools);
   const agentPaths = {};
   for (const tool of tools) agentPaths[tool] = await installAgents(targetProject, tool, models[tool]);
   const codexConfigPath = tools.includes('codex') ? await ensureCodexConfig(targetProject) : null;
@@ -518,7 +519,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const baselinePaths = await copyBaselineFiles(targetProject);
   const localPaths = await ensureLocalFiles(targetProject);
   const gitignorePath = await ensureLocalGitignore(targetProject);
-  const upstreamSkillNames = await installUpstreamSkills(targetProject, tools);
 
   console.log(`Initialized project repo: ${targetProject}`);
   console.log('Copied baseline files:');
@@ -539,7 +539,7 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   if (codexConfigPath) console.log(`Ensured Codex config: ${codexConfigPath}`);
   if (claudeStatusLine) console.log(`Ensured Claude Code status line: ${claudeStatusLine.scriptPath}`);
   console.log(`Updated ignore rules: ${gitignorePath}`);
-  console.log(`Installed upstream skills: ${upstreamSkillNames.join(', ')}`);
+  console.log(`Installed skills: ${upstreamSkillNames.join(', ')}`);
 }
 
 async function main() {

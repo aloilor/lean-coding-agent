@@ -274,6 +274,7 @@ test('setup reports installer failures and stops before later commands', async (
     },
   );
   assert.deepEqual((await loggedCommands(commandLog)).map(({ command }) => command), ['npx']);
+  await assert.rejects(fs.access(path.join(project, '.codex', 'agents')), { code: 'ENOENT' });
 });
 
 test('setup with --docs-dir points lean-grill-with-docs at the chosen folder and updates it on rerun', async (t) => {
