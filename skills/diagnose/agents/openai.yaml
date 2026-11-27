@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnose"
+  short_description: "Investigate a failure and find its likely root cause"
+  default_prompt: "Use $diagnose for this request."
