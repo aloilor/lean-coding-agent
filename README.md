@@ -7,10 +7,10 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Works with Codex and Claude Code](https://img.shields.io/badge/works%20with-Codex%20%7C%20Claude%20Code-555)](#quick-start)
 
-Popular coding agent frameworks can be slow and token-hungry: huge ceremony fills the context on every request, and even a one-line fix goes through a full plan-and-review loop. In my experience, newer models don't need that much handholding and that many guardrails. Without a framework, agents tend to skip planning entirely. Lean Coding Agent gives Codex and Claude Code a **plan → test-first implementation → independent review** loop that runs only when you ask for it, with each step handled by a separate subagent in its own context. Predefined workflows set the loop and its stop conditions without scripting every move, each subagent prompt is at most 135 lines, and [`define-conventions`](skills/define-conventions/SKILL.md) captures your project's rules. Rules follow progressive disclosure: instead of piling everything into `AGENTS.md`, agents load each convention file by topic only when a task needs it. The always-loaded baseline stays under 800 words, and each workflow under 450.
+Popular coding agent frameworks can be slow and token-hungry: huge ceremony fills the context on every request, and even a one-line fix goes through a full plan-and-review loop. In my experience, newer models don't need that much handholding and that many guardrails. Without a framework, agents tend to skip planning entirely. Lean Coding Agent gives Codex and Claude Code a **plan → test-first implementation → independent review** loop that runs only when you ask for it, with each step handled by a separate subagent in its own context. Predefined workflows set the loop and its stop conditions without scripting every move, each subagent loads a skill of at most 145 lines that you can also run on its own, and [`define-conventions`](skills/define-conventions/SKILL.md) captures your project's rules. Rules follow progressive disclosure: instead of piling everything into `AGENTS.md`, agents load each convention file by topic only when a task needs it. The always-loaded baseline stays under 800 words, and each workflow under 450.
 
 - **Workflows.** The feature, bug-fix, and refactor workflows follow a simple loop: you approve a plan, then an implementer and a reviewer iterate until the reviewer approves. Implementation follows test-driven development, one behavior at a time. If the same problem survives three fix attempts, the loop stops and reports back. Planning and code review can also run on their own.
-- **Subagents.** Each step runs in a subagent with its own context: planner, bug diagnostician, implementer, or code reviewer. An explorer looks up facts when needed. Each subagent is defined in a prompt file of at most 135 lines.
+- **Subagents.** Each step runs in a subagent with its own context: planner, bug diagnostician, implementer, or code reviewer. An explorer looks up facts when needed. Each subagent is a thin definition that loads its [skill](#plan-diagnose-implement-and-review), so you can also run any step yourself without a workflow.
 - **Project conventions.** The [`define-conventions`](skills/define-conventions/SKILL.md) skill scans your repository, asks about rules the code doesn't show, and writes them to `docs/conventions/` as separate files for coding standards, testing, change process, and deployment. Agents load only the files the current task needs, so a testing change reads `TESTING.md` and nothing about deployments. It's the main way to give the workflows your project's context.
 
 Normal requests are handled directly. To use a workflow, start it by name.
@@ -63,10 +63,10 @@ Setup only writes inside your project, and every change shows up in `git status`
 | Change | Details |
 | --- | --- |
 | Replaced on every run | `AGENTS.md` and `CLAUDE.md`. `AGENTS.md` is the active baseline, and `CLAUDE.md` points Claude Code to it. |
-| Refreshed on every run | The five bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the upstream skills below, and the three bundled templates in `.agents/templates/`. Your own agents, templates, and override index entries are preserved. |
+| Refreshed on every run | The five bundled subagents in `.codex/agents/` or `.claude/agents/`, the bundled skill overrides, the `plan`, `diagnose`, `implement`, and `code-review` skills the subagents load, and the upstream skills below. Your own agents and override index entries are preserved. |
 | Created when missing | `AGENTS.override.md`, `.agents/lessons/`, `.agents/skill-overrides/`, and, for Codex, `.codex/config.toml` with multi-agent defaults and a status line, and, for Claude Code, a status line in `.claude/statusline.mjs` registered in `.claude/settings.json` unless that file already sets one, plus per-model `autoCompactWindow` limits for models without one and `permissions.deny` entries for the `Artifact` and `PowerShell` tools when they are not already denied. `Artifact` is denied because coding sessions do not need claude.ai artifacts and its tool and skill definitions consume context; `PowerShell` is denied so Claude Code on Windows runs every shell command through Bash (POSIX), keeping commands and scripts consistent across platforms. |
 | Added to `.gitignore` | Local files and agent task and report directories. |
-| Installed | The [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
+| Installed | The `plan`, `diagnose`, `implement`, and `code-review` skills the subagents load, and the [upstream skills](#upstream-skills-installed-by-setup) from third-party repositories. |
 
 </details>
 
@@ -113,7 +113,20 @@ Each workflow leaves a written record of the agreed scope, decisions, and verifi
 | Review pass | `.agents/code-reviews/review_YYYYMMDD_<name>_pass_N.md` |
 | Incident report, only on request | `docs/incidents/incident_YYYYMMDD_<name>.md` |
 
-Setup installs shared [plan](skills/setup-lean-coding-agent/references/templates/plan.md), [implementation-report](skills/setup-lean-coding-agent/references/templates/implementation-report.md), and [code-review](skills/setup-lean-coding-agent/references/templates/code-review.md) templates, used by the planners, implementers, and reviewers of both coding agents.
+Each skill below bundles the template for the record it writes.
+
+### Plan, diagnose, implement, and review
+
+Each workflow subagent loads one of these skills. You can also invoke one directly to run just that step in your main session, for example `/implement .agents/plans/plan_20261127_csv-export.md` (`$implement` in Codex). A direct run keeps the same approval gates and writes the same record, but it does not start the next step.
+
+| Skill | Used by | Writes | Template |
+| --- | --- | --- | --- |
+| [`plan`](skills/plan/SKILL.md) | `planner` | Approved plan | [plan.md](skills/plan/references/plan.md) |
+| [`diagnose`](skills/diagnose/SKILL.md) | `bug-diagnostician` | Investigation, plus an incident draft on request | [incident-report.md](skills/diagnose/references/incident-report.md) |
+| [`implement`](skills/implement/SKILL.md) | `implementer` | Implementation report | [implementation-report.md](skills/implement/references/implementation-report.md) |
+| [`code-review`](skills/code-review/SKILL.md) | `code-reviewer` | Review pass | [code-review.md](skills/code-review/references/code-review.md) |
+
+In Claude Code, `/plan` and `/code-review` are also built-in commands, so the built-in may run instead of the project skill. To be sure you get the project skill, name it in your request (for example, "use the `plan` skill").
 
 ### Engineering and Git
 
@@ -166,7 +179,7 @@ Update project-installed skills from the project directory:
 npx skills update -p
 ```
 
-Run `npx skills check` to see whether updates are available. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. Rerun setup when you want refreshed project guidance, templates, overrides, or agent configuration. Remember that this replaces `AGENTS.md` and `CLAUDE.md`.
+Run `npx skills check` to see whether updates are available. To add skills introduced since your last selection, rerun `npx skills@latest add aloilor/lean-coding-agent` and select them. Rerun setup when you want refreshed project guidance, overrides, or agent configuration. Remember that this replaces `AGENTS.md` and `CLAUDE.md`.
 
 The Skills CLI owns skill installation, tracking, updates, and removal. See its [update documentation](https://github.com/vercel-labs/skills#skills-update) for scope options.
 

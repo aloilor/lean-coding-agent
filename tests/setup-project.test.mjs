@@ -135,12 +135,13 @@ test('setup initializes project files and preserves project-owned content on rer
   });
 
   const firstCommands = await loggedCommands(commandLog);
-  assert.deepEqual(firstCommands.map(({ command }) => command), ['npx', 'npx', 'npx', 'npx']);
+  assert.deepEqual(firstCommands.map(({ command }) => command), ['npx', 'npx', 'npx', 'npx', 'npx']);
   assert.deepEqual(firstCommands.map(({ args }) => args), [
     ['skills', 'add', 'https://github.com/mattpocock/skills', '--skill', 'handoff', 'tdd', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/github/awesome-copilot', '--skill', 'refactor', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/anthropics/claude-plugins-community', '--skill', 'eli5', '--agent', 'codex', 'claude-code', '--copy', '-y'],
     ['skills', 'add', 'https://github.com/anthropics/skills', '--skill', 'skill-creator', '--agent', 'codex', 'claude-code', '--copy', '-y'],
+    ['skills', 'add', 'https://github.com/aloilor/lean-coding-agent', '--skill', 'plan', 'diagnose', 'implement', 'code-review', '--agent', 'codex', 'claude-code', '--copy', '-y'],
   ]);
   assert.ok(firstCommands.every(({ cwd }) => cwd === project));
 
@@ -175,7 +176,7 @@ test('setup initializes project files and preserves project-owned content on rer
   );
   const ignoreRules = await fs.readFile(path.join(project, '.gitignore'), 'utf8');
   assert.match(ignoreRules, /^AGENTS\.override\.md$/m);
-  assert.equal((await loggedCommands(commandLog)).length, 8);
+  assert.equal((await loggedCommands(commandLog)).length, 10);
 });
 
 test('setup preserves installed skills and the CLI lock on rerun', async (t) => {
@@ -215,45 +216,47 @@ test('setup for Claude Code only installs Claude Code agents and skills without 
   }
   await assert.rejects(fs.access(path.join(project, '.codex')), { code: 'ENOENT' });
   const skillCommands = (await loggedCommands(commandLog)).filter(({ command }) => command === 'npx');
-  assert.equal(skillCommands.length, 4);
+  assert.equal(skillCommands.length, 5);
   for (const { args } of skillCommands) {
     assert.deepEqual(args.slice(args.indexOf('--agent')), ['--agent', 'claude-code', '--copy', '-y']);
   }
 });
 
-test('setup installs shared artifact templates for each tool selection and refreshes only managed templates on rerun', async (t) => {
+const subagentSkills = [
+  ['planner', 'plan', 'plan.md'],
+  ['bug-diagnostician', 'diagnose', 'incident-report.md'],
+  ['implementer', 'implement', 'implementation-report.md'],
+  ['code-reviewer', 'code-review', 'code-review.md'],
+];
+
+test('subagent skills allow model invocation and bundle the artifact template they write', async () => {
+  for (const [, skill, artifact] of subagentSkills) {
+    const skillDirectory = path.join(repositoryRoot, 'skills', skill);
+    const contents = await fs.readFile(path.join(skillDirectory, 'SKILL.md'), 'utf8');
+    assert.match(contents, new RegExp(`^name: ${skill}$`, 'm'));
+    assert.doesNotMatch(contents, /^disable-model-invocation:/m);
+    assert.ok(contents.includes(`references/${artifact}`), `${skill} points at its bundled template`);
+    await fs.access(path.join(skillDirectory, 'references', artifact));
+    assert.doesNotMatch(await fs.readFile(path.join(skillDirectory, 'agents', 'openai.yaml'), 'utf8'), /allow_implicit_invocation/);
+  }
+});
+
+test('setup installs thin agents that load their skill and no shared templates', async (t) => {
   for (const tools of ['codex', 'claude-code', 'both']) {
     const { project, env } = await setupFixture(t);
-    const options = [setupScript, project, '--tools', tools];
-    await runFile(process.execPath, options, { env });
+    await runFile(process.execPath, [setupScript, project, '--tools', tools], { env });
     await assertBaselinesMatchBundledReferences(project);
-    const templateDirectory = path.join(project, '.agents', 'templates');
-    const installedNames = await fs.readdir(templateDirectory).catch((error) => {
-      if (error.code === 'ENOENT') return [];
-      throw error;
-    });
-    assert.deepEqual(installedNames.sort(), ['code-review.md', 'implementation-report.md', 'plan.md'], tools);
-
-    for (const name of installedNames) {
-      const source = path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'templates', name);
-      assert.equal(await fs.readFile(path.join(templateDirectory, name), 'utf8'), await fs.readFile(source, 'utf8'));
-      await fs.writeFile(path.join(templateDirectory, name), 'Outdated managed template\n');
-    }
-    await fs.writeFile(path.join(templateDirectory, 'project-template.md'), 'Project-owned template\n');
-    await runFile(process.execPath, options, { env });
-    for (const name of installedNames) {
-      const source = path.join(repositoryRoot, 'skills', 'setup-lean-coding-agent', 'references', 'templates', name);
-      assert.equal(await fs.readFile(path.join(templateDirectory, name), 'utf8'), await fs.readFile(source, 'utf8'));
-    }
-    assert.equal(await fs.readFile(path.join(templateDirectory, 'project-template.md'), 'utf8'), 'Project-owned template\n');
+    await assert.rejects(fs.access(path.join(project, '.agents', 'templates')), { code: 'ENOENT' });
 
     const selectedTools = tools === 'both' ? ['codex', 'claude-code'] : [tools];
     for (const tool of selectedTools) {
       const directory = tool === 'codex' ? '.codex' : '.claude';
       const extension = tool === 'codex' ? '.toml' : '.md';
-      for (const [agent, template] of [['planner', 'plan'], ['implementer', 'implementation-report'], ['code-reviewer', 'code-review']]) {
+      const mention = (skill) => (tool === 'codex' ? `Use $${skill}.` : `Use the \`${skill}\` skill.`);
+      for (const [agent, skill] of subagentSkills) {
         const contents = await fs.readFile(path.join(project, directory, 'agents', `${agent}${extension}`), 'utf8');
-        assert.ok(contents.includes(`.agents/templates/${template}.md`), `${tool} ${agent} references its installed template`);
+        assert.ok(contents.includes(mention(skill)), `${tool} ${agent} loads ${skill}`);
+        assert.ok(contents.split('\n').length < 12, `${tool} ${agent} stays thin`);
       }
     }
   }

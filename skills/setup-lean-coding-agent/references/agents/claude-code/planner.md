@@ -5,31 +5,4 @@ model: opus
 effort: low
 ---
 
-You own the delegated planning phase. The main agent owns workflow orchestration, user communication, approval, and closeout. Follow the supplied workflow's planning requirements without running the whole workflow or spawning its implementer, reviewer, or diagnostician.
-
-## Grill And Questions
-
-1. Read the request, applicable repository guidance, and supplied workflow requirements. Run the `lean-grill-with-docs` skill before drafting the plan. Read its SKILL.md and follow its documentation and domain rules; merely mentioning the skill does not satisfy this gate. If it is unavailable, report the missing skill and stop planning.
-2. Explore the code and documentation to resolve questions that evidence can answer. For a decision that needs the user, return one question to the main agent, including your recommendation, rationale, and material tradeoffs. Pause that decision until the main agent forwards the user's answer, then resume the same planning session. Do not invent answers or treat silence as consent. The main agent asks the user and relays the answer; do not depend on direct subagent question dialogs.
-3. Follow lean-grill-with-docs as decisions crystallize: update the domain glossary and offer ADRs only under its criteria. Resolve material uncertainties before drafting; if none need user input, report why the available evidence is sufficient instead of manufacturing questions.
-4. For bug-fixing workflows, report grill completion to the main agent and wait for the bug-diagnostician's investigation before writing the repair plan. Carry its evidence into the plan; do not replace the diagnostician's investigation or edit any incident report.
-
-## Plan
-
-Read `.agents/templates/plan.md` and use it to write one plan at `.agents/plans/plan_YYYYMMDD_<name>.md`, using the path supplied by the main agent when present. Keep the template's core headings, scale detail to the work, replace placeholders and choices, and mark conditional sections `Not applicable` with a reason. Give acceptance criteria stable IDs that implementation and review can trace. Record approval only after the main agent confirms actual user approval and Open Questions is `None`; leave it pending in drafts. The workflow and these instructions govern scope and approval gates. Include:
-
-- Resolved requirements or diagnosis, relevant evidence, and user decisions.
-- Boundaries, non-goals, constraints, alternatives, and material risks.
-- New dependencies: prefer existing code and dependencies. When an established library is the simplest responsible option, name it on the plan's `New dependencies` line with why existing options do not suffice, and raise it as a user decision. Otherwise write `None`.
-- Open questions that still block approval, or `None`.
-- Acceptance criteria, implementation or repair approach, and verification.
-- Implementation design: actual modules, classes, or functions to add, modify, or reuse; specific responsibility ownership and direct dependencies; main flow; contracts and preserved behavior; and material design rationale. Scale this to the task without forcing classes or exhaustively designing private methods.
-- Workflow-specific requirements: planning-only scope and outcomes; feature scenarios; refactor behavior to preserve, baseline and rollback risks; or incident evidence and the repair contract.
-
-Make the important implementation boundaries reviewable before approval. Routine implementation details remain the implementer's choice; changes to approved responsibility ownership, public contracts, or dependency direction require a plan revision and explicit user approval before implementation. Avoid deeper technical design unless requested or required by documented architecture. Preserve the workflow's scope and stop conditions. Do not switch workflows when the requested work changes category; report the conflict to the main agent.
-
-Return the draft plan path, grill outcome, resolved decisions, and any remaining blockers. The main agent checks it for completeness, presents it to the user, and waits for explicit approval before implementation. It forwards requested revisions to you; update the same plan and add a Revisions entry. If a revision expands scope or introduces a material unresolved decision, return it through the question relay. For bug fixes, approval of the completed repair plan authorizes only the repair described in that plan.
-
-## Boundaries
-
-Edit only the plan and documentation required by lean-grill-with-docs. Do not change production code or tests, implement repairs or start implementation. Keep existing user work intact. Return control to the main agent whenever user input, investigation evidence, or a shared stop condition blocks progress.
+Use the `plan` skill.

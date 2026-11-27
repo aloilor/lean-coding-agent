@@ -83,6 +83,10 @@ const upstreamSkillGroups = [
     source: 'https://github.com/anthropics/skills',
     skills: ['skill-creator'],
   },
+  {
+    source: 'https://github.com/aloilor/lean-coding-agent',
+    skills: ['plan', 'diagnose', 'implement', 'code-review'],
+  },
 ];
 
 function modelOptionName(tool, agentName) {
@@ -330,18 +334,6 @@ export async function installAgents(targetProject, tool, models) {
   return installedPaths;
 }
 
-async function syncArtifactTemplates(targetProject) {
-  const targetDirectory = path.join(targetProject, agentsDirectoryName, 'templates');
-  await fs.mkdir(targetDirectory, { recursive: true });
-  const installedPaths = [];
-  for (const name of ['plan.md', 'implementation-report.md', 'code-review.md']) {
-    const targetPath = path.join(targetDirectory, name);
-    await fs.copyFile(await requiredReference('templates', name), targetPath);
-    installedPaths.push(targetPath);
-  }
-  return installedPaths;
-}
-
 async function ensureIncidentsReadme(targetProject) {
   const targetDirectory = path.join(targetProject, 'docs', 'incidents');
   const readmePath = path.join(targetDirectory, 'README.md');
@@ -519,7 +511,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   const overridePaths = await syncBaselineSkillOverrides(targetProject);
   const grillOverride = docsDirectory === null ? null : await syncGrillWithDocsOverride(targetProject, docsDirectory);
   if (grillOverride !== null && docsDirectory !== defaultDocsDirectory) overridePaths.push(grillOverride.overridePath);
-  const templatePaths = await syncArtifactTemplates(targetProject);
   const agentPaths = {};
   for (const tool of tools) agentPaths[tool] = await installAgents(targetProject, tool, models[tool]);
   const codexConfigPath = tools.includes('codex') ? await ensureCodexConfig(targetProject) : null;
@@ -542,8 +533,6 @@ async function initializeProject(targetProject, tools, models, docsDirectory) {
   }
   console.log(`Ensured incident reports file: ${incidentReadme}`);
   console.log(`Ensured shared lessons index: ${lessonsIndex}`);
-  console.log('Installed shared artifact templates:');
-  for (const filePath of templatePaths) console.log(`- ${filePath}`);
   console.log(`Ensured skill overrides: ${path.join(targetProject, agentsDirectoryName, skillOverridesDirectoryName)}`);
   for (const filePath of overridePaths) console.log(`- ${filePath}`);
   if (grillOverride?.removed) console.log(`Removed lean-grill-with-docs folder override: ${grillOverride.overridePath}`);

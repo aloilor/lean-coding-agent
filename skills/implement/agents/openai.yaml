@@ -1,0 +1,4 @@
+interface:
+  display_name: "Implement"
+  short_description: "Implement an approved plan test-first"
+  default_prompt: "Use $implement for this request."

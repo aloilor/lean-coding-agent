@@ -1,0 +1,4 @@
+interface:
+  display_name: "Code Review"
+  short_description: "Review changes and record a verdict"
+  default_prompt: "Use $code-review for this request."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Plan"
+  short_description: "Grill the request and write an approvable plan"
+  default_prompt: "Use $plan for this request."
