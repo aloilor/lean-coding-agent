@@ -1,5 +1,13 @@
 # lean-coding-agent
 
+## 3.0.0
+
+### Major Changes
+
+- [#17](https://github.com/aloilor/lean-coding-agent/pull/17) [`bd35348`](https://github.com/aloilor/lean-coding-agent/commit/bd3534867c55d85948065cb76cc53b16078de75f) Thanks [@aloilor](https://github.com/aloilor)! - Add the `plan`, `diagnose`, `implement`, and `code-review` skills. Workflow subagents now load them, and you can run any of them directly without a workflow. Each skill bundles its artifact template, so setup no longer copies templates into `.agents/templates/`.
+
+  Upgrading: rerun setup. It installs the four new skills, which the refreshed subagents need. You can delete the old `.agents/templates/` folder, because nothing reads it anymore.
+
 ## 2.4.0
 
 ### Minor Changes
